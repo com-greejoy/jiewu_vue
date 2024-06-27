@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwWxUserMapper">
+    
+    <resultMap type="JwWxUser" id="JwWxUserResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="mobile"    column="mobile"    />
+        <result property="sex"    column="sex"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="openId"    column="open_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="parentUserId"    column="parent_user_id"    />
+        <result property="parentTeamId"    column="parent_team_id"    />
+    </resultMap>
+
+    <sql id="selectJwWxUserVo">
+        select id, name, mobile, sex, avatar, open_id, create_time, update_time, remark, parent_user_id, parent_team_id from jw_wx_user
+    </sql>
+
+    <select id="selectJwWxUserList" parameterType="JwWxUser" resultMap="JwWxUserResult">
+        <include refid="selectJwWxUserVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="mobile != null  and mobile != ''"> and mobile = #{mobile}</if>
+            <if test="sex != null  and sex != ''"> and sex = #{sex}</if>
+            <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>
+            <if test="openId != null  and openId != ''"> and open_id = #{openId}</if>
+            <if test="parentUserId != null "> and parent_user_id = #{parentUserId}</if>
+            <if test="parentTeamId != null "> and parent_team_id = #{parentTeamId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJwWxUserById" parameterType="Long" resultMap="JwWxUserResult">
+        <include refid="selectJwWxUserVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectZwWxUserByOpenId" parameterType="String" resultMap="JwWxUserResult">
+        <include refid="selectJwWxUserVo"/>
+        where open_id = #{openId}
+    </select>
+
+    <insert id="insertJwWxUser" parameterType="JwWxUser" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_wx_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="mobile != null">mobile,</if>
+            <if test="sex != null">sex,</if>
+            <if test="avatar != null">avatar,</if>
+            <if test="openId != null">open_id,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="parentUserId != null">parent_user_id,</if>
+            <if test="parentTeamId != null">parent_team_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="mobile != null">#{mobile},</if>
+            <if test="sex != null">#{sex},</if>
+            <if test="avatar != null">#{avatar},</if>
+            <if test="openId != null">#{openId},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="parentUserId != null">#{parentUserId},</if>
+            <if test="parentTeamId != null">#{parentTeamId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwWxUser" parameterType="JwWxUser">
+        update jw_wx_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="mobile != null  and mobile != ''">mobile = #{mobile},</if>
+            <if test="sex != null  and null != ''">sex = #{sex},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="openId != null and openId != ''">open_id = #{openId},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="parentUserId != null">parent_user_id = #{parentUserId},</if>
+            <if test="parentTeamId != null">parent_team_id = #{parentTeamId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwWxUserById" parameterType="Long">
+        delete from jw_wx_user where id = #{id}
+    </delete>
+
+    <delete id="deleteJwWxUserByIds" parameterType="String">
+        delete from jw_wx_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

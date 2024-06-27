@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwScheduleInfoMapper">
+    
+    <resultMap type="JwScheduleInfo" id="JwScheduleInfoResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="scheduleName"    column="schedule_name"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="indexOrder"    column="index_order"    />
+        <result property="matchName"    column="match_name"    />
+    </resultMap>
+
+    <sql id="selectJwScheduleInfoVo">
+        select id, match_id, schedule_name, begin_time, end_time, index_order from jw_schedule_info
+    </sql>
+
+    <select id="selectJwScheduleInfoList" parameterType="JwScheduleInfo" resultMap="JwScheduleInfoResult">
+        select gi.*, m.match_name from jw_schedule_info gi
+        left join jw_match m on m.id = gi.match_id
+        <where>  
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="scheduleName != null  and scheduleName != ''"> and gi.schedule_name like concat('%', #{scheduleName}, '%')</if>
+            <if test="beginTime != null "> and gi.begin_time = #{beginTime}</if>
+            <if test="endTime != null "> and gi.end_time = #{endTime}</if>
+            <if test="indexOrder != null "> and gi.index_order = #{indexOrder}</if>
+        </where>
+    </select>
+
+    <select id="selectJwScheduleInfoByMatchId" parameterType="Long" resultMap="JwScheduleInfoResult">
+        <include refid="selectJwScheduleInfoVo"/>
+        where match_id = #{matchId}
+    </select>
+    
+    <select id="selectJwScheduleInfoById" parameterType="Long" resultMap="JwScheduleInfoResult">
+        <include refid="selectJwScheduleInfoVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwScheduleInfo" parameterType="JwScheduleInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_schedule_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">match_id,</if>
+            <if test="scheduleName != null and scheduleName != ''">schedule_name,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="indexOrder != null">index_order,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">#{matchId},</if>
+            <if test="scheduleName != null and scheduleName != ''">#{scheduleName},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="indexOrder != null">#{indexOrder},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwScheduleInfo" parameterType="JwScheduleInfo">
+        update jw_schedule_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="scheduleName != null and scheduleName != ''">schedule_name = #{scheduleName},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="indexOrder != null">index_order = #{indexOrder},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwScheduleInfoById" parameterType="Long">
+        delete from jw_schedule_info where id = #{id}
+    </delete>
+
+    <delete id="deleteJwScheduleInfoByIds" parameterType="String">
+        delete from jw_schedule_info where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

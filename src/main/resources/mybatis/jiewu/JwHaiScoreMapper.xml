@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwHaiScoreMapper">
+    
+    <resultMap type="JwHaiScore" id="JwHaiScoreResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="scheduleItemId"    column="schedule_item_id"    />
+        <result property="sportId"    column="sport_id"    />
+        <result property="judgeId"    column="judge_id"    />
+        <result property="score"    column="score"    />
+        <result property="scoreType"    column="score_type"    />
+        <result property="createTime"    column="create_time"    />
+    </resultMap>
+
+    <sql id="selectJwHaiScoreVo">
+        select id, match_id, game_item_id, schedule_item_id, sport_id, judge_id, score, score_type, create_time from jw_hai_score
+    </sql>
+
+    <select id="selectJwHaiScoreList" parameterType="JwHaiScore" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        <where>  
+            <if test="matchId != null "> and match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and game_item_id = #{gameItemId}</if>
+            <if test="scheduleItemId != null "> and schedule_item_id = #{scheduleItemId}</if>
+            <if test="sportId != null "> and sport_id = #{sportId}</if>
+            <if test="judgeId != null "> and judge_id = #{judgeId}</if>
+            <if test="score != null  and score != ''"> and score = #{score}</if>
+            <if test="scoreType != null  and scoreType != ''"> and score_type = #{scoreType}</if>
+        </where>
+    </select>
+    
+    <select id="selectJwHaiScoreById" parameterType="Long" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwHaiScore" parameterType="JwHaiScore" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_hai_score
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">match_id,</if>
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="scheduleItemId != null">schedule_item_id,</if>
+            <if test="sportId != null">sport_id,</if>
+            <if test="judgeId != null">judge_id,</if>
+            <if test="score != null">score,</if>
+            <if test="scoreType != null">score_type,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">#{matchId},</if>
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="scheduleItemId != null">#{scheduleItemId},</if>
+            <if test="sportId != null">#{sportId},</if>
+            <if test="judgeId != null">#{judgeId},</if>
+            <if test="score != null">#{score},</if>
+            <if test="scoreType != null">#{scoreType},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwHaiScore" parameterType="JwHaiScore">
+        update jw_hai_score
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="gameItemId != null">game_item_id = #{gameItemId},</if>
+            <if test="scheduleItemId != null">schedule_item_id = #{scheduleItemId},</if>
+            <if test="sportId != null">sport_id = #{sportId},</if>
+            <if test="judgeId != null">judge_id = #{judgeId},</if>
+            <if test="score != null">score = #{score},</if>
+            <if test="scoreType != null">score_type = #{scoreType},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwHaiScoreById" parameterType="Long">
+        delete from jw_hai_score where id = #{id}
+    </delete>
+
+    <delete id="deleteJwHaiScoreByIds" parameterType="String">
+        delete from jw_hai_score where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

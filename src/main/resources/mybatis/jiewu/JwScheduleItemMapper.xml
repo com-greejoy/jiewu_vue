@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwScheduleItemMapper">
+    
+    <resultMap type="JwScheduleItem" id="JwScheduleItemResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="scheduleInfoId"    column="schedule_info_id"    />
+        <result property="schedulePlaceId"    column="schedule_place_id"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="shceduleTime"    column="shcedule_time"    />
+        <result property="area"    column="area"    />
+        <result property="itemProcess"    column="item_process"    />
+        <result property="sportCount"    column="sportCount"    />
+    </resultMap>
+
+    <sql id="selectJwScheduleItemVo">
+        select id, match_id, game_item_id, schedule_info_id, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
+    </sql>
+
+    <select id="selectJwScheduleItemByGameItemId" parameterType="Long" resultMap="JwScheduleItemResult">
+        select jsi.*, count(jsr.id) as sportCount from jw_schedule_item jsi
+        left join jw_sign_record jsr on jsr.schedule_item_id = jsi.id
+        where jsi.game_item_id = #{gameItemId}
+        group by jsi.id
+    </select>
+
+    <select id="listNoPlaceJwScheduleItem" parameterType="Long" resultMap="JwScheduleItemResult">
+        select jsi.*, count(jsr.id) as sportCount from jw_schedule_item jsi
+        left join jw_sign_record jsr on jsr.schedule_item_id = jsi.id
+        where jsi.match_id = #{matchId} and (jsi.schedule_place_id is null or jsi.schedule_info_id is null)
+        group by jsi.id
+    </select>
+
+    <select id="selectJwScheduleItemList" parameterType="JwScheduleItem" resultMap="JwScheduleItemResult">
+        select jsi.*, count(jsr.id) as sportCount from jw_schedule_item jsi
+        left join jw_sign_record jsr on jsr.schedule_item_id = jsi.id
+        <where>  
+            <if test="matchId != null "> and jsi.match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and jsi.game_item_id = #{gameItemId}</if>
+            <if test="scheduleInfoId != null "> and jsi.schedule_info_id = #{scheduleInfoId}</if>
+            <if test="schedulePlaceId != null "> and jsi.schedule_place_id = #{schedulePlaceId}</if>
+            <if test="itemName != null  and itemName != ''"> and jsi.item_name like concat('%', #{itemName}, '%')</if>
+            <if test="shceduleTime != null "> and jsi.shcedule_time = #{shceduleTime}</if>
+            <if test="area != null  and area != ''"> and jsi.area = #{area}</if>
+            <if test="itemProcess != null  and itemProcess != ''"> and jsi.item_process = #{itemProcess}</if>
+        </where>
+        group by jsi.id
+    </select>
+    
+    <select id="selectJwScheduleItemById" parameterType="Long" resultMap="JwScheduleItemResult">
+        <include refid="selectJwScheduleItemVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwScheduleItem" parameterType="JwScheduleItem" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_schedule_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">match_id,</if>
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="scheduleInfoId != null">schedule_info_id,</if>
+            <if test="schedulePlaceId != null">schedule_place_id,</if>
+            <if test="itemName != null">item_name,</if>
+            <if test="shceduleTime != null">shcedule_time,</if>
+            <if test="area != null">area,</if>
+            <if test="itemProcess != null">item_process,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">#{matchId},</if>
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="scheduleInfoId != null">#{scheduleInfoId},</if>
+            <if test="schedulePlaceId != null">#{schedulePlaceId},</if>
+            <if test="itemName != null">#{itemName},</if>
+            <if test="shceduleTime != null">#{shceduleTime},</if>
+            <if test="area != null">#{area},</if>
+            <if test="itemProcess != null">#{itemProcess},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwScheduleItem" parameterType="JwScheduleItem">
+        update jw_schedule_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="gameItemId != null">game_item_id = #{gameItemId},</if>
+            <if test="scheduleInfoId != null">schedule_info_id = #{scheduleInfoId},</if>
+            <if test="schedulePlaceId != null">schedule_place_id = #{schedulePlaceId},</if>
+            <if test="itemName != null">item_name = #{itemName},</if>
+            <if test="shceduleTime != null">shcedule_time = #{shceduleTime},</if>
+            <if test="area != null">area = #{area},</if>
+            <if test="itemProcess != null">item_process = #{itemProcess},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="updateJwScheduleItemPlace" parameterType="String">
+        update jw_schedule_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="scheduleInfoId != null">schedule_info_id = #{scheduleInfoId},</if>
+            <if test="schedulePlaceId != null">schedule_place_id = #{schedulePlaceId},</if>
+        </trim>
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="clearSchedulePlace">
+        update jw_schedule_item
+        set schedule_info_id = null, schedule_place_id = null
+        where schedule_place_id = #{schedulePlaceId}
+    </update>
+
+    <update id="clearSchedulePlaceById">
+        update jw_schedule_item
+        set schedule_info_id = null, schedule_place_id = null
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwScheduleItemById" parameterType="Long">
+        delete from jw_schedule_item where id = #{id}
+    </delete>
+
+    <delete id="clearMatchScheduleItem" parameterType="Long">
+        delete from jw_schedule_item where match_id = #{matchId}
+    </delete>
+
+    <delete id="deleteJwScheduleItemByGameItem" parameterType="Long">
+        delete from jw_schedule_item where game_item_id = #{gameItemId}
+    </delete>
+
+    <delete id="deleteJwScheduleItemByIds" parameterType="String">
+        delete from jw_schedule_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

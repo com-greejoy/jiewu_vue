@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwSignRecordSportMapper">
+    
+    <resultMap type="JwSignRecordSport" id="JwSignRecordSportResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="sportId"    column="sport_id"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="signRecordId"    column="sign_record_id"    />
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="playerName"    column="player_name"    />
+        <result property="idCard"    column="id_card"    />
+        <result property="sex"    column="sex"    />
+    </resultMap>
+
+    <sql id="selectJwSignRecordSportVo">
+        select id, match_id, sport_id, team_id, game_item_id, sign_record_id from jw_sign_record_sport
+    </sql>
+
+    <select id="selectJwSignRecordSportList" parameterType="JwSignRecordSport" resultMap="JwSignRecordSportResult">
+        <include refid="selectJwSignRecordSportVo"/>
+        <where>
+            <if test="teamId != null "> and team_id = #{teamId}</if>
+            <if test="matchId != null "> and match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and game_item_id = #{gameItemId}</if>
+            <if test="sportId != null "> and sport_id = #{sportId}</if>
+            <if test="signRecordId != null "> and sign_record_id = #{signRecordId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwSignRecordSportListById" parameterType="Long" resultMap="JwSignRecordSportResult">
+        select b.*,  cc.player_name, cc.id_card, cc.sex from jw_sign_record_sport b
+        left join jw_sport cc on cc.id = b.sport_id
+        where sign_record_id = #{signRecordId}
+    </select>
+
+    <select id="selectJwSignRecordSportById" parameterType="Long" resultMap="JwSignRecordSportResult">
+        <include refid="selectJwSignRecordSportVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwSignRecordSport" parameterType="JwSignRecordSport" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_sign_record_sport
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">match_id,</if>
+            <if test="teamId != null">team_id,</if>
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="sportId != null">sport_id,</if>
+            <if test="signRecordId != null">sign_record_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">#{matchId},</if>
+            <if test="teamId != null">#{teamId},</if>
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="sportId != null">#{sportId},</if>
+            <if test="signRecordId != null">#{signRecordId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwSignRecordSport" parameterType="JwSignRecordSport">
+        update jw_sign_record_sport
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamId != null">team_id = #{teamId},</if>
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="gameItemId != null">game_item_id = #{gameItemId},</if>
+            <if test="sportId != null">sport_id = #{sportId},</if>
+            <if test="signRecordId != null">sign_record_id = #{signRecordId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwSignRecordSportById" parameterType="Long">
+        delete from jw_sign_record_sport where id = #{id}
+    </delete>
+
+    <delete id="deleteJwSignRecordSportBySignRecordId" parameterType="Long">
+        delete from jw_sign_record_sport where sign_record_id = #{signRecordId}
+    </delete>
+
+    <delete id="deleteJwSignRecordSportByIds" parameterType="String">
+        delete from jw_sign_record_sport where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

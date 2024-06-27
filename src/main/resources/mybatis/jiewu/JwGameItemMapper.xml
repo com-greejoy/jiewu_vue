@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwGameItemMapper">
+    
+    <resultMap type="JwGameItem" id="JwGameItemResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="matchName"    column="match_name"    />
+        <result property="code"    column="code"    />
+        <result property="name"    column="name"    />
+        <result property="groupLimit"    column="group_limit"    />
+        <result property="maxSport"    column="max_sport"    />
+        <result property="minSport"    column="min_sport"    />
+        <result property="singleDuration"    column="single_duration"    />
+        <result property="matchType"    column="match_type"    />
+        <result property="promotionNum"    column="promotion_num"    />
+        <result property="minYear"    column="min_year"    />
+        <result property="maxYear"    column="max_year"    />
+        <result property="fee"    column="fee"    />
+        <result property="feeMaxSport"    column="fee_max_sport"    />
+        <result property="resultDesId"    column="result_des_id"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="screenImg"    column="screen_img"    />
+        <result property="remark"    column="remark"    />
+        <result property="sexCon"    column="sex_con"    />
+        <result property="sportLimit"    column="sport_limit"    />
+        <result property="signCount"    column="signCount"    />
+        <result property="groupMode"    column="group_mode"    />
+    </resultMap>
+
+    <sql id="selectJwGameItemVo">
+        select id, match_id, code, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
+        single_duration, match_type, promotion_num, min_year, max_year,
+        fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
+        screen_img, remark from jw_game_item
+    </sql>
+
+    <select id="selectJwGameItemList" parameterType="JwGameItem" resultMap="JwGameItemResult">
+        select gi.*, m.match_name from jw_game_item gi
+        left join jw_match m on m.id = gi.match_id
+        <where>  
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="code != null  and code != ''"> and gi.code = #{code}</if>
+            <if test="name != null  and name != ''"> and gi.name like concat('%', #{name}, '%')</if>
+            <if test="groupLimit != null "> and gi.group_limit = #{groupLimit}</if>
+            <if test="singleDuration != null "> and gi.single_duration = #{singleDuration}</if>
+            <if test="matchType != null  and matchType != ''"> and gi.match_type = #{matchType}</if>
+            <if test="promotionNum != null "> and gi.promotion_num = #{promotionNum}</if>
+            <if test="minYear != null "> and gi.min_year = #{minYear}</if>
+            <if test="maxYear != null "> and gi.max_year = #{maxYear}</if>
+            <if test="fee != null "> and gi.fee = #{fee}</if>
+            <if test="resultDesId != null "> and gi.result_des_id = #{resultDesId}</if>
+            <if test="screenImg != null  and screenImg != ''"> and gi.screen_img = #{screenImg}</if>
+            <if test="sexCon != null  and sexCon != ''"> and gi.sex_con = #{sexCon}</if>
+            <if test="sportLimit != null  and sportLimit != ''"> and gi.sport_limit = #{sportLimit}</if>
+        </where>
+    </select>
+
+    <select id="selectJwGameItemListWithCount" parameterType="JwGameItem" resultMap="JwGameItemResult">
+        select gi.*, m.match_name, count(jsr.id) as signCount from jw_game_item gi
+        left join jw_match m on m.id = gi.match_id
+        left join jw_sign_record jsr on jsr.game_item_id = gi.id
+        <where>
+            <if test="id != null "> and gi.id = #{id}</if>
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="code != null  and code != ''"> and gi.code = #{code}</if>
+            <if test="name != null  and name != ''"> and gi.name like concat('%', #{name}, '%')</if>
+            <if test="groupLimit != null "> and gi.group_limit = #{groupLimit}</if>
+            <if test="singleDuration != null "> and gi.single_duration = #{singleDuration}</if>
+            <if test="matchType != null  and matchType != ''"> and gi.match_type = #{matchType}</if>
+            <if test="promotionNum != null "> and gi.promotion_num = #{promotionNum}</if>
+            <if test="minYear != null "> and gi.min_year = #{minYear}</if>
+            <if test="maxYear != null "> and gi.max_year = #{maxYear}</if>
+            <if test="fee != null "> and gi.fee = #{fee}</if>
+            <if test="resultDesId != null "> and gi.result_des_id = #{resultDesId}</if>
+            <if test="screenImg != null  and screenImg != ''"> and gi.screen_img = #{screenImg}</if>
+            <if test="sexCon != null  and sexCon != ''"> and gi.sex_con = #{sexCon}</if>
+            <if test="sportLimit != null  and sportLimit != ''"> and gi.sport_limit = #{sportLimit}</if>
+        </where>
+        group by gi.id
+    </select>
+
+    <select id="selectJwGameItemListByMatchId" parameterType="Long" resultMap="JwGameItemResult">
+        select gi.*, m.match_name from jw_game_item gi
+        left join jw_match m on m.id = gi.match_id
+        <where>
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and gi.id = #{gameItemId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwGameItemById" parameterType="Long" resultMap="JwGameItemResult">
+        <include refid="selectJwGameItemVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwGameItem" parameterType="JwGameItem" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_game_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">match_id,</if>
+            <if test="code != null">code,</if>
+            <if test="name != null">name,</if>
+            <if test="groupLimit != null">group_limit,</if>
+            <if test="singleDuration != null">single_duration,</if>
+            <if test="matchType != null">match_type,</if>
+            <if test="promotionNum != null">promotion_num,</if>
+            <if test="minYear != null">min_year,</if>
+            <if test="maxYear != null">max_year,</if>
+            <if test="maxSport != null">max_sport,</if>
+            <if test="minSport != null">min_sport,</if>
+            <if test="fee != null">fee,</if>
+            <if test="feeMaxSport != null">fee_max_sport,</if>
+            <if test="resultDesId != null">result_des_id,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="screenImg != null">screen_img,</if>
+            <if test="remark != null">remark,</if>
+            <if test="sexCon != null">sex_con,</if>
+            <if test="sportLimit != null">sport_limit,</if>
+            <if test="groupMode != null">group_mode,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchId != null">#{matchId},</if>
+            <if test="code != null">#{code},</if>
+            <if test="name != null">#{name},</if>
+            <if test="groupLimit != null">#{groupLimit},</if>
+            <if test="singleDuration != null">#{singleDuration},</if>
+            <if test="matchType != null">#{matchType},</if>
+            <if test="promotionNum != null">#{promotionNum},</if>
+            <if test="minYear != null">#{minYear},</if>
+            <if test="maxYear != null">#{maxYear},</if>
+            <if test="maxSport != null">#{maxSport},</if>
+            <if test="minSport != null">#{minSport},</if>
+            <if test="fee != null">#{fee},</if>
+            <if test="feeMaxSport != null">#{feeMaxSport},</if>
+            <if test="resultDesId != null">#{resultDesId},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="screenImg != null">#{screenImg},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="sexCon != null">#{sexCon},</if>
+            <if test="sportLimit != null">#{sportLimit},</if>
+            <if test="groupMode != null">#{groupMode},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwGameItem" parameterType="JwGameItem">
+        update jw_game_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="groupLimit != null">group_limit = #{groupLimit},</if>
+            <if test="singleDuration != null">single_duration = #{singleDuration},</if>
+            <if test="matchType != null">match_type = #{matchType},</if>
+            <if test="promotionNum != null">promotion_num = #{promotionNum},</if>
+            <if test="minYear != null">min_year = #{minYear},</if>
+            <if test="maxYear != null">max_year = #{maxYear},</if>
+            <if test="maxSport != null">max_sport = #{maxSport},</if>
+            <if test="minSport != null">min_sport = #{minSport},</if>
+            <if test="fee != null">fee = #{fee},</if>
+            <if test="feeMaxSport != null">fee_max_sport = #{feeMaxSport},</if>
+            <if test="resultDesId != null">result_des_id = #{resultDesId},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="screenImg != null">screen_img = #{screenImg},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="sexCon != null">sex_con = #{sexCon},</if>
+            <if test="sportLimit != null">sport_limit = #{sportLimit},</if>
+            <if test="groupMode != null">group_mode = #{groupMode},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwGameItemById" parameterType="Long">
+        delete from jw_game_item where id = #{id}
+    </delete>
+
+    <delete id="deleteJwGameItemByIds" parameterType="String">
+        delete from jw_game_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwJudgeMapper">
+    
+    <resultMap type="JwJudge" id="JwJudgeResult">
+        <result property="id"    column="id"    />
+        <result property="judgeName"    column="judge_name"    />
+        <result property="judgeType"    column="judge_type"    />
+        <result property="img"    column="img"    />
+    </resultMap>
+
+    <sql id="selectJwJudgeVo">
+        select id, judge_name, judge_type, img from jw_judge
+    </sql>
+
+    <select id="selectJwJudgeList" parameterType="JwJudge" resultMap="JwJudgeResult">
+        <include refid="selectJwJudgeVo"/>
+        <where>  
+            <if test="judgeName != null  and judgeName != ''"> and judge_name like concat('%', #{judgeName}, '%')</if>
+            <if test="judgeType != null  and judgeType != ''"> and judge_type = #{judgeType}</if>
+
+        </where>
+    </select>
+    
+    <select id="selectJwJudgeById" parameterType="Long" resultMap="JwJudgeResult">
+        <include refid="selectJwJudgeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwJudge" parameterType="JwJudge" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_judge
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="judgeName != null">judge_name,</if>
+            <if test="judgeType != null">judge_type,</if>
+            <if test="img != null">img,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="judgeName != null">#{judgeName},</if>
+            <if test="judgeType != null">#{judgeType},</if>
+            <if test="img != null">#{img},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwJudge" parameterType="JwJudge">
+        update jw_judge
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="judgeName != null">judge_name = #{judgeName},</if>
+            <if test="judgeType != null">judge_type = #{judgeType},</if>
+            <if test="img != null">img = #{img},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwJudgeById" parameterType="Long">
+        delete from jw_judge where id = #{id}
+    </delete>
+
+    <delete id="deleteJwJudgeByIds" parameterType="String">
+        delete from jw_judge where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

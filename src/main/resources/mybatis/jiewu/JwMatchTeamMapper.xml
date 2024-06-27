@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwMatchTeamMapper">
+    
+    <resultMap type="JwMatchTeam" id="JwMatchTeamResult">
+        <result property="teamId"    column="team_id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="indexOrder"    column="index_order"    />
+    </resultMap>
+
+    <sql id="selectJwMatchTeamVo">
+        select team_id, match_id, index_order from jw_match_team
+    </sql>
+
+    <select id="selectJwMatchTeamList" parameterType="JwMatchTeam" resultMap="JwMatchTeamResult">
+        <include refid="selectJwMatchTeamVo"/>
+        <where>  
+            <if test="matchId != null "> and match_id = #{matchId}</if>
+            <if test="indexOrder != null "> and index_order = #{indexOrder}</if>
+        </where>
+    </select>
+
+    <select id="getJwMatchTeam" resultMap="JwMatchTeamResult">
+        <include refid="selectJwMatchTeamVo"/>
+        where team_id = #{teamId} and match_id = #{matchId}
+    </select>
+
+    <select id="selectJwMatchTeamByTeamId" parameterType="Long" resultMap="JwMatchTeamResult">
+        <include refid="selectJwMatchTeamVo"/>
+        where team_id = #{teamId}
+    </select>
+
+    <select id="selectJwMatchTeamByMatchId" parameterType="Long" resultMap="JwMatchTeamResult">
+        <include refid="selectJwMatchTeamVo"/>
+        where match_id = #{matchId}
+    </select>
+
+    <select id="getLastOrder" parameterType="Long">
+        select max(index_order) from jw_match_team
+        where match_id = #{matchId}
+    </select>
+
+
+    <insert id="insertJwMatchTeam" parameterType="JwMatchTeam">
+        insert into jw_match_team
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">team_id,</if>
+            <if test="matchId != null">match_id,</if>
+            <if test="indexOrder != null">index_order,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">#{teamId},</if>
+            <if test="matchId != null">#{matchId},</if>
+            <if test="indexOrder != null">#{indexOrder},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwMatchTeam" parameterType="JwMatchTeam">
+        update jw_match_team
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="indexOrder != null">index_order = #{indexOrder},</if>
+        </trim>
+        where team_id = #{teamId}
+    </update>
+
+    <delete id="deleteJwMatchTeamByTeamId" parameterType="Long">
+        delete from jw_match_team where team_id = #{teamId}
+    </delete>
+
+    <delete id="deleteJwMatchTeamByTeamIds" parameterType="String">
+        delete from jw_match_team where team_id in 
+        <foreach item="teamId" collection="array" open="(" separator="," close=")">
+            #{teamId}
+        </foreach>
+    </delete>
+</mapper>

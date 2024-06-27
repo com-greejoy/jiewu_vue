@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwJudgeMatchMapper">
+    
+    <resultMap type="JwJudgeMatch" id="JwJudgeMatchResult">
+        <result property="judgeId"    column="judge_id"    />
+        <result property="matchId"    column="match_id"    />
+    </resultMap>
+
+    <resultMap type="JwJudge" id="JwJudgeResult">
+        <result property="id"    column="id"    />
+        <result property="judgeName"    column="judge_name"    />
+        <result property="judgeType"    column="judge_type"    />
+        <result property="img"    column="img"    />
+    </resultMap>
+
+    <sql id="selectJwJudgeMatchVo">
+        select judge_id, match_id from jw_judge_match
+    </sql>
+
+    <select id="selectJwJudgeMatchList" parameterType="JwJudgeMatch" resultMap="JwJudgeResult">
+        select jj.* from jw_judge jj
+        left join jw_judge_match jjm on jj.id = jjm.judge_id
+        <where>
+            <if test="matchId != null"> and jjm.match_id = #{matchId}</if>
+        </where>
+    </select>
+    
+    <select id="selectJwJudgeMatchByJudgeId" parameterType="Long" resultMap="JwJudgeMatchResult">
+        <include refid="selectJwJudgeMatchVo"/>
+        where judge_id = #{judgeId} and match_id = #{matchId}
+    </select>
+        
+    <insert id="insertJwJudgeMatch" parameterType="JwJudgeMatch">
+        insert into jw_judge_match
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="judgeId != null">judge_id,</if>
+            <if test="matchId != null">match_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="judgeId != null">#{judgeId},</if>
+            <if test="matchId != null">#{matchId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwJudgeMatch" parameterType="JwJudgeMatch">
+        update jw_judge_match
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+        </trim>
+        where judge_id = #{judgeId}
+    </update>
+
+
+    <delete id="deleteJwJudgeMatch" parameterType="Long">
+        delete from jw_judge_match where judge_id = #{judgeId} and match_id = #{matchId}
+    </delete>
+
+    <delete id="deleteJwJudgeMatchByJudgeId" parameterType="Long">
+        delete from jw_judge_match where judge_id = #{judgeId}
+    </delete>
+
+    <delete id="deleteJwJudgeMatchByJudgeIds" parameterType="String">
+        delete from jw_judge_match where judge_id in 
+        <foreach item="judgeId" collection="array" open="(" separator="," close=")">
+            #{judgeId}
+        </foreach>
+    </delete>
+</mapper>

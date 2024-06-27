@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwMatchMapper">
+    
+    <resultMap type="JwMatch" id="JwMatchResult">
+        <result property="id"    column="id"    />
+        <result property="matchName"    column="match_name"    />
+        <result property="beginTime"    column="begin_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="signBeginTime"    column="sign_begin_time"    />
+        <result property="signEndTime"    column="sign_end_time"    />
+        <result property="addr"    column="addr"    />
+        <result property="posterImg"    column="poster_img"    />
+        <result property="state"    column="state"    />
+        <result property="matchDetails"    column="match_details"    />
+        <result property="matchRegulations"    column="match_regulations"    />
+        <result property="sealUnit"    column="seal_unit"    />
+    </resultMap>
+
+    <sql id="selectJwMatchVo">
+        select id, match_name, begin_time, end_time, seal_unit, sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations from jw_match
+    </sql>
+
+    <!--获取没开始的比赛和正在报名的比赛-->
+    <select id="selectFutureIngList" parameterType="JwMatch" resultMap="JwMatchResult">
+        <include refid="selectJwMatchVo"/>
+        where state = 1 or state = 2
+    </select>
+
+    <select id="selectJwMatchList" parameterType="JwMatch" resultMap="JwMatchResult">
+        <include refid="selectJwMatchVo"/>
+        <where>  
+            <if test="matchName != null  and matchName != ''"> and match_name like concat('%', #{matchName}, '%')</if>
+            <if test="beginTime != null "> and begin_time = #{beginTime}</if>
+            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="signBeginTime != null "> and sign_begin_time = #{signBeginTime}</if>
+            <if test="signEndTime != null "> and sign_end_time = #{signEndTime}</if>
+            <if test="addr != null  and addr != ''"> and addr = #{addr}</if>
+            <if test="posterImg != null  and posterImg != ''"> and poster_img = #{posterImg}</if>
+            <if test="state != null  and state != ''"> and state = #{state}</if>
+        </where>
+    </select>
+    
+    <select id="selectJwMatchById" parameterType="Long" resultMap="JwMatchResult">
+        <include refid="selectJwMatchVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwMatch" parameterType="JwMatch" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_match
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="matchName != null">match_name,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="signBeginTime != null">sign_begin_time,</if>
+            <if test="signEndTime != null">sign_end_time,</if>
+            <if test="addr != null">addr,</if>
+            <if test="posterImg != null">poster_img,</if>
+            <if test="state != null">state,</if>
+            <if test="matchDetails != null">match_details,</if>
+            <if test="matchRegulations != null">match_regulations,</if>
+            <if test="sealUnit != null">seal_unit,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="matchName != null">#{matchName},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="signBeginTime != null">#{signBeginTime},</if>
+            <if test="signEndTime != null">#{signEndTime},</if>
+            <if test="addr != null">#{addr},</if>
+            <if test="posterImg != null">#{posterImg},</if>
+            <if test="state != null">#{state},</if>
+            <if test="matchDetails != null">#{matchDetails},</if>
+            <if test="matchRegulations != null">#{matchRegulations},</if>
+            <if test="sealUnit != null">#{sealUnit},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwMatch" parameterType="JwMatch">
+        update jw_match
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchName != null">match_name = #{matchName},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="signBeginTime != null">sign_begin_time = #{signBeginTime},</if>
+            <if test="signEndTime != null">sign_end_time = #{signEndTime},</if>
+            <if test="addr != null">addr = #{addr},</if>
+            <if test="posterImg != null">poster_img = #{posterImg},</if>
+            <if test="state != null">state = #{state},</if>
+            <if test="matchDetails != null">match_details = #{matchDetails},</if>
+            <if test="matchRegulations != null">match_regulations = #{matchRegulations},</if>
+            <if test="sealUnit != null">seal_unit = #{sealUnit},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwMatchById" parameterType="Long">
+        delete from jw_match where id = #{id}
+    </delete>
+
+    <delete id="deleteJwMatchByIds" parameterType="String">
+        delete from jw_match where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

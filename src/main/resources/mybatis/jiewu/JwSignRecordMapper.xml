@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwSignRecordMapper">
+
+    <resultMap type="JwSignRecord" id="JwSignRecordResult">
+        <result property="id" column="id"/>
+        <result property="teamId" column="team_id"/>
+        <result property="backNumber" column="back_number"/>
+        <result property="matchId" column="match_id"/>
+        <result property="gameItemId" column="game_item_id"/>
+        <result property="sportLimit" column="sport_limit"/>
+        <result property="worksName" column="works_name"/>
+        <result property="worksMusic" column="works_music"/>
+        <result property="worksMusicName" column="works_music_name"/>
+        <result property="worksVideo" column="works_video"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="scheduleItemId" column="schedule_item_id"/>
+        <result property="indexOrder"    column="index_order"    />
+        <result property="scheduleName"    column="schedule_name"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="placeOrder"    column="place_order"    />
+        <result property="area"    column="area"    />
+        <result property="placeTime"    column="place_time"    />
+    </resultMap>
+
+    <resultMap id="JwSignRecordJwSignRecordSportResult" type="JwSignRecord" extends="JwSignRecordResult">
+        <collection property="jwSignRecordSportList" notNullColumn="sub_id" javaType="java.util.List" resultMap="JwSignRecordSportResult"/>
+    </resultMap>
+
+    <resultMap id="JwSignRecordWithMusicResult" type="JwSignRecord" extends="JwSignRecordJwSignRecordSportResult">
+        <collection property="jwGameItem" notNullColumn="game_item_id" javaType="JwGameItem" resultMap="JwGameItemResult"/>
+    </resultMap>
+
+    <resultMap type="JwGameItem" id="JwGameItemResult">
+        <result property="id" column="game_item_id"/>
+        <result property="matchId" column="match_id"/>
+        <result property="code" column="game_item_code"/>
+        <result property="name" column="game_item_name"/>
+        <result property="fee" column="game_item_fee"/>
+    </resultMap>
+
+    <resultMap type="JwSignRecordSport" id="JwSignRecordSportResult">
+        <result property="id" column="sub_id"/>
+        <result property="matchId" column="sub_match_id"/>
+        <result property="sportId" column="sub_sport_id"/>
+        <result property="signRecordId" column="sub_sign_record_id"/>
+        <result property="playerName" column="player_name"/>
+        <result property="idCard" column="id_card"/>
+        <result property="sex" column="sex"/>
+    </resultMap>
+
+    <sql id="selectJwSignRecordVo">
+        select id, back_number, schedule_item_id, index_order, match_id, works_music_name, team_id, game_item_id, sport_limit, works_name, works_music, works_video, create_time, update_time from jw_sign_record
+    </sql>
+
+    <select id="selectJwSignRecordList" parameterType="JwSignRecord" resultMap="JwSignRecordResult">
+        <include refid="selectJwSignRecordVo"/>
+        <where>
+            <if test="teamId != null ">and team_id = #{teamId}</if>
+            <if test="backNumber != null  and backNumber != ''">and back_number = #{backNumber}</if>
+            <if test="matchId != null ">and match_id = #{matchId}</if>
+            <if test="gameItemId != null ">and game_item_id = #{gameItemId}</if>
+            <if test="sportLimit != null  and sportLimit != ''">and sport_limit = #{sportLimit}</if>
+            <if test="worksName != null  and worksName != ''">and works_name like concat('%', #{worksName}, '%')</if>
+            <if test="worksMusic != null  and worksMusic != ''">and works_music = #{worksMusic}</if>
+            <if test="worksVideo != null  and worksVideo != ''">and works_video = #{worksVideo}</if>
+            <if test="scheduleItemId != null ">and schedule_item_id = #{scheduleItemId}</if>
+        </where>
+    </select>
+
+    <resultMap id="JwSignRecordAllResult" type="JwSignRecord" extends="JwSignRecordJwSignRecordSportResult">
+        <collection property="jwGameItem" notNullColumn="game_item_id" javaType="JwGameItem" resultMap="JwGameItemResult"/>
+        <collection property="jwScheduleItem" notNullColumn="schedule_item_id" javaType="JwScheduleItem" resultMap="JwScheduleItemResult"/>
+        <collection property="jwTeam" notNullColumn="team_id" javaType="JwTeam" resultMap="JwTeamResult"/>
+    </resultMap>
+
+    <resultMap type="JwScheduleItem" id="JwScheduleItemResult">
+        <result property="id"    column="schedule_item_id"    />
+        <result property="scheduleInfoId"    column="schedule_info_id"    />
+        <result property="schedulePlaceId"    column="schedule_place_id"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="shceduleTime"    column="shcedule_time"    />
+        <result property="area"    column="area"    />
+    </resultMap>
+
+    <resultMap type="JwTeam" id="JwTeamResult">
+        <result property="id"    column="team_id"    />
+        <result property="teamName"    column="team_name"    />
+    </resultMap>
+
+    <select id="selectJwSignRecordListWithAllInfo" resultMap="JwSignRecordAllResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit,
+        a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.create_time, a.update_time, b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
+        cc.player_name, cc.id_card, cc.sex,
+         jt.team_name,
+         jst.schedule_info_id, jst.schedule_place_id, jst.item_name, jst.shcedule_time, jst.area
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_sport cc on cc.id = b.sport_id
+        left join jw_team jt on jt.id = a.team_id
+        left join jw_schedule_item jst on jst.id = a.schedule_item_id
+        <where>
+            <if test="scheduleItemId != null ">and a.schedule_item_id = #{scheduleItemId}</if>
+            <if test="gameItemId != null ">and a.game_item_id = #{gameItemId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwSignRecordListWithUserGameItem" resultMap="JwSignRecordJwSignRecordSportResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.create_time, a.update_time, b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
+        cc.player_name, cc.id_card, cc.sex
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_sport cc on cc.id = b.sport_id
+        <where>
+            <if test="teamId != null ">and a.team_id = #{teamId}</if>
+            <if test="gameItemId != null ">and a.game_item_id = #{gameItemId}</if>
+            <if test="backNumber != null and backNumber != ''">and a.back_number = #{backNumber}</if>
+        </where>
+    </select>
+
+    <select id="selectJwSignRecordListByScheduleItem" resultMap="JwSignRecordResult">
+        select * from jw_sign_record where schedule_item_id = #{scheduleItemId}
+    </select>
+
+    <select id="selectJwSignRecordListWithUserMatch" resultMap="JwSignRecordJwSignRecordSportResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.create_time, a.update_time,  b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
+        cc.player_name, cc.id_card, cc.sex
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_sport cc on cc.id = b.sport_id
+        where a.team_id = #{teamId} and a.match_id = #{matchId}
+    </select>
+
+    <select id="selectJwSignRecordListByMatchId" resultMap="JwSignRecordJwSignRecordSportResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name,
+        a.works_music, a.works_music_name, a.works_video,
+        a.create_time, a.update_time,  b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_match_team jmt on jmt.team_id = a.team_id
+        where a.match_id = #{matchId}
+        order by jmt.index_order
+    </select>
+
+    <!--获取代表队全部赛程-->
+    <select id="getTeamScheduleInfoList" resultMap="JwSignRecordJwSignRecordSportResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit,
+         a.works_name, a.works_music, a.works_music_name, a.works_video,
+          b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
+        cc.player_name, cc.id_card, cc.sex,
+        jsi.item_name, jsii.schedule_name, jsp.place_order, jsi.area, jsp.place_time
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_sport cc on cc.id = b.sport_id
+        left join jw_schedule_item jsi on jsi.id = a.schedule_item_id
+        left join jw_schedule_info jsii on jsii.id = jsi.schedule_info_id
+        left join jw_schedule_place jsp on jsp.id = jsi.schedule_place_id
+        where a.team_id = #{teamId} and a.match_id = #{matchId}
+        order by jsii.index_order asc, jsp.place_order asc,jsi.area asc,  a.index_order asc
+    </select>
+
+    <select id="selectJwSignRecordBySportId" resultMap="JwSignRecordResult">
+        select a.*
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        where b.sport_id = #{sportId} and a.match_id = #{matchId} and a.sport_limit = '1' and a.back_number is not null
+    </select>
+
+    <select id="selectMaxBackNum" resultType="String">
+        select a.back_number
+        from jw_sign_record a
+        where a.match_id = #{matchId} and a.back_number is not null
+        order by a.back_number desc
+        limit 1
+    </select>
+
+    <!--获取齐舞的报名记录-->
+    <select id="listMatchQiWuSignRecord" resultMap="JwSignRecordWithMusicResult">
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.create_time, a.update_time,  b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
+        cc.player_name, cc.id_card, cc.sex,
+        jgi.id as game_item_id, jgi.match_id, jgi.code as game_item_code, jgi.name as game_item_name, jgi.fee as game_item_fee
+        from jw_sign_record a
+        left join jw_sign_record_sport b on b.sign_record_id = a.id
+        left join jw_sport cc on cc.id = b.sport_id
+        left join jw_game_item jgi on jgi.id = a.game_item_id
+        where a.team_id = #{teamId} and a.match_id = #{matchId} and a.sport_limit = 3
+    </select>
+
+    <!--获取代表队比赛报名人数-->
+    <select id="selectJwSignRecordSportNum" resultType="Long">
+        select COUNT(DISTINCT sport_id ) as count from jw_sign_record_sport
+        where team_id = #{teamId} and match_id = #{matchId}
+    </select>
+
+    <!--获取代表队比赛报名人次-->
+    <select id="selectJwSignRecordSportTime" resultType="Long">
+        select COUNT( sport_id ) as count from jw_sign_record_sport
+        where team_id = #{teamId} and match_id = #{matchId}
+    </select>
+
+    <select id="selectJwSignRecordById" parameterType="Long" resultMap="JwSignRecordResult">
+        <include refid="selectJwSignRecordVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertJwSignRecord" parameterType="JwSignRecord" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_sign_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">team_id,</if>
+            <if test="backNumber != null">back_number,</if>
+            <if test="matchId != null">match_id,</if>
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="sportLimit != null">sport_limit,</if>
+            <if test="worksName != null">works_name,</if>
+            <if test="worksMusic != null">works_music,</if>
+            <if test="worksMusicName != null">works_music_name,</if>
+            <if test="worksVideo != null">works_video,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="scheduleItemId != null">schedule_item_id,</if>
+            <if test="indexOrder != null">index_order,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">#{teamId},</if>
+            <if test="backNumber != null">#{backNumber},</if>
+            <if test="matchId != null">#{matchId},</if>
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="sportLimit != null">#{sportLimit},</if>
+            <if test="worksName != null">#{worksName},</if>
+            <if test="worksMusic != null">#{worksMusic},</if>
+            <if test="worksMusicName != null">#{worksMusicName},</if>
+            <if test="worksVideo != null">#{worksVideo},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="scheduleItemId != null">#{scheduleItemId},</if>
+            <if test="indexOrder != null">#{indexOrder},</if>
+        </trim>
+    </insert>
+
+    <update id="updateJwSignRecord" parameterType="JwSignRecord">
+        update jw_sign_record
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamId != null">team_id = #{teamId},</if>
+            <if test="backNumber != null and backNumber != ''">back_number = #{backNumber},</if>
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="gameItemId != null">game_item_id = #{gameItemId},</if>
+            <if test="sportLimit != null and sportLimit != ''">sport_limit = #{sportLimit},</if>
+            <if test="worksName != null  and worksName != ''">works_name = #{worksName},</if>
+            <if test="worksMusic != null and worksMusic != ''">works_music = #{worksMusic},</if>
+            <if test="worksMusicName != null and worksMusicName != ''">works_music_name = #{worksMusicName},</if>
+            <if test="worksVideo != null and worksVideo != ''">works_video = #{worksVideo},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="scheduleItemId != null">schedule_item_id = #{scheduleItemId},</if>
+            <if test="indexOrder != null">index_order = #{indexOrder},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <update id="changeGameItem">
+        update jw_sign_record set game_item_id = #{changeGameItemId} where id = #{id};
+        update jw_sign_record_sport set game_item_id = #{changeGameItemId} where sign_record_id = #{id};
+    </update>
+
+    <update id="clearAllBackNum">
+        update jw_sign_record set back_number = null where match_id = #{matchId}
+    </update>
+
+    <delete id="deleteJwSignRecordById" parameterType="Long">
+        delete from jw_sign_record where id = #{id}
+    </delete>
+
+    <delete id="deleteJwSignRecordByIds" parameterType="String">
+        delete from jw_sign_record where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

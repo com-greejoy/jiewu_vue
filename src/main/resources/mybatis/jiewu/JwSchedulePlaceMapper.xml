@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwSchedulePlaceMapper">
+    
+    <resultMap type="JwSchedulePlace" id="JwSchedulePlaceResult">
+        <result property="id"    column="id"    />
+        <result property="matchId"    column="match_id"    />
+        <result property="scheduleInfoId"    column="schedule_info_id"    />
+        <result property="placeOrder"    column="place_order"    />
+        <result property="placeTime"    column="place_time"    />
+    </resultMap>
+
+
+    <resultMap id="JwSchedulePlaceWithScheduleItemResult" type="JwSchedulePlace" extends="JwSchedulePlaceResult">
+        <collection property="jwScheduleItemList" notNullColumn="schedule_item_id" javaType="java.util.List" resultMap="JwScheduleItemResult"/>
+    </resultMap>
+    <resultMap type="JwScheduleItem" id="JwScheduleItemResult">
+        <result property="id"    column="schedule_item_id"    />
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="schedulePlaceId"    column="schedule_place_id"    />
+        <result property="itemName"    column="item_name"    />
+        <result property="shceduleTime"    column="shcedule_time"    />
+        <result property="area"    column="area"    />
+        <result property="sportCount"    column="sportCount" />
+    </resultMap>
+
+    <sql id="selectJwSchedulePlaceVo">
+        select id, match_id, schedule_info_id, place_order, place_time from jw_schedule_place
+    </sql>
+
+    <select id="selectJwSchedulePlaceList" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceResult">
+        <include refid="selectJwSchedulePlaceVo"/>
+        <where>  
+            <if test="matchId != null "> and match_id = #{matchId}</if>
+            <if test="scheduleInfoId != null "> and schedule_info_id = #{scheduleInfoId}</if>
+            <if test="placeOrder != null "> and place_order = #{placeOrder}</if>
+            <if test="placeTime != null "> and place_time = #{placeTime}</if>
+        </where>
+    </select>
+
+    <select id="listJwSchedulePlaceWithScheduleItem" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceWithScheduleItemResult">
+        select jsp.*, jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id, jsi.item_name, jsi.shcedule_time, jsi.area, jsi.sportCount
+        from jw_schedule_place jsp
+        left join (select jsii.*, count(jsr.id) as sportCount from jw_schedule_item jsii
+        left join jw_sign_record jsr on jsr.schedule_item_id = jsii.id
+        group by jsii.id
+        ) jsi on jsi.schedule_place_id = jsp.id
+        <where>
+            <if test="matchId != null "> and jsp.match_id = #{matchId}</if>
+            <if test="scheduleInfoId != null "> and jsp.schedule_info_id = #{scheduleInfoId}</if>
+            <if test="placeOrder != null "> and jsp.place_order = #{placeOrder}</if>
+            <if test="placeTime != null "> and jsp.place_time = #{placeTime}</if>
+        </where>
+    </select>
+
+    <select id="selectJwSchedulePlaceById" parameterType="Long" resultMap="JwSchedulePlaceResult">
+        <include refid="selectJwSchedulePlaceVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="getLastJwSchedulePlace" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceResult">
+        <include refid="selectJwSchedulePlaceVo"/>
+        <where>
+            <if test="matchId != null "> and match_id = #{matchId}</if>
+            <if test="scheduleInfoId != null "> and schedule_info_id = #{scheduleInfoId}</if>
+        </where>
+        order by place_order desc limit 1
+    </select>
+
+        
+    <insert id="insertJwSchedulePlace" parameterType="JwSchedulePlace">
+        insert into jw_schedule_place
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="matchId != null">match_id,</if>
+            <if test="scheduleInfoId != null">schedule_info_id,</if>
+            <if test="placeOrder != null">place_order,</if>
+            <if test="placeTime != null">place_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="matchId != null">#{matchId},</if>
+            <if test="scheduleInfoId != null">#{scheduleInfoId},</if>
+            <if test="placeOrder != null">#{placeOrder},</if>
+            <if test="placeTime != null">#{placeTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwSchedulePlace" parameterType="JwSchedulePlace">
+        update jw_schedule_place
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="matchId != null">match_id = #{matchId},</if>
+            <if test="scheduleInfoId != null">schedule_info_id = #{scheduleInfoId},</if>
+            <if test="placeOrder != null">place_order = #{placeOrder},</if>
+            <if test="placeTime != null">place_time = #{placeTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwSchedulePlaceById" parameterType="Long">
+        delete from jw_schedule_place where id = #{id}
+    </delete>
+
+    <delete id="deleteJwSchedulePlaceByIds" parameterType="String">
+        delete from jw_schedule_place where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

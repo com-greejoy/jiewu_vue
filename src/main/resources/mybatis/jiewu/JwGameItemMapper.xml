@@ -18,6 +18,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="promotionNum"    column="promotion_num"    />
         <result property="minYear"    column="min_year"    />
         <result property="maxYear"    column="max_year"    />
+        <result property="showMinYear"    column="show_min_year"    />
+        <result property="showMaxYear"    column="show_max_year"    />
         <result property="fee"    column="fee"    />
         <result property="feeMaxSport"    column="fee_max_sport"    />
         <result property="resultDesId"    column="result_des_id"    />
@@ -34,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectJwGameItemVo">
-        select id, match_id, code, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
+        select id, match_id, code, show_min_year, show_max_year, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
         single_duration, match_type, promotion_num, min_year, max_year,
         fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
         screen_img, remark from jw_game_item
@@ -54,7 +56,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="minYear != null "> and gi.min_year = #{minYear}</if>
             <if test="maxYear != null "> and gi.max_year = #{maxYear}</if>
             <if test="fee != null "> and gi.fee = #{fee}</if>
-            <if test="resultDesId != null "> and gi.result_des_id = #{resultDesId}</if>
+            <if test="resultDesId != null and resultDesId != ''"> and gi.result_des_id = #{resultDesId}</if>
             <if test="screenImg != null  and screenImg != ''"> and gi.screen_img = #{screenImg}</if>
             <if test="sexCon != null  and sexCon != ''"> and gi.sex_con = #{sexCon}</if>
             <if test="sportLimit != null  and sportLimit != ''"> and gi.sport_limit = #{sportLimit}</if>
@@ -77,12 +79,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="minYear != null "> and gi.min_year = #{minYear}</if>
             <if test="maxYear != null "> and gi.max_year = #{maxYear}</if>
             <if test="fee != null "> and gi.fee = #{fee}</if>
-            <if test="resultDesId != null "> and gi.result_des_id = #{resultDesId}</if>
+            <if test="resultDesId != null and resultDesId != ''"> and gi.result_des_id = #{resultDesId}</if>
             <if test="screenImg != null  and screenImg != ''"> and gi.screen_img = #{screenImg}</if>
             <if test="sexCon != null  and sexCon != ''"> and gi.sex_con = #{sexCon}</if>
             <if test="sportLimit != null  and sportLimit != ''"> and gi.sport_limit = #{sportLimit}</if>
         </where>
         group by gi.id
+        order by gi.code
     </select>
 
     <select id="selectJwGameItemListByMatchId" parameterType="Long" resultMap="JwGameItemResult">
@@ -92,6 +95,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="matchId != null "> and gi.match_id = #{matchId}</if>
             <if test="gameItemId != null "> and gi.id = #{gameItemId}</if>
         </where>
+    </select>
+
+    <select id="selectJwGameItemByName" resultMap="JwGameItemResult">
+        select gi.* from jw_game_item gi
+        <where>
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="name != null and name != ''"> and gi.name = #{name}</if>
+        </where>
+        limit 1
     </select>
 
     <select id="selectJwGameItemById" parameterType="Long" resultMap="JwGameItemResult">
@@ -115,7 +127,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="minSport != null">min_sport,</if>
             <if test="fee != null">fee,</if>
             <if test="feeMaxSport != null">fee_max_sport,</if>
-            <if test="resultDesId != null">result_des_id,</if>
+            <if test="resultDesId != null and resultDesId != ''">result_des_id,</if>
             <if test="updateTime != null">update_time,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
@@ -125,6 +137,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sexCon != null">sex_con,</if>
             <if test="sportLimit != null">sport_limit,</if>
             <if test="groupMode != null">group_mode,</if>
+            <if test="showMinYear != null">show_min_year,</if>
+            <if test="showMaxYear != null">show_max_year,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -140,7 +154,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="minSport != null">#{minSport},</if>
             <if test="fee != null">#{fee},</if>
             <if test="feeMaxSport != null">#{feeMaxSport},</if>
-            <if test="resultDesId != null">#{resultDesId},</if>
+            <if test="resultDesId != null and resultDesId != ''">#{resultDesId},</if>
             <if test="updateTime != null">#{updateTime},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -150,6 +164,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sexCon != null">#{sexCon},</if>
             <if test="sportLimit != null">#{sportLimit},</if>
             <if test="groupMode != null">#{groupMode},</if>
+            <if test="showMinYear != null">#{showMinYear},</if>
+            <if test="showMaxYear != null">#{showMaxYear},</if>
          </trim>
     </insert>
 
@@ -169,7 +185,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="minSport != null">min_sport = #{minSport},</if>
             <if test="fee != null">fee = #{fee},</if>
             <if test="feeMaxSport != null">fee_max_sport = #{feeMaxSport},</if>
-            <if test="resultDesId != null">result_des_id = #{resultDesId},</if>
+            <if test="resultDesId != null and resultDesId != ''">result_des_id = #{resultDesId},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
@@ -179,6 +195,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sexCon != null">sex_con = #{sexCon},</if>
             <if test="sportLimit != null">sport_limit = #{sportLimit},</if>
             <if test="groupMode != null">group_mode = #{groupMode},</if>
+            <if test="showMinYear != null">show_min_year = #{showMinYear},</if>
+            <if test="showMaxYear != null">show_max_year = #{showMaxYear},</if>
         </trim>
         where id = #{id}
     </update>

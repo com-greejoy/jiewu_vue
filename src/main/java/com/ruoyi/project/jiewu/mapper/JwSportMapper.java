@@ -15,6 +15,9 @@ public interface JwSportMapper {
 
     public JwSport selectJwSportByIdCard(String idCard, Long id);
 
+    public JwSport selectJwSportByName(String playerName, String idCard, Long createUserId);
+
+
     public List<JwSport> getSportListWithsignRecord(Long signRecordId);
 
     // 获取运动员 没有报名该项目的

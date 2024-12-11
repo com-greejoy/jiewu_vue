@@ -42,6 +42,27 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/JwQiWuMusicScreen',
+    hidden: true,
+    component: () => import('@/views/jiewu/JwQiWuMusicScreen')
+  },
+  {
+    path: '/appScore',
+    hidden: true,
+    component: () => import('@/views/jiewu/appScore/appScore')
+  },
+
+  {
+    path: '/battlePhone',
+    hidden: true,
+    component: () => import('@/views/jiewu/JwQiWuMusicScreen/battlePhone')
+  },
+  {
+    path: '/battlePhoneNew',
+    hidden: true,
+    component: () => import('@/views/jiewu/JwQiWuMusicScreen/battlePhoneNew')
+  },
+  {
     path: '/login',
     component: () => import('@/views/login'),
     hidden: true

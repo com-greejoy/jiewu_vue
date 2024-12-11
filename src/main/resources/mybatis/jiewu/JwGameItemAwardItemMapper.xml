@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwGameItemAwardItemMapper">
+    
+    <resultMap type="JwGameItemAwardItem" id="JwGameItemAwardItemResult">
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="awardItem"    column="award_item"    />
+    </resultMap>
+
+    <sql id="selectJwGameItemAwardItemVo">
+        select game_item_id, award_item from jw_game_item_award_item
+    </sql>
+
+    <select id="selectJwGameItemAwardItemList" parameterType="JwGameItemAwardItem" resultMap="JwGameItemAwardItemResult">
+        <include refid="selectJwGameItemAwardItemVo"/>
+        <where>  
+        </where>
+    </select>
+    
+    <select id="selectJwGameItemAwardItemByGameItemId" parameterType="Long" resultMap="JwGameItemAwardItemResult">
+        <include refid="selectJwGameItemAwardItemVo"/>
+        where game_item_id = #{gameItemId}
+    </select>
+        
+    <insert id="insertJwGameItemAwardItem" parameterType="JwGameItemAwardItem">
+        insert into jw_game_item_award_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="awardItem != null">award_item,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="awardItem != null">#{awardItem},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwGameItemAwardItem" parameterType="JwGameItemAwardItem">
+        update jw_game_item_award_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="awardItem != null">award_item = #{awardItem},</if>
+        </trim>
+        where game_item_id = #{gameItemId}
+    </update>
+
+    <delete id="deleteJwGameItemAwardItemByGameItemId" parameterType="Long">
+        delete from jw_game_item_award_item where game_item_id = #{gameItemId}
+    </delete>
+
+    <delete id="deleteJwGameItemAwardItemByGameItemIds" parameterType="String">
+        delete from jw_game_item_award_item where game_item_id in 
+        <foreach item="gameItemId" collection="array" open="(" separator="," close=")">
+            #{gameItemId}
+        </foreach>
+    </delete>
+</mapper>

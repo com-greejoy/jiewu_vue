@@ -34,6 +34,14 @@ export function updateJwMatch(data) {
     data: data
   })
 }
+export function genBackNumPDF(data) {
+  return request({
+    url: '/jiewu/jwMatch/genBackNumPDF',
+    method: 'post',
+    data: data
+  })
+}
+
 
 // 删除赛事管理
 export function delJwMatch(id) {

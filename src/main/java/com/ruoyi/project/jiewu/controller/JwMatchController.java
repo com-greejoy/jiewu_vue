@@ -1,6 +1,7 @@
 package com.ruoyi.project.jiewu.controller;
 
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.file.PdfUtils;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
@@ -30,10 +31,13 @@ public class JwMatchController extends BaseController {
     @Autowired
     private JwMatchService jwMatchService;
 
+    @Autowired
+    private PdfUtils pdfUtils;
+
     /**
      * 查询赛事管理列表
      */
-    @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:list')")
+//    @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:list')")
     @GetMapping("/list")
     public TableDataInfo list(JwMatch jwMatch) {
         startPage();
@@ -62,6 +66,15 @@ public class JwMatchController extends BaseController {
         return success(jwMatchService.selectJwMatchById(id));
     }
 
+
+    // 生成背号PDF
+    @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:add')")
+    @Log(title = "赛事管理", businessType = BusinessType.INSERT)
+    @PostMapping("/genBackNumPDF")
+    public AjaxResult genBackNumPDF(@RequestBody JwMatch jwMatch) {
+        pdfUtils.genPdf(jwMatch.getId());
+        return toAjax(1);
+    }
     /**
      * 新增赛事管理
      */

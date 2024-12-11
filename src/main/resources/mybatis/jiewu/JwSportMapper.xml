@@ -65,7 +65,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectJwSportByIdCard" resultMap="JwSportResult">
         <include refid="selectJwSportVo"/>
-        where id_card = #{idCard} <if test="id != null"> and id != #{id}</if>
+        where id_card = #{idCard}
+        <if test="id != null"> and id != #{id}</if>
+    </select>
+
+    <select id="selectJwSportByName" resultMap="JwSportResult">
+        <include refid="selectJwSportVo"/>
+        <where>
+            <if test="playerName != null  and playerName != ''"> and player_name = #{playerName}</if>
+            <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
+            <if test="createUserId != null "> and create_user_id = #{createUserId}</if>
+        </where>
+        limit 1
     </select>
 
     <select id="getWxSportListWithGameItem" resultMap="JwSportResult">
@@ -81,9 +92,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select js.* ,jsrs.back_number as backNumber, jt.team_name as teamName from jw_sport js
         left join (select DISTINCT jsrs.sport_id, jsr.back_number from jw_sign_record jsr
         left join jw_sign_record_sport jsrs on jsrs.sign_record_id = jsr.id
-        where jsr.sport_limit = 1) jsrs on jsrs.sport_id = js.id
+        where jsr.sport_limit = 1 and jsr.match_id = #{matchId}) jsrs on jsrs.sport_id = js.id
         left join jw_team jt on jt.create_user_id = js.create_user_id
-        where js.id in (select sport_id from jw_sign_record_sport where match_id = 1)
+        where js.id in (select sport_id from jw_sign_record_sport where match_id = #{matchId})
         <if test="playerName != null  and playerName != ''"> and js.player_name like concat('%', #{playerName}, '%')</if>
         <if test="idCard != null  and idCard != ''"> and js.id_card like concat('%', #{idCard}, '%')</if>
         <if test="backNumber != null  and backNumber != ''"> and jsrs.back_number = #{backNumber}</if>
@@ -91,14 +102,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by js.id
     </select>
 
-
     <!--根据报名记录获取报名运动员数据-->
     <select id="getSportListWithsignRecord" resultMap="JwSportResult">
         select s.* from jw_sign_record_sport js
         left join jw_sport s on s.id = js.sport_id
         where js.sign_record_id = #{signRecordId}
     </select>
-
 
     <select id="selectJwSportById" parameterType="Long" resultMap="JwSportResult">
         <include refid="selectJwSportVo"/>

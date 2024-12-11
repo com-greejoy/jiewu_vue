@@ -11,11 +11,9 @@ import com.ruoyi.framework.redis.RedisCache;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.jiewu.domain.*;
-import com.ruoyi.project.jiewu.service.JwGameItemService;
-import com.ruoyi.project.jiewu.service.JwMatchService;
-import com.ruoyi.project.jiewu.service.JwSignRecordService;
-import com.ruoyi.project.jiewu.service.JwWxUserService;
+import com.ruoyi.project.jiewu.service.*;
 import me.chanjar.weixin.common.error.WxErrorException;
+import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +22,10 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @RestController
 @RequestMapping("/mini/match/api")
@@ -36,6 +36,8 @@ public class JwMiNiMatchController extends BaseController {
     @Autowired
     private RedisCache redisCache;
 
+    @Autowired JwWxUserService jwWxUserService;
+
     @Autowired
     private JwMatchService jwMatchService;
 
@@ -44,6 +46,10 @@ public class JwMiNiMatchController extends BaseController {
 
     @Autowired
     private JwSignRecordService jwSignRecordService;
+
+    @Autowired
+    private JwTeamService jwTeamService;
+
 
     @PostMapping("/listMatchGameItem")
     @ResponseBody
@@ -74,8 +80,13 @@ public class JwMiNiMatchController extends BaseController {
     @PostMapping("/listMatchItem")
     @ResponseBody
     public AjaxResult listMatchItem() {
-        List<JwMatch> jwMatchList = jwMatchService.selectJwMatchList(null);
-
+        JwMatch jwMatch = new JwMatch();
+        jwMatch.setIsShow("Y");
+        List<JwMatch> jwMatchList = jwMatchService.selectJwMatchList(jwMatch);
+        if(jwMatchList != null && jwMatchList.size() > 0){
+            jwMatchList.forEach(jwMatch1 -> jwMatch1.setMatchName(jwMatch1.getMatchName().replaceAll("<br/>", " ")));
+            jwMatchList.sort(Comparator.comparing(JwMatch::getBeginTime).reversed());
+        }
         return AjaxResult.success(jwMatchList);
     }
 
@@ -83,7 +94,69 @@ public class JwMiNiMatchController extends BaseController {
     @ResponseBody
     public AjaxResult getMatchItem(Long id) {
         JwMatch jwMatch = jwMatchService.selectJwMatchById(id);
+        jwMatch.setMatchName(jwMatch.getMatchName().replaceAll("<br/>", " "));
         return AjaxResult.success(jwMatch);
+    }
+
+    // 获取微信用户管理的比赛
+    @PostMapping("/listWxUserMatchList")
+    @ResponseBody
+    public AjaxResult listWxUserMatchList(@RequestHeader("Authorization") String openId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            List<JwMatch> jwMatchList = jwMatchService.listWxUserMatchList(zwWxUser.getId());
+            if(jwMatchList != null && jwMatchList.size() > 0){
+                jwMatchList.forEach(jwMatch1 -> jwMatch1.setMatchName(jwMatch1.getMatchName().replaceAll("<br/>", " ")));
+                jwMatchList.sort(Comparator.comparing(JwMatch::getBeginTime).reversed());
+            }
+            return AjaxResult.success(jwMatchList);
+        }
+        return AjaxResult.success("拜拜");
+    }
+
+    // 获取比赛报名数据
+    @PostMapping("/getMatchSignInfo")
+    @ResponseBody
+    public AjaxResult getMatchSignInfo(@RequestHeader("Authorization") String openId, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            return AjaxResult.success(jwMatchService.getMatchSignInfo(matchId));
+        }
+        return AjaxResult.success("拜拜");
+    }
+    // 获取比赛 组别报名统计
+    @PostMapping("/listMatchGameItemWithSignCount")
+    @ResponseBody
+    public AjaxResult listMatchGameItemWithSignCount(@RequestHeader("Authorization") String openId, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            JwGameItem jwGameItem = new JwGameItem();
+            jwGameItem.setMatchId(matchId);
+            return AjaxResult.success(jwGameItemService.selectJwGameItemListWithCount(jwGameItem));
+        }
+        return AjaxResult.success("拜拜");
+    }
+
+    // 获取比赛 组别报名数据
+    @PostMapping("/listMatchGameItemWithSignData")
+    @ResponseBody
+    public AjaxResult listMatchGameItemWithSignData(@RequestHeader("Authorization") String openId, Long matchId, Long gameItemId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            return AjaxResult.success(jwSignRecordService.selectJwSignRecordListWithAllInfo(gameItemId, null));
+        }
+        return AjaxResult.success("拜拜");
+    }
+
+    // 获取比赛的全部参赛队伍
+    @PostMapping("/listMatchteamInfo")
+    @ResponseBody
+    public AjaxResult listMatchteamInfo(@RequestHeader("Authorization") String openId, JwTeam jwTeam) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null && StringUtils.isLongNotNull(jwTeam.getMatchId())){
+            return AjaxResult.success(jwTeamService.selectJwTeamList(jwTeam));
+        }
+        return AjaxResult.success("拜拜");
     }
 
 }

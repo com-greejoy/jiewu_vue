@@ -13,6 +13,8 @@ public interface JwSignRecordSportMapper {
     // 获取报名记录的人员名单
     public List<JwSignRecordSport> selectJwSignRecordSportListById(Long signRecordId);
 
+    public List<JwSignRecordSport> selectJwSignRecordSportBySportId(Long sportId);
+
     public int insertJwSignRecordSport(JwSignRecordSport jwSignRecordSport);
 
     public int updateJwSignRecordSport(JwSignRecordSport jwSignRecordSport);

@@ -78,56 +78,84 @@
     <el-table v-loading="loading" :data="jwMatchList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center"/>
       <el-table-column label="ID" align="center" prop="id"/>
-      <el-table-column label="比赛名称" align="center" prop="matchName"/>
-      <el-table-column label="开始时间" align="center" prop="beginTime" width="180">
+      <el-table-column label="比赛名称" width="200" align="left" prop="matchName"/>
+      <el-table-column label="管理员" width="64" align="center">
+        <template slot-scope="scope">
+          <el-link :underline="false" type="primary" style="font-weight: 600" @click="setManager(scope.row)">设置</el-link>
+        </template>
+      </el-table-column>
+      <el-table-column label="开始时间" align="center" prop="beginTime" width="100">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.beginTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endTime" width="180">
+      <el-table-column label="结束时间" align="center" prop="endTime" width="100">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="报名开始时间" align="center" prop="signBeginTime" width="180">
+      <el-table-column label="报名开始时间" align="center" prop="signBeginTime" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.signBeginTime, '{y}-{m}-{d}  {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="报名结束时间" align="center" prop="signEndTime" width="180">
+      <el-table-column label="报名结束时间" align="center" prop="signEndTime" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.signEndTime, '{y}-{m}-{d}  {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="地址" align="center" prop="addr"/>
+      <el-table-column label="地址" show-overflow-tooltip align="left" prop="addr"/>
       <el-table-column label="盖章单位" show-overflow-tooltip align="center" prop="sealUnit" />
-      <el-table-column label="海报" align="center" prop="posterImg" width="100">
-        <template slot-scope="scope">
-          <image-preview :src="scope.row.posterImg" :width="50" :height="50"/>
-        </template>
-      </el-table-column>
+      <el-table-column label="起始背号" show-overflow-tooltip align="center" prop="startBackNum" />
       <el-table-column label="状态" align="center" prop="state">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.jw_match_state" :value="scope.row.state"/>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="海报" align="center" prop="posterImg" width="100">
+        <template slot-scope="scope">
+          <image-preview :src="scope.row.posterImg" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="主屏" align="center" prop="mainImg" width="100">
+        <template slot-scope="scope">
+          <image-preview :src="scope.row.mainImg" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="对阵屏" align="center" prop="battleImg" width="100">
+        <template slot-scope="scope">
+          <image-preview :src="scope.row.battleImg" :width="50" :height="50"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否显示" align="center" prop="isShow">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isShow"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="240" align="center" class-name="small-padding fixed-width" fixed="right">
         <template slot-scope="scope">
           <el-button
             size="mini"
-            type="text"
-            icon="el-icon-edit"
+            type="success"
+            style="padding: 6px;"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['jiewu:jwMatch:edit']"
           >修改
           </el-button>
           <el-button
             size="mini"
-            type="text"
-            icon="el-icon-delete"
+            type="danger"
+            style="padding: 6px;"
             @click="handleDelete(scope.row)"
             v-hasPermi="['jiewu:jwMatch:remove']"
           >删除
+          </el-button>
+          <el-button
+            size="mini"
+            type="primary"
+            style="padding: 6px;"
+            @click="genPdf(scope.row)"
+          >生成背号PDF
           </el-button>
         </template>
       </el-table-column>
@@ -142,7 +170,7 @@
     />
 
     <!-- 添加或修改赛事管理对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="1100px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="1100px" append-to-body close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="120px">
         <el-row>
           <el-col :span="12">
@@ -222,25 +250,93 @@
 
         <el-row>
           <el-col :span="8">
+            <el-form-item label="是否显示" prop="isShow">
+              <el-radio-group v-model="form.isShow">
+                <el-radio
+                  v-for="dict in dict.type.sys_yes_no"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="起始背号" prop="startBackNum">
+              <el-input-number size="mini" v-model="form.startBackNum" controls-position="right" :min="1"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+
+          </el-col>
+        </el-row>
+
+
+        <el-row>
+          <el-col :span="8">
             <el-form-item label="海报" prop="posterImg">
               <image-upload v-model="form.posterImg"/>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="赛事详情" prop="matchDetails">
-              <image-upload :limit="10" v-model="form.matchDetails"/>
+              <image-upload :limit="20" v-model="form.matchDetails"/>
             </el-form-item>
           </el-col>
           <el-col :span="8">
             <el-form-item label="竞赛规程" prop="matchRegulations">
-              <image-upload :limit="10" v-model="form.matchRegulations"/>
-
+              <image-upload :limit="20" v-model="form.matchRegulations"/>
             </el-form-item>
           </el-col>
         </el-row>
+        <el-row>
+          <el-col :span="8">
+            <el-form-item label="主屏" prop="mainImg">
+              <image-upload :limit="1" v-model="form.mainImg"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="对阵屏" prop="battleImg">
+              <image-upload :limit="1" v-model="form.battleImg"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+
+          </el-col>
+        </el-row>
+
+
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 修改管理员 -->
+    <el-dialog title="修改管理员" :visible.sync="matchOpen" width="500px" append-to-body>
+      <el-form ref="form" :model="userform" :rules="rules" label-width="80px">
+        <el-form-item label="名字" prop="matchName">
+          <el-input v-model="userform.matchName" readonly/>
+        </el-form-item>
+
+        <el-form-item label="微信用户" prop="userIds">
+          <el-select style="width: 380px" v-model="userform.userIds"
+                     filterable
+                     clearable
+                     remote
+                     multiple
+                     reserve-keyword
+                     placeholder="请输入微信用户"
+                     :remote-method="remoteMethodUser"
+                     :loading="loadingUser">
+            <el-option v-for="item in wxUserList" :key="item.id" :label="item.name" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitUserForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -248,13 +344,18 @@
 </template>
 
 <script>
-  import {listJwMatch, getJwMatch, delJwMatch, addJwMatch, updateJwMatch} from "@/api/jiewu/jwMatch";
+  import { listJwMatch, getJwMatch, delJwMatch, addJwMatch, updateJwMatch, genBackNumPDF} from "@/api/jiewu/jwMatch";
+  import { listJwMatchUser, addJwMatchUser} from "@/api/jiewu/JwMatchUser";
+  import { listJwWxUser} from "@/api/jiewu/JwWxUser";
 
   export default {
     name: "JwMatch",
-    dicts: ['jw_match_state'],
+    dicts: ['jw_match_state', 'sys_yes_no'],
     data() {
       return {
+        userform:{},
+        matchOpen: false,
+        wxUserList: [],
         // 遮罩层
         loading: true,
         // 选中数组
@@ -273,6 +374,7 @@
         title: "",
         // 是否显示弹出层
         open: false,
+        loadingUser: false,
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -296,6 +398,43 @@
       this.getList();
     },
     methods: {
+      genPdf(row){
+        genBackNumPDF({id: row.id}).then(res=>{
+
+        })
+      },
+      remoteMethodUser(query) {
+        if (query !== '') {
+          this.loadingUser = true;
+          listJwWxUser({
+            name: query,
+            pageNum: 1,
+            pageSize: 50,
+          }).then(response => {
+            this.wxUserList = response.rows;
+            this.loadingUser = false;
+          });
+        } else {
+          this.wxUserList = [];
+        }
+      },
+      submitUserForm(){
+        let that = this;
+        addJwMatchUser(this.userform).then(res=>{
+          that.getList();
+          that.matchOpen = false;
+        })
+      },
+      // 设置管理员
+      setManager(row){
+        let that = this;
+        this.wxUserList = [];
+        listJwMatchUser({matchId: row.id}).then(res=>{
+          let userIds = (res.rows || []).map(item=>item.userId);
+          that.userform = {matchId: row.id, matchName: row.matchName, userIds: userIds};
+          that.matchOpen = true;
+        });
+      },
       /** 查询赛事管理列表 */
       getList() {
         this.loading = true;
@@ -308,6 +447,7 @@
       // 取消按钮
       cancel() {
         this.open = false;
+        this.matchOpen = false;
         this.reset();
       },
       // 表单重置

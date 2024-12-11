@@ -87,6 +87,17 @@
           v-hasPermi="['jiewu:JwSignRecordSport:export']"
         >导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="warning"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="teamSportHandel"
+          v-hasPermi="['jiewu:JwSignRecordSport:export']"
+        >代表队名单</el-button>
+      </el-col>
+
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -146,13 +157,34 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="代表队名单" :visible.sync="showTeamSport" width="750px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handlePrint('printFeeConT')">打印</el-button>
+      </div>
+      <div class="fee-items" id="printFeeConT" v-if="showTeamSport" >
+        <div class="match-name">2024乐山市中小学生运动会体育舞蹈比赛 街舞项目</div>
+        <div class="title-name">代表队名单</div>
+        <div class="team-item" v-for="(item, key) in teamSports">
+          <div class="team-name">{{key}}</div>
+          <div class="la">运动员:</div>
+          <div class="sport-rows">
+            <div class="sport-row" v-for="itemm in item">
+              <div class="sport-name">{{itemm.playerName}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
   import { listMatchJwSport, getJwSport, delJwSport, addJwSport, updateJwSport } from "@/api/jiewu/JwSport";
   import {listJwTeam} from "@/api/jiewu/JwTeam";
-
+  import 'core-js/actual/array/group';
 export default {
   name: "JwSignRecordSport",
   dicts: ['jw_sport_limit', 'jw_sex'],
@@ -191,7 +223,9 @@ export default {
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      teamSports: [],
+      showTeamSport: false
     };
   },
   watch: {
@@ -207,6 +241,14 @@ export default {
     getTeamList() {
       listJwTeam({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000}).then(response => {
         this.JwTeamList = response.rows;
+      });
+    },
+    teamSportHandel(){
+      listMatchJwSport({ pageNum: 1,
+        pageSize: 100000,
+        matchId: this.queryParams.matchId}).then(response => {
+        this.teamSports = response.rows.group((b) => b.teamName);console.log( this.teamSports);
+        this.showTeamSport = true;
       });
     },
     getList() {
@@ -292,10 +334,75 @@ export default {
 
     },
     handleExport() {
-      this.download('jiewu/JwSignRecordSport/export', {
+      if(!this.queryParams.matchId){
+        this.$modal.msgError("比赛");
+        return;
+      }
+      this.download('jiewu/JwSport/export', {
         ...this.queryParams
-      }, `JwSignRecordSport_${new Date().getTime()}.xlsx`)
+      }, `参赛选手名单.xlsx`)
     }
   }
 };
 </script>
+<style lang="scss" scoped>
+
+  .match-name {
+    text-align: center;
+    font-size: 24px;
+    /*font-weight: 600;*/
+    margin-bottom: 16px;
+    font-family: "华文中宋";
+  }
+  .title-name {
+    text-align: center;
+    margin-bottom: 8px;
+    /*font-weight: 600;*/
+    font-size: 18px;
+    font-family: "华文中宋";
+  }
+  .fee-items {
+    display: flex;
+    flex-direction: column;
+    margin-right: 12px;
+    color: #000;
+    width: 520pt;
+    page-break-inside: avoid;
+    font-family: "华文中宋";
+    .team-item{
+      margin-top: 32px;
+      page-break-inside: avoid;
+      .team-name{
+        text-align: center;
+        margin-bottom: 8px;
+        /*font-weight: 600;*/
+        font-size: 18px;
+      }
+
+      .la{
+        /*font-weight: 600;*/
+        font-size: 16px;
+        margin-bottom: 8px;
+        padding-left: 16px;
+
+      }
+      .sport-rows{
+        padding-left: 24px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        /*justify-content: space-between;*/
+
+        .sport-row{
+          margin-right: 24px;
+          margin-bottom: 8px;
+          .sport-name{
+            white-space: nowrap;
+            width: 56px;
+          }
+        }
+      }
+    }
+
+  }
+</style>

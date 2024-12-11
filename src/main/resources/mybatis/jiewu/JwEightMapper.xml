@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwEightMapper">
+    
+    <resultMap type="JwEight" id="JwEightResult">
+        <result property="id"    column="id"    />
+        <result property="playerId"    column="player_id"    />
+        <result property="backNumber" column="back_number"/>
+        <result property="playerIndex"    column="player_index"    />
+        <result property="playerPosition"    column="player_position"    />
+        <result property="playerPkGroup"    column="player_pk_group"    />
+        <result property="gameItemId"    column="game_item_id"    />
+        <result property="groupIndex"    column="group_index"    />
+    </resultMap>
+
+    <resultMap id="JwEightSportResult" type="JwEight" extends="JwEightResult">
+        <collection property="jwSignRecordSportList" notNullColumn="sub_id" javaType="java.util.List" resultMap="JwSignRecordSportResult"/>
+    </resultMap>
+
+    <resultMap type="JwSignRecordSport" id="JwSignRecordSportResult">
+        <result property="id" column="sub_id"/>
+        <result property="playerName" column="player_name"/>
+    </resultMap>
+
+    <sql id="selectJwEightVo">
+        select id, player_id, player_index, player_position, player_pk_group, game_item_id, group_index from jw_eight
+    </sql>
+
+    <select id="getEightOrder" parameterType="Long" resultMap="JwEightResult">
+        select * from (select js.id, js.game_item_id, js.player_id, js.player_index,
+        SUBSTRING_INDEX(GROUP_CONCAT(js.group_index order by js.id desc),',',1) as description, js.player_position, js.player_pk_group
+        from  jw_eight js
+        where js.game_item_id = #{gameItemId}
+		group by js.player_id) aa order by field(aa.description,'季军争夺','季军','冠军争夺', '冠军', '8强', '16强', '32强') asc, aa.player_index
+    </select>
+
+
+    <select id="selectJwEightList" parameterType="JwEight" resultMap="JwEightResult">
+        <include refid="selectJwEightVo"/>
+        <where>  
+            <if test="playerId != null  and playerId != ''"> and player_id = #{playerId}</if>
+            <if test="playerIndex != null "> and player_index = #{playerIndex}</if>
+            <if test="playerPosition != null  and playerPosition != ''"> and player_position = #{playerPosition}</if>
+            <if test="playerPkGroup != null  and playerPkGroup != ''"> and player_pk_group = #{playerPkGroup}</if>
+            <if test="gameItemId != null "> and game_item_id = #{gameItemId}</if>
+            <if test="groupIndex != null  and groupIndex != ''"> and group_index = #{groupIndex}</if>
+        </where>
+    </select>
+
+    <select id="selectJwEightListWithSport" parameterType="JwEight" resultMap="JwEightSportResult">
+        select je.* , cc.id as sub_id, jsr.back_number, cc.player_name from jw_eight je
+        left join jw_sign_record jsr on jsr.id = je.player_id
+        left join jw_sign_record_sport b on b.sign_record_id = je.player_id
+        left join jw_sport cc on cc.id = b.sport_id
+        <where>
+            <if test="playerId != null  and playerId != ''"> and je.player_id = #{playerId}</if>
+            <if test="playerIndex != null "> and je.player_index = #{playerIndex}</if>
+            <if test="playerPosition != null  and playerPosition != ''"> and je.player_position = #{playerPosition}</if>
+            <if test="playerPkGroup != null  and playerPkGroup != ''"> and je.player_pk_group = #{playerPkGroup}</if>
+            <if test="gameItemId != null "> and je.game_item_id = #{gameItemId}</if>
+            <if test="groupIndex != null  and groupIndex != ''"> and je.group_index = #{groupIndex}</if>
+        </where>
+    </select>
+
+    <select id="selectJwEightById" parameterType="Long" resultMap="JwEightResult">
+        <include refid="selectJwEightVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertJwEight" parameterType="JwEight" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_eight
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="playerId != null">player_id,</if>
+            <if test="playerIndex != null">player_index,</if>
+            <if test="playerPosition != null">player_position,</if>
+            <if test="playerPkGroup != null">player_pk_group,</if>
+            <if test="gameItemId != null">game_item_id,</if>
+            <if test="groupIndex != null">group_index,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="playerId != null">#{playerId},</if>
+            <if test="playerIndex != null">#{playerIndex},</if>
+            <if test="playerPosition != null">#{playerPosition},</if>
+            <if test="playerPkGroup != null">#{playerPkGroup},</if>
+            <if test="gameItemId != null">#{gameItemId},</if>
+            <if test="groupIndex != null">#{groupIndex},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwEight" parameterType="JwEight">
+        update jw_eight
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="playerId != null">player_id = #{playerId},</if>
+            <if test="playerIndex != null">player_index = #{playerIndex},</if>
+            <if test="playerPosition != null">player_position = #{playerPosition},</if>
+            <if test="playerPkGroup != null">player_pk_group = #{playerPkGroup},</if>
+            <if test="gameItemId != null">game_item_id = #{gameItemId},</if>
+            <if test="groupIndex != null">group_index = #{groupIndex},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!--保存对阵晋级选手-->
+    <update id="saveEightPro">
+        update jw_eight
+        set player_id = #{playerId}
+        where game_item_id = #{gameItemId} and player_position = #{playerPosition} and player_index = #{playerIndex}
+    </update>
+
+    <update id="updateJwEightSport">
+        update jw_eight
+        <trim prefix="SET" suffixOverrides=",">
+            player_id = #{playerId},
+        </trim>
+        where player_position = #{playerPosition} and player_group = #{playerGroup}
+    </update>
+
+    <delete id="deleteAllJwEight" parameterType="Long">
+        delete from jw_eight where game_item_id = #{gameItemId}
+    </delete>
+
+    <delete id="deleteJwEightById" parameterType="Long">
+        delete from jw_eight where id = #{id}
+    </delete>
+
+    <delete id="deleteJwEightByIds" parameterType="String">
+        delete from jw_eight where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="clearEightPro" >
+        delete from jw_eight_score where player_group = #{gameItemId} and player_pk_group = #{playerPosition}
+    </delete>
+
+    <update id="setJiJunOne">
+        update jw_eight set player_id =
+            ( select u.player_id from
+                (select player_id from jw_eight
+                where player_pk_group = '2.1'
+                and player_group = #{playerGroup}
+                and player_id not in
+                   (select player_id from jw_eight
+                   where player_position = '2.1'
+                   and player_group = #{playerGroup}) LIMIT 1 ) u )
+       where player_position = '2.3' and player_group = #{playerGroup};
+    </update>
+
+    <update id="setJiJunTwo" >
+        update jw_eight set player_id =
+        ( select u.player_id from
+        ( select player_id from jw_eight
+        where player_pk_group = '2.2'
+        and player_group = #{playerGroup}
+        and player_id not in
+          (select player_id from jw_eight where player_position = '2.2' and player_group = #{playerGroup}) LIMIT 1)
+            u )
+           where player_position = '2.4' and player_group = #{playerGroup};
+    </update>
+
+    <update id="setJiJunOrder" >
+        UPDATE jw_eight  SET eight_order = null where player_pk_group = '2.0' and player_group = #{playerGroup};
+        update jw_eight j set j.eight_order = '4'
+        where j.player_pk_group = '2.0'
+        and j.player_id not in
+         (select jj.player_id from (select jjj.player_id from jw_eight jjj where jjj.player_pk_group = '2' and jjj.player_group = #{playerGroup}) jj)
+        and j.player_group = #{playerGroup};
+    </update>
+
+    <update id="setYaJunOrder">
+        UPDATE jw_eight  SET eight_order = null where player_pk_group = '1.1' and player_group = #{playerGroup};
+        update jw_eight j set j.eight_order = '2'
+        where j.player_pk_group = '1.1'
+        and j.player_id not in
+        (select jj.player_id from (select jjj.player_id from jw_eight jjj where jjj.player_pk_group = '1' and jjj.player_group = #{playerGroup}) jj)
+        and j.player_group = #{playerGroup};
+    </update>
+
+    <select id="getFourCount" resultType="Long">
+        select count(id) from jw_eight where (player_id is null or player_id = '') and player_group = #{playerGroup} and player_pk_group in ('2.1', '2.2')
+    </select>
+
+    <update id="setFourOrder" >
+        UPDATE jw_eight  SET eight_order = null where player_pk_group in ('4.1', '4.2', '4.3', '4.4') and player_group = #{playerGroup};
+        UPDATE jw_eight a, (SELECT @rank := 0) r, (SELECT (@rank := @rank + 1) i, id FROM jw_eight j
+        WHERE j.player_group = #{playerGroup}
+        and j.player_pk_group in ('4.1', '4.2', '4.3', '4.4')
+        and j.player_id not in
+        (select player_id from jw_eight where player_id is not null and player_id != '' and player_group = #{playerGroup} and player_pk_group in ('2.1', '2.2'))
+        order by (j.player_index+0) asc) i
+        SET a.eight_order = i + 4
+        WHERE a.id = i.id;
+    </update>
+
+</mapper>

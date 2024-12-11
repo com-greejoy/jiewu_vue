@@ -139,22 +139,37 @@
     },
     methods: {
       leaveMatch(judge){
+        if(!this.matchId){
+          this.$modal.msgError("先选择比赛");
+          return;
+        }
         delJwJudgeMatch({matchId: this.matchId, judgeId: judge.id}).then(res=>{
           this.getMatchJudgeList();
         })
       },
       toMatch(judge){
+        if(!this.matchId){
+          this.$modal.msgError("先选择比赛");
+          return;
+        }
         addJwJudgeMatch({matchId: this.matchId, judgeId: judge.id}).then(res=>{
           this.getMatchJudgeList();
         })
       },
       getMatchJudgeList(){
         this.loading = true;
-        listJwJudgeMatch({matchId: this.matchId}).then(response=>{
-          this.matchJudgeList = response.rows || [];
-          this.matchJudgeList.sort((a,b)=> a.judgeId-b.judgeId)
+        if(this.matchId){
+          listJwJudgeMatch({matchId: this.matchId,  pageNum: 1,
+            pageSize: 1000,}).then(response=>{
+            this.matchJudgeList = response.rows || [];
+            this.matchJudgeList.sort((a,b)=> a.judgeId-b.judgeId)
+            this.loading = false;
+          })
+        }else{
+          this.matchJudgeList = [];
           this.loading = false;
-        })
+        }
+
       },
       getList() {
         this.loading = true;

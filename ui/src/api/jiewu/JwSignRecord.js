@@ -9,6 +9,16 @@ export function listJwSignRecord(query) {
   })
 }
 
+// 查询齐舞音乐
+export function listQiWuMusic(query) {
+  return request({
+    url: '/jiewu/JwSignRecord/listQiWuMusic',
+    method: 'get',
+    params: query
+  })
+}
+
+
 // 查询报名记录详细
 export function getJwSignRecord(id) {
   return request({

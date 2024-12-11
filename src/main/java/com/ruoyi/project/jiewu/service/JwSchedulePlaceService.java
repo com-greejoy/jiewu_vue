@@ -28,7 +28,6 @@ public class JwSchedulePlaceService {
         return jwSchedulePlaceMapper.getLastJwSchedulePlace(jwSchedulePlace);
     }
 
-
     public List<JwSchedulePlace> selectJwSchedulePlaceList(JwSchedulePlace jwSchedulePlace) {
         return jwSchedulePlaceMapper.selectJwSchedulePlaceList(jwSchedulePlace);
     }

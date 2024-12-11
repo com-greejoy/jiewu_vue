@@ -52,6 +52,16 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="打分锁定" prop="lockScore">
+        <el-select v-model="queryParams.lockScore" placeholder="请选择打分锁定" clearable>
+          <el-option
+            v-for="dict in dict.type.sys_yes_no"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -165,22 +175,25 @@
           <el-link :underline="false" type="primary" @click="viewSignRecord(scope.row)">{{scope.row.sportCount}}</el-link>
         </template>
       </el-table-column>
+      <el-table-column label="打分锁定" align="center" prop="lockScore">
+        <template slot-scope="scope">
+          <el-switch
+            v-model="scope.row.lockScore"
+            active-value="Y"
+            inactive-value="N"
+            @change="handleLockChange(scope.row)"
+          ></el-switch>
+
+        </template>
+      </el-table-column>
       <el-table-column label="开始时间" align="center" prop="shceduleTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.shceduleTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="操作" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['jiewu:JwScheduleItem:edit']"
-          >修改
-          </el-button>
           <el-button
             size="mini"
             type="text"
@@ -245,6 +258,10 @@
     </el-dialog>
 
     <el-dialog title="选手" center :visible.sync="viewSignOpen" width="65vw" append-to-body>
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handleArrangeOrder()">整理排序</el-button>
+        <el-button type="success" plain size="mini" @click="handleOrderSignRecord()">重新排序</el-button>
+      </div>
       <el-table :data="signRecordList" height="75vh">
         <el-table-column label="ID" align="left" prop="id" width="50"/>
         <el-table-column label="代表队" align="left" prop="jwTeam.teamName"/>
@@ -254,7 +271,7 @@
                   class="sport-name"
                   :class="itemm.sex === 'f'? 'female' : (itemm.sex === 'm'? 'male' : '')"
             >
-           <span>{{itemm.playerName}}<span v-if="scope.row.sportLimit == 3" style="margin-right: 8px"></span></span>
+           <span>{{itemm.playerName}}<span v-if="scope.row.sportLimit != 1" style="margin-right: 8px"></span></span>
           </span>
           </template>
         </el-table-column>
@@ -274,12 +291,11 @@
               </div>
               <div slot="reference" class="area-btn" >
                 <el-link :underline="false" type="danger"><div style="width: 60px; cursor: pointer">{{scope.row.indexOrder}}</div></el-link>
-
               </div>
             </el-popover>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <el-table-column label="操作" align="center"  class-name="small-padding fixed-width">
           <template slot-scope="scope">
             <!--<el-button-->
             <!--size="mini"-->
@@ -346,7 +362,7 @@
 </template>
 
 <script>
-  import {listJwScheduleItem, getJwScheduleItem, delJwScheduleItem, addJwScheduleItem, updateJwScheduleItem, initScheduleItem, initBackNum} from "@/api/jiewu/JwScheduleItem";
+  import {listJwScheduleItem, getJwScheduleItem, delJwScheduleItem, addJwScheduleItem, updateJwScheduleItem, initScheduleItem, initBackNum, arrangeOrder, orderSignRecord} from "@/api/jiewu/JwScheduleItem";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {listJwSignRecordByGameItem, changeJwScheduleItem, updateJwSignRecord} from "@/api/jiewu/JwSignRecord";
   import {listJwScheduleInfo} from "@/api/jiewu/JwScheduleInfo";
@@ -354,7 +370,7 @@
 
   export default {
     name: "JwScheduleItem",
-    dicts: ['jw_area', 'jw_item_process'],
+    dicts: ['jw_area', 'jw_item_process', "sys_yes_no"],
     data() {
       return {
         scheduleItem: {},
@@ -394,7 +410,8 @@
           schedulePlaceId: null,
           itemName: null,
           shceduleTime: null,
-          area: null
+          area: null,
+          lockScore: null
         },
         // 表单参数
         form: {},
@@ -415,11 +432,16 @@
     },
     created() {
       this.getList();
-      this.getGameItemList()
-      this.getScheduleInfoList()
-      this.getSchedulePlaceList()
+      this.getGameItemList();
+      this.getScheduleInfoList();
+      this.getSchedulePlaceList();
     },
     methods: {
+      handleLockChange(v){
+       updateJwScheduleItem({id: v.id, lockScore: v.lockScore}).then(res=>{
+         this.getList();
+       });
+      },
       handleChangeOrder(row){
         if(this.reOrder){
           updateJwSignRecord({id: row.id, indexOrder: this.reOrder}).then(res=>{
@@ -597,6 +619,20 @@
           this.$modal.msgError("请选择比赛");
         }
       },
+      // 重新排序
+      handleOrderSignRecord(){
+        orderSignRecord({scheduleItemId: this.scheduleItem.id}).then(res=>{
+          this.$modal.msgSuccess("排序完成");
+          this.viewSignRecord(this.scheduleItem)
+        })
+      },
+      // 整理排序
+      handleArrangeOrder(){
+        arrangeOrder({gameItemId: this.scheduleItem.gameItemId}).then(res=>{
+          this.$modal.msgSuccess("整理完成");
+          this.viewSignRecord(this.scheduleItem)
+        })
+      },
       handleDelete(row) {
         const ids = row.id || this.ids;
         this.$modal.confirm('是否确认删除赛程小项编号为"' + ids + '"的数据项？').then(function () {
@@ -650,5 +686,11 @@
   .sport-name {
     cursor: pointer;
     word-break: keep-all;
+  }
+  .btn-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 12px;
+    justify-content: end;
   }
 </style>

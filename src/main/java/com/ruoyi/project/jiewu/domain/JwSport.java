@@ -43,6 +43,9 @@ public class JwSport extends BaseEntity {
     private String backNumber;
     private String teamName;
 
+    private List<JwGameItem> jwGameItemList;
+
+
     public String getTeamName() {
         return teamName;
     }
@@ -74,8 +77,6 @@ public class JwSport extends BaseEntity {
     public void setTeamId(Long teamId) {
         this.teamId = teamId;
     }
-
-    private List<JwGameItem> jwGameItemList;
 
     public List<JwGameItem> getJwGameItemList() {
         return jwGameItemList;

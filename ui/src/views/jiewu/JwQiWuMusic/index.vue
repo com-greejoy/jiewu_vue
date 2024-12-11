@@ -1,0 +1,255 @@
+<template>
+  <div class="app-container">
+    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="比赛" prop="matchId">
+        <ELSelectMatch :matchId.sync="queryParams.matchId"/>
+      </el-form-item>
+      <el-form-item label="代表队" prop="teamId">
+        <el-select filterable v-model="queryParams.teamId" placeholder="代表队" clearable>
+          <el-option
+            v-for="team in JwTeamList"
+            :key="team.id"
+            :label="team.indexOrder + ' : ' + team.teamName"
+            :value="team.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="组别" prop="gameItemId">
+        <el-select filterable v-model="queryParams.gameItemId" placeholder="组别" clearable>
+          <!--v-if="gameItem.sportLimit == 3"-->
+          <el-option
+            v-for="gameItem in JwGameItemList"
+            :key="gameItem.id"
+            :label="gameItem.code + ' : ' + gameItem.name"
+            :value="gameItem.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="背号" prop="backNumber">
+        <el-input
+          v-model="queryParams.backNumber"
+          placeholder="请输入背号"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
+    <el-table v-loading="loading" :data="JwSignRecordList" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="55" align="center" />
+      <el-table-column label="ID" width="55" align="center" prop="id" />
+      <el-table-column label="代表队" align="left" prop="teamId" >
+        <template slot-scope="scope">
+          <span>{{ getTeamName(scope.row) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="组别" width="300" align="left" prop="gameItemId" >
+        <template slot-scope="scope">
+          <span>{{ getGameItemName(scope.row) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="背号" width="88" align="center" prop="backNumber" >
+        <template slot-scope="scope">
+          <span style="color: #07c160; font-weight: 600;">{{ scope.row.backNumber }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="出场顺序" width="88" align="center" prop="indexOrder" >
+        <template slot-scope="scope">
+          <span style="color: #E6A23C; font-weight: 600;">{{ scope.row.indexOrder }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="作品名称" align="left" prop="worksName" />
+      <el-table-column label="音乐/视频" align="left" prop="worksMusicName" />
+
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.worksMusic" @click="handleOpenMusic(scope.row)" type="success" size="small" icon="el-icon-video-play" circle></el-button>
+          <el-button  @click="handlePlayMusic(scope.row)" type="success" size="small" icon="el-icon-video-play" circle>远程</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-dialog title="音乐视频" :visible.sync="musicOpen" center :append-to-body="false">
+
+      <video controls autoplay ref="videoElement" style="width: 100%" v-if="musicOpen">
+        <source :src="musicUrl" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </el-dialog>
+
+
+  </div>
+</template>
+
+<script>
+  import {listQiWuMusic} from "@/api/jiewu/JwSignRecord";
+  import {listJwTeam} from "@/api/jiewu/JwTeam";
+  import {listJwGameItem} from "@/api/jiewu/JwGameItem";
+  import {delJwSignRecordSport, addJwSignRecordSport} from "@/api/jiewu/JwSignRecordSport";
+  import {listJwSport} from "@/api/jiewu/JwSport";
+  import {sendMusic} from "@/api/jiewu/ScreenSend";
+
+  export default {
+    name: "JwQiWuMusic",
+    dicts: ['jw_sport_limit', 'jw_sex'],
+    data() {
+      return {
+        loading: true,
+        ids: [],
+        // 非单个禁用
+        single: true,
+        // 非多个禁用
+        multiple: true,
+        // 显示搜索条件
+        showSearch: true,
+        // 总条数
+        total: 0,
+        // 报名记录表格数据
+        JwSignRecordList: [],
+        JwGameItemList: [],
+        // 弹出层标题
+        title: "",
+        // 是否显示弹出层
+        musicOpen: false,
+        musicUrl: "",
+        JwTeamList: [],
+        // 查询参数
+        queryParams: {
+          pageNum: 1,
+          pageSize: 10,
+          backNumber: null,
+          teamId: null,
+          matchId: (this.Cookies.get("matchId") * 1) || null,
+          gameItemId: null,
+          sportLimit: null,
+          worksName: null,
+          worksMusic: null,
+          worksVideo: null,
+        },
+        form: {gameItem: {}},
+        rules: {},
+        ws: null,
+      };
+    },
+    created() {
+      this.getTeamList()
+      this.getGameItemList()
+      this.getList();
+    },
+    watch: {
+      "queryParams.matchId": function (val) {
+        this.getTeamList();
+        this.getGameItemList();
+      },
+    },
+    methods: {
+      handlePlayMusic(item){
+        sendMusic({ worksMusic: item.worksMusic, matchId: this.queryParams.matchId}).then(res=>{
+          this.$modal.msgSuccess("发送成功");
+        })
+      },
+      handleOpenMusic(item){
+        if(item.worksMusic){
+          this.musicUrl = process.env.VUE_APP_BASE_URL + item.worksMusic;
+          this.musicOpen = true;
+        }else{
+          this.$modal.msgError("没有音乐");
+        }
+      },
+      playMusic(item) {
+
+      },
+
+      getGameItemName(row) {
+        let item = this.JwGameItemList.find((item) => item.id == row.gameItemId);
+        if(item){
+          return item.code + ":" + item.name;
+        }else{
+          return row.gameItemId;
+        }
+
+      },
+      getGameItemList() {
+        listJwGameItem({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000}).then(response => {
+          this.JwGameItemList = response.rows;
+        });
+      },
+      getTeamName(row) {
+        if (this.JwTeamList && this.JwTeamList.find((item) => item.id == row.teamId)) {
+          return this.JwTeamList.find((item) => item.id == row.teamId).teamName;
+        }
+      },
+      getTeamList() {
+        listJwTeam({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000}).then(response => {
+          this.JwTeamList = response.rows || [];
+          this.JwTeamList.sort((a,b)=>a.indexOrder - b.indexOrder)
+        });
+      },
+      getList() {
+        this.loading = true;
+        // this.queryParams.sportLimit = 3;
+        listQiWuMusic(this.queryParams).then(response => {
+          this.JwSignRecordList = response.rows;
+          this.total = response.total;
+          this.loading = false;
+        });
+      },
+      // 取消按钮
+      cancel() {
+        this.musicOpen = false;
+        this.reset();
+      },
+      // 表单重置
+      reset() {
+        this.form = {
+          id: null,
+          backNumber: null,
+          matchId: null,
+          gameItemId: null,
+          sportLimit: null,
+          worksName: null,
+          worksMusic: null,
+          worksVideo: null,
+          createTime: null,
+          updateTime: null,
+          gameItem: {},
+          sportIds: []
+        };
+        this.resetForm("form");
+      },
+      /** 搜索按钮操作 */
+      handleQuery() {
+        this.queryParams.pageNum = 1;
+        this.getList();
+      },
+      /** 重置按钮操作 */
+      resetQuery() {
+        this.resetForm("queryForm");
+        this.handleQuery();
+      },
+      // 多选框选中数据
+      handleSelectionChange(selection) {
+        this.ids = selection.map(item => item.id);
+        this.single = selection.length !== 1;
+        this.multiple = !selection.length
+      },
+
+
+      /** 修改按钮操作 */
+      handleUpdate(row) {
+        this.reset();
+        const id = row.id || this.ids;
+
+      },
+    }
+  };
+</script>
+
+<style lang="scss" scoped>
+
+
+
+</style>

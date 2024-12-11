@@ -51,3 +51,12 @@ export function reGroupJwGameItem(data) {
     params: data
   })
 }
+
+// 锁定一个项目打分
+export function lockJwGameItem(data) {
+  return request({
+    url: '/jiewu/JwGameItem/lockJwGameItem',
+    method: 'post',
+    params: data
+  })
+}

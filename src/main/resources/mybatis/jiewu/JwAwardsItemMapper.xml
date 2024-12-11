@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwAwardsItemMapper">
+    
+    <resultMap type="JwAwardsItem" id="JwAwardsItemResult">
+        <result property="id"    column="id"    />
+        <result property="awardName"    column="award_name"    />
+        <result property="rankStart"    column="rank_start"    />
+        <result property="rankEnd"    column="rank_end"    />
+        <result property="proportionStart"    column="proportion_start"    />
+        <result property="proportionEnd"    column="proportion_end"    />
+        <result property="rankText"    column="rank_text"    />
+        <result property="jiangBei"    column="jiang_bei"    />
+        <result property="jiangPai"    column="jiang_pai"    />
+        <result property="zhengShu"    column="zheng_shu"    />
+    </resultMap>
+
+    <sql id="selectJwAwardsItemVo">
+        select id, award_name, rank_start, rank_end, proportion_start, proportion_end, rank_text, jiang_bei, jiang_pai, zheng_shu from jw_awards_item
+    </sql>
+
+    <select id="selectJwAwardsItemList" parameterType="JwAwardsItem" resultMap="JwAwardsItemResult">
+        <include refid="selectJwAwardsItemVo"/>
+        <where>  
+            <if test="awardName != null  and awardName != ''"> and award_name like concat('%', #{awardName}, '%')</if>
+            <if test="rankStart != null "> and rank_start = #{rankStart}</if>
+            <if test="rankEnd != null "> and rank_end = #{rankEnd}</if>
+            <if test="proportionStart != null "> and proportion_start = #{proportionStart}</if>
+            <if test="proportionEnd != null "> and proportion_end = #{proportionEnd}</if>
+            <if test="rankText != null  and rankText != ''"> and rank_text = #{rankText}</if>
+            <if test="jiangBei != null "> and jiang_bei = #{jiangBei}</if>
+            <if test="jiangPai != null "> and jiang_pai = #{jiangPai}</if>
+            <if test="zhengShu != null "> and zheng_shu = #{zhengShu}</if>
+        </where>
+    </select>
+    
+    <select id="selectJwAwardsItemById" parameterType="Long" resultMap="JwAwardsItemResult">
+        <include refid="selectJwAwardsItemVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectJwAwardsItemListByIds" parameterType="String" resultMap="JwAwardsItemResult">
+        <include refid="selectJwAwardsItemVo"/>
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+        
+    <insert id="insertJwAwardsItem" parameterType="JwAwardsItem" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_awards_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="awardName != null">award_name,</if>
+            <if test="rankStart != null">rank_start,</if>
+            <if test="rankEnd != null">rank_end,</if>
+            <if test="proportionStart != null">proportion_start,</if>
+            <if test="proportionEnd != null">proportion_end,</if>
+            <if test="rankText != null">rank_text,</if>
+            <if test="jiangBei != null">jiang_bei,</if>
+            <if test="jiangPai != null">jiang_pai,</if>
+            <if test="zhengShu != null">zheng_shu,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="awardName != null">#{awardName},</if>
+            <if test="rankStart != null">#{rankStart},</if>
+            <if test="rankEnd != null">#{rankEnd},</if>
+            <if test="proportionStart != null">#{proportionStart},</if>
+            <if test="proportionEnd != null">#{proportionEnd},</if>
+            <if test="rankText != null">#{rankText},</if>
+            <if test="jiangBei != null">#{jiangBei},</if>
+            <if test="jiangPai != null">#{jiangPai},</if>
+            <if test="zhengShu != null">#{zhengShu},</if>
+         </trim>
+    </insert>
+
+    <update id="updateJwAwardsItem" parameterType="JwAwardsItem">
+        update jw_awards_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="awardName != null">award_name = #{awardName},</if>
+            <if test="rankStart != null">rank_start = #{rankStart},</if>
+            <if test="rankEnd != null">rank_end = #{rankEnd},</if>
+            <if test="proportionStart != null">proportion_start = #{proportionStart},</if>
+            <if test="proportionEnd != null">proportion_end = #{proportionEnd},</if>
+            <if test="rankText != null">rank_text = #{rankText},</if>
+            <if test="jiangBei != null">jiang_bei = #{jiangBei},</if>
+            <if test="jiangPai != null">jiang_pai = #{jiangPai},</if>
+            <if test="zhengShu != null">zheng_shu = #{zhengShu},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwAwardsItemById" parameterType="Long">
+        delete from jw_awards_item where id = #{id}
+    </delete>
+
+    <delete id="deleteJwAwardsItemByIds" parameterType="String">
+        delete from jw_awards_item where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

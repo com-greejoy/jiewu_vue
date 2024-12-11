@@ -16,6 +16,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createUserId"    column="create_user_id"    />
         <result property="matchId"    column="match_id"    />
         <result property="indexOrder"    column="index_order"    />
+        <result property="singleCount"    column="singleCount"    />
+        <result property="singleSportCount"    column="singleSportCount"    />
+        <result property="qiCount"    column="qiCount"    />
+        <result property="qiSportCount"    column="qiSportCount"    />
     </resultMap>
 
     <sql id="selectJwTeamVo">
@@ -23,8 +27,28 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <select id="selectJwTeamList" parameterType="JwTeam" resultMap="JwTeamResult">
-        select jt.*, jmt.index_order from jw_team jt
+        select jt.* from jw_team jt
+        <where>
+            <if test="teamName != null  and teamName != ''"> and team_name like concat('%', #{teamName}, '%')</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="userPhone != null  and userPhone != ''"> and user_phone = #{userPhone}</if>
+            <if test="addr != null  and addr != ''"> and addr = #{addr}</if>
+            <if test="createUserId != null "> and create_user_id = #{createUserId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwTeamListWithMatch" parameterType="JwTeam" resultMap="JwTeamResult">
+        select jt.*, jmt.index_order, jsrr.singleCount, jsrr.qiCount, jsrr.singleSportCount, jsrr.qiSportCount from jw_team jt
         left join jw_match_team jmt on jmt.team_id = jt.id
+        left join (
+        select jsr.team_id, jsr.match_id, count(case when jsr.sport_limit = '1' then 1 end) as singleCount,
+        sum(case when jsr.sport_limit = '1' then jsr.sportCount end) as singleSportCount,
+        count(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2') then 1 end) as qiCount,
+        sum(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2') then jsr.sportCount end) as qiSportCount
+        from (
+        select jr.*, count(jsrs.id) as sportCount from jw_sign_record jr
+        left join jw_sign_record_sport jsrs on jsrs.match_id = #{matchId} and jsrs.sign_record_id = jr.id group by jr.id ) jsr
+        where jsr.match_id = #{matchId} group by jsr.team_id ) jsrr on jsrr.team_id = jt.id
         <where>
             <if test="teamName != null  and teamName != ''"> and team_name like concat('%', #{teamName}, '%')</if>
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
@@ -46,7 +70,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectJwTeamVo"/>
         where id = #{id}
     </select>
-        
+
+    <select id="selectJwTeamByName" parameterType="String" resultMap="JwTeamResult">
+        <include refid="selectJwTeamVo"/>
+        where team_name = #{teamName}
+        limit 1
+    </select>
+
     <insert id="insertJwTeam" parameterType="JwTeam" useGeneratedKeys="true" keyProperty="id">
         insert into jw_team
         <trim prefix="(" suffix=")" suffixOverrides=",">

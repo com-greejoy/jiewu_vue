@@ -82,6 +82,17 @@
           v-hasPermi="['jiewu:JwGameItem:export']"
         >导出
         </el-button>
+
+        <el-button type="success" icon="el-icon-upload2" size="mini" @click="handleImport">导入数据</el-button>
+
+        <el-button
+          style="padding: 6px;"
+          size="mini"
+          type="primary"
+          @click="handleAwardAll()"
+          v-hasPermi="['jiewu:JwGameItem:remove']"
+        >统一设奖项
+        </el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -103,6 +114,7 @@
           <el-link :underline="false" @click="viewSignRecord(scope.row)" type="primary">{{scope.row.signCount}}</el-link>
         </template>
       </el-table-column>
+      <el-table-column label="晋级人数" align="center" prop="promotionNum"/>
       <el-table-column label="时长(秒)" align="center" prop="singleDuration"/>
       <el-table-column label="比赛模式" align="center" prop="matchType">
         <template slot-scope="scope">
@@ -119,7 +131,6 @@
           {{scope.row.minSport}}-{{scope.row.maxSport}}
         </template>
       </el-table-column>
-      <el-table-column label="晋级人数" align="center" prop="promotionNum"/>
       <el-table-column label="最小年龄" align="center" prop="minYear"/>
       <el-table-column label="最大年龄" align="center" prop="maxYear"/>
       <el-table-column label="性别" align="center" prop="matchType">
@@ -129,18 +140,18 @@
       </el-table-column>
       <el-table-column label="报名费" align="center" prop="fee"/>
 
-      <el-table-column label="成绩奖项" align="center" prop="resultDesId">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.resultDesId"/>
-        </template>
-      </el-table-column>
+      <!--<el-table-column label="成绩奖项" align="center" prop="resultDesId">-->
+      <!--<template slot-scope="scope">-->
+      <!--<dict-tag :options="dict.type.sys_yes_no" :value="scope.row.resultDesId"/>-->
+      <!--</template>-->
+      <!--</el-table-column>-->
       <el-table-column label="投屏背景图" align="center" prop="screenImg" width="100">
         <template slot-scope="scope">
           <image-preview v-if="scope.row.screenImg" :src="scope.row.screenImg" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark"/>
-      <el-table-column label="操作" width="180" fixed="right" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="备注" show-overflow-tooltip align="center" prop="remark"/>
+      <el-table-column label="操作" width="280" fixed="right" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             style="padding: 6px;"
@@ -166,6 +177,18 @@
             v-hasPermi="['jiewu:JwGameItem:remove']"
           >删除
           </el-button>
+          <el-button
+            style="padding: 6px;"
+            size="mini"
+            type="primary"
+            @click="handleAward(scope.row)"
+            v-hasPermi="['jiewu:JwGameItem:remove']"
+          >奖项
+          </el-button>
+
+          <el-button size="small" type="success" icon="el-icon-document-copy" @click="handleCopyAdd(scope.row)" circle></el-button>
+
+
         </template>
       </el-table-column>
     </el-table>
@@ -250,21 +273,28 @@
         </el-row>
         <el-row>
 
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="人数限制" prop="maxSport">
-              <el-input-number size="small" v-model="form.minSport" controls-position="right" :min="1"/>
+              <el-input-number size="mini" v-model="form.minSport" controls-position="right" :min="1"/>
               -
-              <el-input-number size="small" v-model="form.maxSport" controls-position="right" :min="1"/>
+              <el-input-number size="mini" v-model="form.maxSport" controls-position="right" :min="1"/>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="年龄限制" prop="minYear">
-              <el-input-number size="small" v-model="form.minYear" controls-position="right" :min="1"/>
+              <el-input-number size="mini" v-model="form.minYear" controls-position="right" :min="1"/>
               -
-              <el-input-number size="small" v-model="form.maxYear" controls-position="right" :min="1"/>
+              <el-input-number size="mini" v-model="form.maxYear" controls-position="right" :min="1"/>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
+            <el-form-item label="显示年龄" prop="showMinYear">
+              <el-input-number size="mini" v-model="form.showMinYear" controls-position="right" :min="1"/>
+              -
+              <el-input-number size="mini" v-model="form.showMaxYear" controls-position="right" :min="1"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
             <el-form-item label="性别限制" prop="sexCon">
               <el-radio-group v-model="form.sexCon">
                 <el-radio
@@ -294,16 +324,16 @@
         </el-row>
         <el-row>
           <el-col :span="12">
-            <el-form-item label="成绩奖项" prop="resultDesId">
-              <el-radio-group v-model="form.resultDesId">
-                <el-radio
-                  v-for="dict in dict.type.sys_yes_no"
-                  :key="dict.value"
-                  :label="parseInt(dict.value)"
-                >{{dict.label}}
-                </el-radio>
-              </el-radio-group>
-            </el-form-item>
+            <!--<el-form-item label="成绩奖项" prop="resultDesId">-->
+            <!--<el-radio-group v-model="form.resultDesId">-->
+            <!--<el-radio-->
+            <!--v-for="dict in dict.type.sys_yes_no"-->
+            <!--:key="dict.value"-->
+            <!--:label="parseInt(dict.value)"-->
+            <!--&gt;{{dict.label}}-->
+            <!--</el-radio>-->
+            <!--</el-radio-group>-->
+            <!--</el-form-item>-->
           </el-col>
           <el-col :span="12">
             <el-form-item label="分组模式" prop="groupMode">
@@ -339,7 +369,7 @@
 
     <el-dialog title="报名记录" :visible.sync="viewSignOpen" width="85vw" append-to-body v-loading="cardLoadIng">
 
-      <el-tabs v-model="currentTab" type="border-card" >
+      <el-tabs v-model="currentTab" type="border-card">
         <el-tab-pane :label="key" :name="key" v-for="(value, key) in signRecordList" :key="key">
           <el-table :data="value" height="65vh">
             <el-table-column label="ID" align="left" prop="id" width="50"/>
@@ -351,7 +381,7 @@
                   class="sport-name"
                   :class="itemm.sex === 'f'? 'female' : (itemm.sex === 'm'? 'male' : '')"
             >
-           <span>{{itemm.playerName}}<span v-if="scope.row.sportLimit == 3" style="margin-right: 8px"></span></span>
+           <span>{{itemm.playerName}}<span v-if="scope.row.sportLimit != 1" style="margin-right: 8px"></span></span>
           </span>
               </template>
             </el-table-column>
@@ -361,6 +391,56 @@
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
+
+    <el-dialog title="设置奖项" :visible.sync="awardOpen" width="75vw" append-to-body>
+      <el-form ref="form" :model="awardForm" :rules="rules" label-width="120px">
+        <el-form-item label="项目名" prop="name">
+          <el-input v-model="awardForm.name" placeholder="请输入项目名"/>
+        </el-form-item>
+
+        <el-form-item label="成绩奖项" prop="resultDesId">
+          <el-checkbox-group v-model="awardForm.resultDesId" style="height: 50vh;overflow: auto;display: flex;flex-direction: column;flex-wrap: wrap;">
+            <el-checkbox v-for="item in JwAwardsItemList" :label="item.id" class="checkbox-game-item" :key="item.awardName">
+              <div class="item-name">{{item.awardName}} 【{{item.rankStart}} - {{item.rankEnd}}名，{{item.proportionStart}}% - {{item.proportionEnd}} % : {{item.rankText}}】</div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAwardForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+
+    <el-dialog title="导入报名" :visible.sync="upload.open" width="400px" append-to-body>
+
+      <el-form ref="form" :model="upload" label-width="80px">
+        <el-form-item label="比赛" prop="matchId">
+          <ELSelectMatch :matchId.sync="upload.matchId"/>
+        </el-form-item>
+      </el-form>
+
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -368,17 +448,36 @@
   import 'core-js/actual/array/group';
   import {listJwGameItem, getJwGameItem, delJwGameItem, addJwGameItem, updateJwGameItem, reGroupJwGameItem} from "@/api/jiewu/JwGameItem";
   import {listJwSignRecordByGameItem} from "@/api/jiewu/JwSignRecord";
+  import {listJwAwardsItem} from "@/api/jiewu/JwAwardsItem";
+  import {getToken} from "@/utils/auth";
 
   export default {
     name: "JwGameItem",
     dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode'],
     data() {
       return {
+        JwAwardsItemList: [],
+        awardForm: {},
+        awardOpen: false,
         currentTab: "",
         cardLoadIng: false,
         viewSignOpen: false,
         signRecordList: {},
-
+        // 用户导入参数
+        upload: {
+          // 是否显示弹出层（用户导入）
+          open: false,
+          // 弹出层标题（用户导入）
+          title: "",
+          // 是否禁用上传
+          isUploading: false,
+          // 是否更新已经存在的用户数据
+          matchId: 0,
+          // 设置上传的请求头部
+          headers: {Authorization: "Bearer " + getToken()},
+          // 上传的地址
+          url: process.env.VUE_APP_BASE_URL + "/jiewu/JwGameItem/importData"
+        },
         // 遮罩层
         loading: true,
         // 选中数组
@@ -413,7 +512,6 @@
           fee: null,
           resultDesId: null,
           sexCon: null,
-
         },
         // 表单参数
         form: {},
@@ -425,16 +523,58 @@
       this.getList();
     },
     methods: {
+      // 设置奖项
+      submitAwardForm() {
+        if (this.awardForm.id) {
+          updateJwGameItem({id: this.awardForm.id, resultDesId: this.awardForm.resultDesId.join(",")}).then(res => {
+            this.awardOpen = false;
+            this.getList();
+          });
+        } else {
+          (this.ids || []).forEach(id => {
+            updateJwGameItem({id: id, resultDesId: this.awardForm.resultDesId.join(",")}).then(res => {
+              this.awardOpen = false;
+              this.getList();
+            });
+          });
+
+        }
+
+      },
+      handleAwardAll() {
+        this.awardForm = {resultDesId: []};
+        listJwAwardsItem({pageNum: 1, pageSize: 100,}).then(res => {
+          let names = [];
+          (this.ids || []).forEach(id => {
+            let item = this.JwGameItemList.find((item) => item.id == id);
+            names.push(item.name)
+          });
+
+          this.JwAwardsItemList = res.rows;
+          this.awardForm = {ids: this.ids, name: names.join(", "), resultDesId: []};
+          this.awardOpen = true;
+        })
+      },
+      handleAward(row) {
+        this.awardForm = {resultDesId: []};
+        listJwAwardsItem({pageNum: 1, pageSize: 100,}).then(res => {
+          this.JwAwardsItemList = res.rows;
+          let resultDesId = row.resultDesId ? row.resultDesId.split(",") : [];
+          this.awardForm = {id: row.id, name: row.name, resultDesId: resultDesId.map(Number)};
+          this.awardOpen = true;
+        })
+      },
       // 查看比赛项目的报名数据
       viewSignRecord(gameItem) {
         let that = this;
         that.signRecordList = [];
         that.cardLoadIng = true;
-        that.viewSignOpen = true
+        that.viewSignOpen = true;
         listJwSignRecordByGameItem({gameItemId: gameItem.id}).then(res => {
+          that.cardLoadIng = false;
           let signRecordList = res.data || [];
-          signRecordList.forEach(item=>{
-            if(!item.jwScheduleItem || !item.jwScheduleItem.itemName){
+          signRecordList.forEach(item => {
+            if (!item.jwScheduleItem || !item.jwScheduleItem.itemName) {
               item.jwScheduleItem = {itemName: "未分组"}
             }
           })
@@ -448,8 +588,6 @@
 
           that.currentTab = signRecordList[0].jwScheduleItem.itemName;
           that.signRecordList = signRecordList.group((b) => b.jwScheduleItem.itemName);
-          that.cardLoadIng = false;
-
 
         })
       },
@@ -464,7 +602,8 @@
       },
       // 取消按钮
       cancel() {
-        this.open = false;
+        this.awardOpen = false,
+          this.open = false;
         this.reset();
       },
       // 表单重置
@@ -480,6 +619,8 @@
           promotionNum: null,
           minYear: null,
           maxYear: null,
+          showMinYear: null,
+          showMaxYear: null,
           fee: null,
           resultDesId: null,
           updateTime: null,
@@ -510,6 +651,21 @@
         this.ids = selection.map(item => item.id)
         this.single = selection.length !== 1
         this.multiple = !selection.length
+      },
+      handleCopyAdd(row) {
+        this.reset();
+        this.open = true;
+        this.form = {...row};
+        this.form.id = null;
+        this.form.code = row.code * 1 + 1;
+        this.form.name = null;
+        this.form.remark = "[等级赛]";
+        this.form.minYear = null;
+        this.form.maxYear = null;
+        this.form.showMinYear = null;
+        this.form.showMaxYear = null;
+
+        this.form.matchId = this.queryParams.matchId;
       },
       /** 新增按钮操作 */
       handleAdd() {
@@ -577,7 +733,27 @@
         this.download('jiewu/JwGameItem/export', {
           ...this.queryParams
         }, `JwGameItem_${new Date().getTime()}.xlsx`)
-      }
+      },
+      handleImport(){
+        this.upload.title = "导入";
+        this.upload.open = true;
+      },
+      // 提交上传文件
+      submitFileForm() {
+        this.$refs.upload.submit();
+      },
+      // 文件上传中处理
+      handleFileUploadProgress(event, file, fileList) {
+        this.upload.isUploading = true;
+      },
+      // 文件上传成功处理
+      handleFileSuccess(response, file, fileList) {
+        this.upload.open = false;
+        this.upload.isUploading = false;
+        this.$refs.upload.clearFiles();
+        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+        this.getList();
+      },
     }
   };
 </script>

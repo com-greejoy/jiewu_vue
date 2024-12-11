@@ -22,6 +22,9 @@ public interface JwScheduleItemMapper {
 
     public int clearSchedulePlaceById(@Param("id") Long id);
 
+    // 锁定一个项目打分
+    public int lockScoreByGameItem(Long id);
+
     public int deleteJwScheduleItemByGameItem(@Param("gameItemId") Long gameItemId);
 
     public int updateJwScheduleItemPlace(@Param("ids") Long[] ids, @Param("scheduleInfoId") Long scheduleInfoId, @Param("schedulePlaceId") Long schedulePlaceId);
@@ -31,4 +34,7 @@ public interface JwScheduleItemMapper {
     public int clearMatchScheduleItem(Long matchId);
 
     public int deleteJwScheduleItemByIds(Long[] ids);
+
+    // 修改项目名字
+    public int changeItemName(@Param("gameItemId")Long gameItemId, @Param("oldName")String oldName, @Param("newName")String newName);
 }

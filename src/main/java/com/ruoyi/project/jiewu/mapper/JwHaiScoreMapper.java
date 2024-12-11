@@ -7,7 +7,15 @@ public interface JwHaiScoreMapper {
 
     public JwHaiScore selectJwHaiScoreById(Long id);
 
+    public JwHaiScore selectJwHaiScoreByJudgeAndSport(Long judgeId, Long sportId);
+
     public List<JwHaiScore> selectJwHaiScoreList(JwHaiScore jwHaiScore);
+
+    public List<JwHaiScore> selectJwHaiScoreListBySport(Long sportId);
+
+    public List<JwHaiScore> selectJwHaiScoreListByGameItem(Long gameItemId);
+
+    public List<JwHaiScore> selectJwHaiScoreListByScheduleItem(Long scheduleItemId);
 
     public int insertJwHaiScore(JwHaiScore jwHaiScore);
 

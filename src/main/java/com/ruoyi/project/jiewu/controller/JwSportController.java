@@ -1,10 +1,14 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.IDCardUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.JwSignRecordSport;
+import com.ruoyi.project.jiewu.domain.JwSportExport;
 import com.ruoyi.project.system.domain.SysUser;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +43,7 @@ public class JwSportController extends BaseController {
     public TableDataInfo list(JwSport jwSport, Long gameItemId) {
 
         if(StringUtils.isLongNotNull(gameItemId)){
-            List<JwSport> jwSportList = jwSportService.getWxSportListWithGameItem(jwSport.getCreateUserId(), gameItemId, 0l, 100l, null);
+            List<JwSport> jwSportList = jwSportService.getWxSportListWithGameItem(jwSport.getCreateUserId(), gameItemId, -999999l, 999999l, null);
             return getDataTable(jwSportList);
         }else{
             startPage();
@@ -57,7 +61,7 @@ public class JwSportController extends BaseController {
 
 
     @PostMapping("/importData")
-    public AjaxResult importData(MultipartFile file) throws Exception
+    public AjaxResult importData(MultipartFile file, Long createUserId) throws Exception
     {
         ExcelUtil<JwSport> util = new ExcelUtil<>(JwSport.class);
         List<JwSport> userList = util.importExcel(file.getInputStream());
@@ -65,7 +69,10 @@ public class JwSportController extends BaseController {
         for(JwSport jwSport: userList){
             jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
             jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
-            jwSport.setCreateUserId(9l);
+            if(jwSport.getAge() <= 0 || jwSport.getAge() >= 99){
+                jwSport.setAge(10l);
+            }
+            jwSport.setCreateUserId(createUserId);
             jwSportService.insertJwSport(jwSport);
         }
         return success();
@@ -75,9 +82,18 @@ public class JwSportController extends BaseController {
     @Log(title = "选手", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, JwSport jwSport) {
-        List<JwSport> list = jwSportService.selectJwSportList(jwSport);
-        ExcelUtil<JwSport> util = new ExcelUtil<JwSport>(JwSport.class);
-        util.exportExcel(response, list, "选手数据");
+        List<JwSport> jwSportList =jwSportService.getWxSportListByMatchTeam(jwSport);
+        List<JwSportExport> jwSportExportList = new ArrayList<>();
+        if(jwSportList != null && jwSportList.size() > 0){
+            jwSportList.forEach(jwSport1 -> {
+                jwSportExportList.add(new JwSportExport(jwSport1.getTeamName(), jwSport1.getPlayerName(), jwSport1.getIdCard()));
+            });
+        }
+        jwSportExportList.sort(Comparator.comparing(JwSportExport::getTeamName));
+
+        ExcelUtil<JwSportExport> util = new ExcelUtil<JwSportExport>(JwSportExport.class);
+
+        util.exportExcel(response, jwSportExportList, "报名记录选手数据");
     }
 
     /**

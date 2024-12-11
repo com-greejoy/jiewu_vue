@@ -65,6 +65,17 @@
           @click="handleExport"
           v-hasPermi="['jiewu:JwWxUser:export']"
         >导出</el-button>
+
+        <el-col :span="1.5">
+          <el-button
+            type="primary"
+            plain
+            icon="el-icon-plus"
+            size="mini"
+            @click="handleAddTeam"
+            v-hasPermi="['jiewu:JwWxUser:add']"
+          >同步创建队伍</el-button>
+        </el-col>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -153,6 +164,7 @@
 
 <script>
 import { listJwWxUser, getJwWxUser, delJwWxUser, addJwWxUser, updateJwWxUser } from "@/api/jiewu/JwWxUser";
+import { addJwTeam} from "@/api/jiewu/JwTeam";
 
 export default {
   name: "JwWxUser",
@@ -288,6 +300,14 @@ export default {
           }
         }
       });
+    },
+    handleAddTeam(){
+      const ids = this.ids || [];
+      this.JwWxUserList.forEach(user=>{
+        if(ids.indexOf(user.id) >= 0){
+          addJwTeam({createUserId: user.id, teamName: user.name})
+        }
+      })
     },
     /** 删除按钮操作 */
     handleDelete(row) {

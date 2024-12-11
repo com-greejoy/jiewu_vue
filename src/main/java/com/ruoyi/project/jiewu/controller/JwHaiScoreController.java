@@ -1,17 +1,15 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.JwSignRecord;
+import com.ruoyi.project.jiewu.service.JwSignRecordService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.project.jiewu.domain.JwHaiScore;
@@ -28,12 +26,18 @@ public class JwHaiScoreController extends BaseController {
     @Autowired
     private JwHaiScoreService jwHaiScoreService;
 
+    @Autowired
+    private JwSignRecordService jwSignRecordService;
+
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
     @GetMapping("/list")
-    public TableDataInfo list(JwHaiScore jwHaiScore) {
-        startPage();
-        List<JwHaiScore> list = jwHaiScoreService.selectJwHaiScoreList(jwHaiScore);
-        return getDataTable(list);
+    public AjaxResult list(JwSignRecord jwSignRecord) {
+        if(StringUtils.isLongNotNull(jwSignRecord.getGameItemId())){
+            List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord);
+            return AjaxResult.success(list);
+        }else{
+            return AjaxResult.success(new ArrayList<>());
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
@@ -55,8 +59,58 @@ public class JwHaiScoreController extends BaseController {
     @Log(title = "海选打分", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody JwHaiScore jwHaiScore) {
-        return toAjax(jwHaiScoreService.insertJwHaiScore(jwHaiScore));
+        return toAjax(jwHaiScoreService.saveJudgeScore(jwHaiScore.getJudgeId(), jwHaiScore.getScore(), jwHaiScore.getSportId()));
     }
+
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "计算成绩", businessType = BusinessType.INSERT)
+    @PostMapping("/jiSuanGameItem")
+    @ResponseBody
+    public AjaxResult jiSuanGameItem(Long gameItemId) {
+        return toAjax(jwHaiScoreService.jiSuanGameItem(gameItemId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "修改排名", businessType = BusinessType.INSERT)
+    @PostMapping("/saveCustomOrder")
+    @ResponseBody
+    public AjaxResult saveCustomOrder(Long id, Long rankOrder) {
+        return toAjax(jwSignRecordService.saveCustomOrder(id, rankOrder));
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "海选完成", businessType = BusinessType.INSERT)
+    @PostMapping("/haiXuanComplete")
+    @ResponseBody
+    public AjaxResult haiXuanComplete(Long id) {
+        return jwHaiScoreService.haiXuanComplete(id);
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "获取项目成绩描述", businessType = BusinessType.INSERT)
+    @PostMapping("/listGameItemGradeDes")
+    @ResponseBody
+    public AjaxResult listGameItemGradeDes(JwSignRecord jwSignRecord) {
+        return AjaxResult.success(jwHaiScoreService.listGameItemGradeDes(jwSignRecord));
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "获取比赛全部项目成绩描述", businessType = BusinessType.INSERT)
+    @PostMapping("/listAllGameItemGradeDes")
+    @ResponseBody
+    public AjaxResult listAllGameItemGradeDes(Long matchId) {
+        return AjaxResult.success(jwHaiScoreService.listAllGameItemGradeDes(matchId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "获取代表队成绩统计", businessType = BusinessType.INSERT)
+    @PostMapping("/listTeamGradeDes")
+    @ResponseBody
+    public AjaxResult listTeamGradeDes(JwSignRecord jwSignRecord) {
+        return AjaxResult.success(jwHaiScoreService.listTeamGradeDes(jwSignRecord));
+    }
+
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:edit')")
     @Log(title = "海选打分", businessType = BusinessType.UPDATE)

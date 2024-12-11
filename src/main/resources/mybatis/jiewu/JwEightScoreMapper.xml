@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.project.jiewu.mapper.JwEightScoreMapper">
+
+    <resultMap type="JwEightScore" id="JwEightScoreResult">
+        <result property="id" column="id"/>
+        <result property="judgeId" column="judge_id"/>
+        <result property="playerId" column="player_id"/>
+        <result property="playerPkGroup" column="player_pk_group"/>
+        <result property="createTime" column="create_time"/>
+        <result property="playerGroup" column="player_group"/>
+        <result property="judgeNum" column="judge_num"/>
+        <result property="equally" column="equally"/>
+        <result property="lun"    column="lun"    />
+        <result property="judgeName"    column="judge_name"    />
+    </resultMap>
+
+    <sql id="selectJwEightScoreVo">
+        select id, judge_id, player_id, lun, player_pk_group, create_time, player_group, judge_num, equally from jw_eight_score
+    </sql>
+
+    <select id="selectJwEightScoreList" parameterType="JwEightScore" resultMap="JwEightScoreResult">
+        <include refid="selectJwEightScoreVo"/>
+        <where>
+            <if test="judgeId != null ">and judge_id = #{judgeId}</if>
+            <if test="playerId != null ">and player_id = #{playerId}</if>
+            <if test="playerPkGroup != null  and playerPkGroup != ''">and player_pk_group = #{playerPkGroup}</if>
+            <if test="playerGroup != null  ">and player_group = #{playerGroup}</if>
+            <if test="judgeNum != null ">and judge_num = #{judgeNum}</if>
+            <if test="equally != null ">and equally = #{equally}</if>
+            <if test="lun != null "> and lun = #{lun}</if>
+        </where>
+    </select>
+
+    <select id="selectJwEightScore" resultMap="JwEightScoreResult">
+        <include refid="selectJwEightScoreVo"/>
+        where player_pk_group = #{currentPkGroup} and judge_id = #{judgeId} and player_group = #{playerGroup} and (equally is null or equally != 1) and lun = #{lun}
+    </select>
+
+    <select id="selectJwEightScoreListByPkGroup" resultMap="JwEightScoreResult">
+        select hs.id, hs.judge_id, hs.player_id, hs.lun, hs.player_pk_group,
+         hs.create_time, hs.player_group, hs.judge_num, hs.equally, jj.judge_name from jw_eight_score  hs
+        left join jw_judge jj on jj.id = hs.judge_id
+        <where>
+            <if test="playerPkGroup != null and playerPkGroup != ''">and hs.player_pk_group = #{playerPkGroup}</if>
+            <if test="playerGroup != null ">and hs.player_group = #{playerGroup}</if>
+            and (hs.equally is null or hs.equally != 1)
+        </where>
+    </select>
+
+    <select id="selectJwEightScoreById" parameterType="Long" resultMap="JwEightScoreResult">
+        <include refid="selectJwEightScoreVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertJwEightScore" parameterType="JwEightScore" useGeneratedKeys="true" keyProperty="id">
+        insert into jw_eight_score
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="judgeId != null">judge_id,</if>
+            <if test="playerId != null">player_id,</if>
+            <if test="playerPkGroup != null">player_pk_group,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="playerGroup != null">player_group,</if>
+            <if test="judgeNum != null">judge_num,</if>
+            <if test="equally != null">equally,</if>
+            <if test="lun != null">lun,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="judgeId != null">#{judgeId},</if>
+            <if test="playerId != null">#{playerId},</if>
+            <if test="playerPkGroup != null">#{playerPkGroup},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="playerGroup != null">#{playerGroup},</if>
+            <if test="judgeNum != null">#{judgeNum},</if>
+            <if test="equally != null">#{equally},</if>
+            <if test="lun != null">#{lun},</if>
+        </trim>
+    </insert>
+
+    <update id="updateJwEightScore" parameterType="JwEightScore">
+        update jw_eight_score
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="judgeId != null">judge_id = #{judgeId},</if>
+            <if test="playerId != null">player_id = #{playerId},</if>
+            <if test="playerPkGroup != null">player_pk_group = #{playerPkGroup},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="playerGroup != null">player_group = #{playerGroup},</if>
+            <if test="judgeNum != null">judge_num = #{judgeNum},</if>
+            <if test="equally != null">equally = #{equally},</if>
+            <if test="lun != null">lun = #{lun},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteJwEightScoreById" parameterType="Long">
+        delete from jw_eight_score where id = #{id}
+    </delete>
+
+    <delete id="deleteJwEightScoreByIds" parameterType="String">
+        delete from jw_eight_score where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

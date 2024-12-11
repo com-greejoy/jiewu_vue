@@ -5,7 +5,7 @@
         <ELSelectMatch :matchId.sync="queryParams.matchId"/>
       </el-form-item>
       <el-form-item label="代表队" prop="teamId">
-        <el-select filterable v-model="queryParams.teamId" placeholder="代表队" clearable>
+        <el-select filterable v-model="queryParams.teamId" placeholder="代表队" clearable @change="getList">
           <el-option
             v-for="team in JwTeamList"
             :key="team.id"
@@ -15,7 +15,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="组别" prop="gameItemId">
-        <el-select filterable v-model="queryParams.gameItemId" placeholder="组别" clearable>
+        <el-select filterable v-model="queryParams.gameItemId" placeholder="组别" clearable @change="getList">
           <el-option
             v-for="gameItem in JwGameItemList"
             :key="gameItem.id"
@@ -34,7 +34,9 @@
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="success" icon="el-icon-upload2" size="mini" @click="handleImport">导入数据</el-button>
+        <el-button type="warning" icon="el-icon-plus" size="mini" @click="handleAddA">添加</el-button>
+        <el-button icon="el-icon-download" size="mini" @click="handleExport">导出</el-button>
       </el-form-item>
     </el-form>
 
@@ -71,16 +73,16 @@
           >
             <el-popover
               placement="top"
-              :width="scope.row.sportLimit == 3 ? 320 : 60"
+              width="320"
               v-model="itemm.visible">
               <div style="text-align: center; margin: 0">
-                <el-link :underline="false" v-if="scope.row.sportLimit == 3" style="margin-right: 12px" type="primary" @click="playMusic(item)">音乐</el-link>
-                <el-link :underline="false" v-if="scope.row.sportLimit == 3" style="margin-right: 12px" type="danger" @click="delSport(itemm)">删除选手</el-link>
-                <el-link :underline="false" v-if="scope.row.sportLimit == 3" style="margin-right: 12px" type="primary" @click="addSport(item, scope.row)">加人</el-link>
+                <el-link :underline="false"  style="margin-right: 12px" type="primary" @click="playMusic(item)">音乐</el-link>
+                <el-link :underline="false"  style="margin-right: 12px" type="danger" @click="delSport(itemm)">删除选手</el-link>
+                <el-link :underline="false"  style="margin-right: 12px" type="primary" @click="addSport(item, scope.row)">加人</el-link>
                 <el-link :underline="false" type="warning" style="margin-right: 12px" @click="delRecord(item)">删除记录</el-link>
                 <el-link :underline="false" type="success" @click="handleChange(item)">改组</el-link>
               </div>
-              <span slot="reference">{{itemm.playerName}}<span v-if="scope.row.sportLimit == 3" style="margin-right: 8px"></span></span>
+              <span slot="reference">{{itemm.playerName}}<span v-if="scope.row.sportLimit != 1" style="margin-right: 8px"></span></span>
             </el-popover>
 
           </span>)
@@ -267,6 +269,35 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="导入报名" :visible.sync="upload.open" width="400px" append-to-body>
+
+      <el-form ref="form" :model="upload" label-width="80px">
+        <el-form-item label="比赛" prop="matchId">
+          <ELSelectMatch :matchId.sync="upload.matchId"/>
+        </el-form-item>
+      </el-form>
+
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url + '?matchId=' + upload.matchId"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -276,16 +307,33 @@
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {delJwSignRecordSport, addJwSignRecordSport} from "@/api/jiewu/JwSignRecordSport";
   import {listJwSport} from "@/api/jiewu/JwSport";
+  import { getToken } from "@/utils/auth";
 
   export default {
     name: "JwSignRecord",
     dicts: ['jw_sport_limit', 'jw_sex'],
     data() {
       return {
+
+        // 用户导入参数
+        upload: {
+          // 是否显示弹出层（用户导入）
+          open: false,
+          // 弹出层标题（用户导入）
+          title: "",
+          // 是否禁用上传
+          isUploading: false,
+          // 是否更新已经存在的用户数据
+          matchId: 0,
+          // 设置上传的请求头部
+          headers: { Authorization: "Bearer " + getToken() },
+          // 上传的地址
+          url: process.env.VUE_APP_BASE_URL + "/jiewu/JwSignRecord/importData"
+        },
         addSportForm: {gameItem: {}},
         addSportOpen: false,
         // 遮罩层
-        loading: true,
+        loading: false,
         changeGameItemId: null,
         changeGameItem: false,
         changeGameItemForm: {},
@@ -308,6 +356,7 @@
         // 是否显示弹出层
         open: false,
         JwTeamList: [],
+        importForm: {matchId: null},
         // 查询参数
         queryParams: {
           pageNum: 1,
@@ -329,7 +378,7 @@
       };
     },
     created() {
-      this.getList();
+      // this.getList();
       this.getTeamList()
       this.getGameItemList()
     },
@@ -361,7 +410,13 @@
         this.addSportForm = {};
         this.addSportForm = item;
         this.addSportForm.gameItem = gameItem;
-        listJwSport({gameItemId: gameItem.id, createUserId: this.JwTeamList.find((item) => item.id == this.queryParams.teamId).createUserId, pageNum: 1, pageSize: 5000}).then(response => {
+
+        if(!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)){
+          this.$modal.msgError("先选择代表队");
+          return;
+        }
+        let createUserId = this.JwTeamList.find((item) => item.id == this.queryParams.teamId).createUserId;
+        listJwSport({gameItemId: gameItem.id, createUserId: createUserId, pageNum: 1, pageSize: 5000}).then(response => {
           this.JwSportList = response.rows || [];
           this.addSportOpen = true;
         });
@@ -423,6 +478,7 @@
       },
       getList() {
         this.loading = true;
+        this.JwSignRecordList = [];
         listJwSignRecord(this.queryParams).then(response => {
           this.JwSignRecordList = response.rows;
           this.total = response.total;
@@ -470,8 +526,28 @@
         this.single = selection.length !== 1;
         this.multiple = !selection.length
       },
+      handleAddA(){
+        this.reset();
+
+        this.form.gameItem = this.JwGameItemList[0];
+        this.form.gameItemId = this.JwGameItemList[0].id;
+        this.form.teamId = this.queryParams.teamId;
+        this.form.matchId = this.queryParams.matchId;
+        listJwSport({gameItemId: this.form.gameItemId, createUserId: this.JwTeamList.find((item) => item.id == this.form.teamId).createUserId, pageNum: 1, pageSize: 5000}).then(response => {
+          this.JwSportList = response.rows;
+          this.open = true;
+          this.title = "添加报名";
+        });
+
+      },
       handleAdd(item) {
         this.reset();
+
+        if(!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)){
+          this.$modal.msgError("先选择代表队");
+          return;
+        }
+
         this.form.gameItem = item;
         this.form.gameItemId = item.id;
         this.form.teamId = this.queryParams.teamId;
@@ -524,8 +600,33 @@
       handleExport() {
         this.download('jiewu/JwSignRecord/export', {
           ...this.queryParams
-        }, `JwSignRecord_${new Date().getTime()}.xlsx`)
-      }
+        }, `报名数据_${new Date().getTime()}.xlsx`)
+      },
+      handleImport(){
+        if(!this.queryParams.matchId){
+          this.$modal.msgError("先选择比赛");
+          return;
+        }
+        this.importForm.matchId = this.queryParams.matchId;
+        this.upload.title = "导入";
+        this.upload.open = true;
+      },
+      // 提交上传文件
+      submitFileForm() {
+        this.$refs.upload.submit();
+      },
+      // 文件上传中处理
+      handleFileUploadProgress(event, file, fileList) {
+        this.upload.isUploading = true;
+      },
+      // 文件上传成功处理
+      handleFileSuccess(response, file, fileList) {
+        this.upload.open = false;
+        this.upload.isUploading = false;
+        this.$refs.upload.clearFiles();
+        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+        this.getList();
+      },
     }
   };
 </script>

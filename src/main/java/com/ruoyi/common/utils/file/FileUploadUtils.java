@@ -117,23 +117,30 @@ public class FileUploadUtils
         return getPathFileName(baseDir, fileName);
     }
 
-    /**
-     * 编码文件名
-     */
-    public static final String extractFilename(MultipartFile file)
-    {
-        return StringUtils.format("{}/{}_{}.{}", DateUtils.datePath(),
-                FilenameUtils.getBaseName(file.getOriginalFilename()), Seq.getId(Seq.uploadSeqType), getExtension(file));
+    public static final String uploadMatch(String baseDir, MultipartFile file, String[] allowedExtension) throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException, InvalidExtensionException {
+        int fileNameLength = Objects.requireNonNull(file.getOriginalFilename()).length();
+        if (fileNameLength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH) {
+            throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
+        }
+        assertAllowed(file, allowedExtension);
+        String fileName = extractFilenameMatch(file);
+        String absPath = getAbsoluteFile(baseDir, fileName).getAbsolutePath();
+        file.transferTo(Paths.get(absPath));
+        return getPathFileName(baseDir, fileName);
     }
 
-    public static final File getAbsoluteFile(String uploadDir, String fileName) throws IOException
-    {
-        File desc = new File(uploadDir + File.separator + fileName);
+    public static final String extractFilename(MultipartFile file) {
+        return StringUtils.format("{}/{}_{}.{}", DateUtils.datePath(), FilenameUtils.getBaseName(file.getOriginalFilename()), Seq.getId(Seq.uploadSeqType), getExtension(file));
+    }
 
-        if (!desc.exists())
-        {
-            if (!desc.getParentFile().exists())
-            {
+    public static final String extractFilenameMatch(MultipartFile file) {
+        return StringUtils.format("{}_{}.{}", FilenameUtils.getBaseName(file.getOriginalFilename()), Seq.getId(Seq.uploadSeqType), getExtension(file));
+    }
+
+    public static final File getAbsoluteFile(String uploadDir, String fileName) {
+        File desc = new File(uploadDir + File.separator + fileName);
+        if (!desc.exists()) {
+            if (!desc.getParentFile().exists()) {
                 desc.getParentFile().mkdirs();
             }
         }

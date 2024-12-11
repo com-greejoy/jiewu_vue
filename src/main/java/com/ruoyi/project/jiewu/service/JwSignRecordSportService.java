@@ -34,6 +34,12 @@ public class JwSignRecordSportService {
         return jwSignRecordSportMapper.selectJwSignRecordSportListById(signRecordId);
     }
 
+    // 获取一个选手的报名记录
+    public List<JwSignRecordSport> selectJwSignRecordSportBySportId(Long sportId) {
+        return jwSignRecordSportMapper.selectJwSignRecordSportBySportId(sportId);
+    }
+
+
     @Transactional
     public int insertJwSignRecordSport(JwSignRecordSport jwSignRecordSport) {
         if(jwSignRecordSport != null && jwSignRecordSport.getSportIds() != null && jwSignRecordSport.getSportIds().length > 0){

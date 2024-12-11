@@ -96,3 +96,20 @@ export function calculateTime(data) {
   })
 }
 
+// 整理项目的排序
+export function arrangeOrder(data) {
+  return request({
+    url: '/jiewu/JwScheduleItem/arrangeOrder',
+    method: 'post',
+    params: data
+  })
+}
+
+// 赛程小项重新排序
+export function orderSignRecord(data) {
+  return request({
+    url: '/jiewu/JwScheduleItem/orderSignRecord',
+    method: 'post',
+    params: data
+  })
+}

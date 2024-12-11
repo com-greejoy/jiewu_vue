@@ -633,6 +633,11 @@ public class StringUtils extends org.apache.commons.lang3.StringUtils
         return matcher.match(pattern, url);
     }
 
+    public static boolean isJSON(String str) {
+        final String regex = "\\A\\{.*\\}\\z";
+        return str.matches(regex);
+    }
+
     @SuppressWarnings("unchecked")
     public static <T> T cast(Object obj)
     {

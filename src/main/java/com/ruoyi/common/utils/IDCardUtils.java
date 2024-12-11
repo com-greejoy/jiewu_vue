@@ -1,6 +1,7 @@
 package com.ruoyi.common.utils;
 
 import java.util.Calendar;
+import java.util.Random;
 
 public class IDCardUtils {
 
@@ -68,4 +69,26 @@ public class IDCardUtils {
         int genderNum = Integer.parseInt(idCard.substring(idCard.length() - 2, idCard.length() - 1));
         return genderNum % 2 == 0 ? "f" : "m";
     }
+
+
+    public static String RandomIdCard() {
+        Random random = new Random();
+        int[] coefficient = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+        String[] idCardNumberArray = new String[18];
+        int sum = 0;
+        for (int i = 0; i < 17; i++) {
+            int number = random.nextInt(10);
+            sum += number * coefficient[i];
+            idCardNumberArray[i] = String.valueOf(number);
+        }
+        int remainder = sum % 11;
+        String lastNumber = String.valueOf(remainder);
+        idCardNumberArray[17] = remainder == 10 ? "X" : lastNumber;
+        idCardNumberArray[17] = "A";
+        String idCardNumber = String.join("", idCardNumberArray);
+        System.out.println("随机生成的身份证号码为：" + idCardNumber);
+
+        return idCardNumber;
+    }
+
 }

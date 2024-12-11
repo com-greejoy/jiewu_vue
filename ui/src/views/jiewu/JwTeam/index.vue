@@ -181,7 +181,7 @@
 </template>
 
 <script>
-  import {listJwTeam, getJwTeam, delJwTeam, addJwTeam, updateJwTeam} from "@/api/jiewu/JwTeam";
+  import { listJwTeam, getJwTeam, delJwTeam, addJwTeam, updateJwTeam} from "@/api/jiewu/JwTeam";
   import { listJwWxUser} from "@/api/jiewu/JwWxUser";
   import { addJwMatchTeam} from "@/api/jiewu/JwMatchTeam";
 

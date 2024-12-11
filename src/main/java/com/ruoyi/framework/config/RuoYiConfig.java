@@ -93,6 +93,11 @@ public class RuoYiConfig
         return getProfile() + "/avatar";
     }
 
+    public static String getMatchPath()
+    {
+        return getProfile() + "/match";
+    }
+
     /**
      * 获取下载路径
      */

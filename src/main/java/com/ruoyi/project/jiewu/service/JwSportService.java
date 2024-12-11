@@ -35,6 +35,9 @@ public class JwSportService {
         return jwSportMapper.selectJwSportByIdCard(idCard, id);
     }
 
+    public JwSport selectJwSportByName(String playerName, String idCard, Long createUserId) {
+        return jwSportMapper.selectJwSportByName(playerName, idCard, createUserId);
+    }
 
     //根据报名记录获取报名运动员数据
     public List<JwSport> getSportListWithsignRecord(Long signRecordId) {

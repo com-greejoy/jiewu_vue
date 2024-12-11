@@ -57,6 +57,7 @@ public class JwSignRecord extends BaseEntity
     private JwScheduleItem jwScheduleItem;
 
     private JwTeam jwTeam;
+    private String teamName;
 
     private BigDecimal fee;
 
@@ -66,12 +67,78 @@ public class JwSignRecord extends BaseEntity
 
     private Long scheduleItemId;
 
+    private List<JwSignRecordSport> jwSignRecordSportList;
+
+    // 海选打分明细
+    private List<JwHaiScore> jwHaiScoreList;
+    @Excel(name = "总分")
+    private String allScore;
+
+    @Excel(name = "平均分")
+    private String avgScore;
+
+    // 裁判打分
+    private String judgeScore;
+
+    @Excel(name = "排名")
+    private Long rankOrder;
+    private String rankOrderDes;
+    private String description;
+
     private String scheduleName;
     private String itemName;
     private Long placeOrder;
     private String area;
     @JsonFormat(pattern = "MM月dd日 HH:mm")
     private Date placeTime;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getRankOrderDes() {
+        return rankOrderDes;
+    }
+
+    public void setRankOrderDes(String rankOrderDes) {
+        this.rankOrderDes = rankOrderDes;
+    }
+
+    public String getJudgeScore() {
+        return judgeScore;
+    }
+
+    public void setJudgeScore(String judgeScore) {
+        this.judgeScore = judgeScore;
+    }
+
+    public String getAllScore() {
+        return allScore;
+    }
+
+    public void setAllScore(String allScore) {
+        this.allScore = allScore;
+    }
+
+    public String getAvgScore() {
+        return avgScore;
+    }
+
+    public void setAvgScore(String avgScore) {
+        this.avgScore = avgScore;
+    }
+
+    public Long getRankOrder() {
+        return rankOrder;
+    }
+
+    public void setRankOrder(Long rankOrder) {
+        this.rankOrder = rankOrder;
+    }
 
     public Date getPlaceTime() {
         return placeTime;
@@ -127,6 +194,14 @@ public class JwSignRecord extends BaseEntity
 
     public void setJwTeam(JwTeam jwTeam) {
         this.jwTeam = jwTeam;
+    }
+
+    public String getTeamName() {
+        return teamName;
+    }
+
+    public void setTeamName(String teamName) {
+        this.teamName = teamName;
     }
 
     public JwScheduleItem getJwScheduleItem() {
@@ -185,7 +260,13 @@ public class JwSignRecord extends BaseEntity
         this.jwGameItem = jwGameItem;
     }
 
-    private List<JwSignRecordSport> jwSignRecordSportList;
+    public List<JwHaiScore> getJwHaiScoreList() {
+        return jwHaiScoreList;
+    }
+
+    public void setJwHaiScoreList(List<JwHaiScore> jwHaiScoreList) {
+        this.jwHaiScoreList = jwHaiScoreList;
+    }
 
     public List<JwSignRecordSport> getJwSignRecordSportList() {
         return jwSignRecordSportList;

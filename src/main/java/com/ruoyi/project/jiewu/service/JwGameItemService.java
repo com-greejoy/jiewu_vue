@@ -4,17 +4,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.ruoyi.common.utils.DateUtils;
+import com.ruoyi.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.project.jiewu.mapper.JwGameItemMapper;
 import com.ruoyi.project.jiewu.domain.JwGameItem;
 
-/**
- * 比赛项目Service业务层处理
- * 
- * @author ruoyi
- * @date 2024-05-28
- */
 @Service
 public class JwGameItemService {
 
@@ -23,6 +18,9 @@ public class JwGameItemService {
 
     @Autowired
     private JwSignRecordService jwSignRecordService;
+
+    @Autowired
+    private JwScheduleItemService jwScheduleItemService;
 
 
     public JwGameItem selectJwGameItemById(Long id) {
@@ -54,45 +52,31 @@ public class JwGameItemService {
         return jwGameItemList;
     }
 
-
-    /**
-     * 新增比赛项目
-     * 
-     * @param jwGameItem 比赛项目
-     * @return 结果
-     */
     public int insertJwGameItem(JwGameItem jwGameItem) {
         jwGameItem.setCreateTime(DateUtils.getNowDate());
         return jwGameItemMapper.insertJwGameItem(jwGameItem);
     }
 
-    /**
-     * 修改比赛项目
-     * 
-     * @param jwGameItem 比赛项目
-     * @return 结果
-     */
     public int updateJwGameItem(JwGameItem jwGameItem) {
+        JwGameItem oldGameItem = selectJwGameItemById(jwGameItem.getId());
+        // 如果改了项目名字, 则对应修改 赛程小项名字
+        if(!oldGameItem.getName().equals(jwGameItem.getName()) && StringUtils.isNotEmpty(jwGameItem.getName())){
+            jwScheduleItemService.changeItemName(jwGameItem.getId(), oldGameItem.getName(), jwGameItem.getName());
+        }
         jwGameItem.setUpdateTime(DateUtils.getNowDate());
         return jwGameItemMapper.updateJwGameItem(jwGameItem);
     }
 
-    /**
-     * 批量删除比赛项目
-     * 
-     * @param ids 需要删除的比赛项目主键
-     * @return 结果
-     */
+    // 根据项目名获取小项
+    public JwGameItem selectJwGameItemByName(String name, Long matchId) {
+        return jwGameItemMapper.selectJwGameItemByName(name, matchId);
+    }
+
+
     public int deleteJwGameItemByIds(Long[] ids) {
         return jwGameItemMapper.deleteJwGameItemByIds(ids);
     }
 
-    /**
-     * 删除比赛项目信息
-     * 
-     * @param id 比赛项目主键
-     * @return 结果
-     */
     public int deleteJwGameItemById(Long id) {
         return jwGameItemMapper.deleteJwGameItemById(id);
     }

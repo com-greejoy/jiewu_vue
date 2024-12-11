@@ -1,6 +1,7 @@
 <template>
-  <el-select v-model="currentMatchId" placeholder="请选择比赛" @change="ch">
+  <el-select style="width: 200pt" v-model="currentMatchId" placeholder="请选择比赛" @change="ch">
     <el-option
+      style="width: 200pt"
       v-for="match in jwMatchList"
       :key="match.id"
       :label="match.matchName"

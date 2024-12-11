@@ -24,6 +24,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="shceduleTime"    column="shcedule_time"    />
         <result property="area"    column="area"    />
         <result property="sportCount"    column="sportCount" />
+        <result property="itemProcess"    column="item_process"    />
     </resultMap>
 
     <sql id="selectJwSchedulePlaceVo">
@@ -41,7 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="listJwSchedulePlaceWithScheduleItem" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceWithScheduleItemResult">
-        select jsp.*, jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id, jsi.item_name, jsi.shcedule_time, jsi.area, jsi.sportCount
+        select jsp.*, jsi.item_process,  jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id, jsi.item_name, jsi.shcedule_time, jsi.area, jsi.sportCount
         from jw_schedule_place jsp
         left join (select jsii.*, count(jsr.id) as sportCount from jw_schedule_item jsii
         left join jw_sign_record jsr on jsr.schedule_item_id = jsii.id
@@ -52,7 +53,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="scheduleInfoId != null "> and jsp.schedule_info_id = #{scheduleInfoId}</if>
             <if test="placeOrder != null "> and jsp.place_order = #{placeOrder}</if>
             <if test="placeTime != null "> and jsp.place_time = #{placeTime}</if>
+            <if test="lockScore != null and lockScore != ''"> and jsi.lock_score = #{lockScore}</if>
         </where>
+        order by jsp.place_order asc
     </select>
 
     <select id="selectJwSchedulePlaceById" parameterType="Long" resultMap="JwSchedulePlaceResult">

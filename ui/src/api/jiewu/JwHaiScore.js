@@ -26,6 +26,45 @@ export function addJwHaiScore(data) {
   })
 }
 
+// 计算成绩
+export function jiSuanGameItem(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/jiSuanGameItem',
+    method: 'post',
+    params: data
+  })
+}
+
+// 修改排名
+export function saveCustomOrder(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/saveCustomOrder',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
+// 获取名次
+export function listGameItemGradeDes(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/listGameItemGradeDes',
+    method: 'post',
+    params: data
+  })
+}
+
+
+// 海选完成
+export function haiXuanComplete(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/haiXuanComplete',
+    method: 'post',
+    params: data
+  })
+}
+
+
 // 修改海选打分
 export function updateJwHaiScore(data) {
   return request({
@@ -40,5 +79,23 @@ export function delJwHaiScore(id) {
   return request({
     url: '/jiewu/JwHaiScore/' + id,
     method: 'delete'
+  })
+}
+
+// 获取代表队成绩统计
+export function listTeamGradeDes(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/listTeamGradeDes',
+    method: 'post',
+    params: data
+  })
+}
+
+// 获取比赛全部证书
+export function listAllGameItemGradeDes(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/listAllGameItemGradeDes',
+    method: 'post',
+    params: data
   })
 }

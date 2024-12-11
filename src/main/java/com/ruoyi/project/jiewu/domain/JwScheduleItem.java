@@ -46,7 +46,17 @@ public class JwScheduleItem extends BaseEntity
     @Excel(name = "进程")
     private String itemProcess;
 
+    private String lockScore;
+
     private Long sportCount;
+
+    public String getLockScore() {
+        return lockScore;
+    }
+
+    public void setLockScore(String lockScore) {
+        this.lockScore = lockScore;
+    }
 
     public String getItemProcess() {
         return itemProcess;

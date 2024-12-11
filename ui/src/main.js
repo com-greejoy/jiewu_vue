@@ -40,7 +40,13 @@ import DictData from '@/components/DictData'
 
 import ELSelectMatch from '@/components/ELSelectMatch'
 
+import { getOrderDesc , handlePrint, elementToImage} from "@/utils/jiewu";
+
+
 // 全局方法挂载
+Vue.prototype.getOrderDesc = getOrderDesc
+Vue.prototype.handlePrint = handlePrint
+Vue.prototype.elementToImage = elementToImage
 Vue.prototype.getDicts = getDicts
 Vue.prototype.getConfigKey = getConfigKey
 Vue.prototype.parseTime = parseTime

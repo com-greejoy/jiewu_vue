@@ -2,6 +2,8 @@ package com.ruoyi.project.jiewu.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.common.utils.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,14 +42,14 @@ public class JwTeamController extends BaseController {
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:list')")
     @GetMapping("/list")
     public TableDataInfo list(JwTeam jwTeam) {
-        startPage();
+
+        if(!StringUtils.isLongNotNull(jwTeam.getMatchId())){
+            startPage();
+        }
         List<JwTeam> list = jwTeamService.selectJwTeamList(jwTeam);
         return getDataTable(list);
     }
 
-    /**
-     * 导出代表队列表
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:export')")
     @Log(title = "代表队", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -57,18 +59,12 @@ public class JwTeamController extends BaseController {
         util.exportExcel(response, list, "代表队数据");
     }
 
-    /**
-     * 获取代表队详细信息
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(jwTeamService.selectJwTeamById(id));
     }
 
-    /**
-     * 新增代表队
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:add')")
     @Log(title = "代表队", businessType = BusinessType.INSERT)
     @PostMapping
@@ -76,9 +72,6 @@ public class JwTeamController extends BaseController {
         return toAjax(jwTeamService.insertJwTeam(jwTeam));
     }
 
-    /**
-     * 修改代表队
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:edit')")
     @Log(title = "代表队", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -86,9 +79,6 @@ public class JwTeamController extends BaseController {
         return toAjax(jwTeamService.updateJwTeam(jwTeam));
     }
 
-    /**
-     * 删除代表队
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:JwTeam:remove')")
     @Log(title = "代表队", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

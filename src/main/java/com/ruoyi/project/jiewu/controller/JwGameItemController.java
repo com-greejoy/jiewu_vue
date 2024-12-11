@@ -1,8 +1,15 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.utils.IDCardUtils;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.JwSport;
+import com.ruoyi.project.jiewu.domain.JwSportImport;
+import com.ruoyi.project.jiewu.domain.JwTeam;
 import com.ruoyi.project.jiewu.service.JwScheduleItemService;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,6 +23,7 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/jiewu/JwGameItem")
@@ -61,6 +69,18 @@ public class JwGameItemController extends BaseController {
         return AjaxResult.error("没有选择组别");
     }
 
+    // 锁定一个项目打分
+    @PreAuthorize("@ss.hasPermi('jiewu:JwGameItem:edit')")
+    @Log(title = "锁定一个项目打分", businessType = BusinessType.UPDATE)
+    @PostMapping("/lockJwGameItem")
+    @ResponseBody
+    public AjaxResult lockJwGameItem(Long id) {
+        if(StringUtils.isLongNotNull(id)){
+            return AjaxResult.success(jwScheduleItemService.lockScoreByGameItem(id));
+        }else{
+            return AjaxResult.success(1);
+        }
+    }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwGameItem:query')")
     @GetMapping(value = "/{id}")
@@ -87,5 +107,44 @@ public class JwGameItemController extends BaseController {
 	@DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(jwGameItemService.deleteJwGameItemByIds(ids));
+    }
+
+
+    @PostMapping("/importData")
+    public AjaxResult importData(MultipartFile file) throws Exception {
+
+            ExcelUtil<JwGameItem> util = new ExcelUtil<>(JwGameItem.class);
+            List<JwGameItem> jwGameItemList = util.importExcel(file.getInputStream());
+
+            for (JwGameItem jwGameItem : jwGameItemList) {
+                jwGameItem.setMinYear(jwGameItem.getShowMinYear());
+                jwGameItem.setMaxYear(jwGameItem.getShowMaxYear());
+
+                if(jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")){
+                    jwGameItem.setSportLimit("3"); //比赛模式
+                }else{
+                    jwGameItem.setSportLimit("1"); //项目类型
+                }
+
+                jwGameItem.setMatchType("1"); //比赛模式
+                jwGameItem.setGroupMode("1"); // 分组模式
+                jwGameItem.setGroupLimit(1l);
+                jwGameItem.setSingleDuration(60l);
+                jwGameItem.setSexCon("0");
+                jwGameItem.setMinSport(1);
+                jwGameItem.setMaxSport(1);
+                if(jwGameItem.getRemark().contains("六人一组")){
+                    jwGameItem.setMinSport(6);
+                    jwGameItem.setMaxSport(6);
+                }
+                if(Long.valueOf(jwGameItem.getCode()) <= 27){
+                    jwGameItem.setMinSport(1);
+                    jwGameItem.setMaxSport(99);
+                }
+                jwGameItem.setCode(new DecimalFormat("000").format(Long.valueOf(jwGameItem.getCode())));
+                jwGameItemService.insertJwGameItem(jwGameItem);
+            }
+
+        return success();
     }
 }

@@ -4,6 +4,10 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.JwGameItem;
+import com.ruoyi.project.jiewu.domain.JwSignRecord;
+import com.ruoyi.project.jiewu.service.JwGameItemService;
+import com.ruoyi.project.jiewu.service.JwSignRecordService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +26,12 @@ public class JwScheduleItemController extends BaseController {
 
     @Autowired
     private JwScheduleItemService jwScheduleItemService;
+
+    @Autowired
+    private JwSignRecordService jwSignRecordService;
+
+    @Autowired
+    private JwGameItemService jwGameItemService;
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwScheduleItem:list')")
     @GetMapping("/list")
@@ -75,6 +85,34 @@ public class JwScheduleItemController extends BaseController {
     public AjaxResult clearSchedulePlaceById(Long id) {
         if(StringUtils.isLongNotNull(id)){
             return AjaxResult.success(jwScheduleItemService.clearSchedulePlaceById(id));
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
+    // 重新整理组别里面的选手排序
+    @PreAuthorize("@ss.hasPermi('jiewu:JwScheduleItem:add')")
+    @Log(title = "赛程小项", businessType = BusinessType.UPDATE)
+    @PostMapping("/arrangeOrder")
+    @ResponseBody
+    public AjaxResult arrangeOrder(Long gameItemId) {
+        if(StringUtils.isLongNotNull(gameItemId)){
+            jwSignRecordService.arrangeOrder(gameItemId);
+            return AjaxResult.success(1);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
+    //赛程小项重新排序
+    @PreAuthorize("@ss.hasPermi('jiewu:JwScheduleItem:add')")
+    @Log(title = "赛程小项", businessType = BusinessType.UPDATE)
+    @PostMapping("/orderSignRecord")
+    @ResponseBody
+    public AjaxResult orderSignRecord(Long scheduleItemId) {
+        if(StringUtils.isLongNotNull(scheduleItemId)){
+            jwScheduleItemService.orderSignRecordByScheduleItem(scheduleItemId);
+            return AjaxResult.success(1);
         }else{
             return AjaxResult.error("错误");
         }

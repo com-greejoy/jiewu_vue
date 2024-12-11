@@ -9,6 +9,7 @@ public interface JwScheduleInfoMapper {
 
     public List<JwScheduleInfo> selectJwScheduleInfoList(JwScheduleInfo jwScheduleInfo);
 
+
     public List<JwScheduleInfo> selectJwScheduleInfoByMatchId(Long matchId);
 
     public int insertJwScheduleInfo(JwScheduleInfo jwScheduleInfo);

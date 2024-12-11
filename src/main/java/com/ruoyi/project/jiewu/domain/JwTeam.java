@@ -6,6 +6,7 @@ import com.ruoyi.framework.aspectj.lang.annotation.Excel;
 import com.ruoyi.framework.web.domain.BaseEntity;
 
 import javax.validation.constraints.NotEmpty;
+import java.math.BigDecimal;
 
 /**
  * 代表队对象 jw_team
@@ -19,6 +20,9 @@ public class JwTeam extends BaseEntity
 
     /** $column.columnComment */
     private Long id;
+
+    @Excel(name = "序号")
+    private Long indexOrder;
 
     /** 代表队名字 */
     @NotEmpty(message = "代表队名字不能为空")
@@ -40,14 +44,70 @@ public class JwTeam extends BaseEntity
     private String addr;
 
     /** 创建者 */
-    @Excel(name = "创建者")
+//    @Excel(name = "创建者")
     private Long createUserId;
 
     /** 比赛ID */
-    @Excel(name = "比赛ID")
+//    @Excel(name = "比赛ID")
     private Long matchId;
 
-    private Long indexOrder;
+
+    private Long singleCount;
+    private Long singleSportCount;
+    private Long qiCount;
+    private Long qiSportCount;
+    private BigDecimal allFee;
+
+    @Excel(name = "背号")
+    private String backNums;
+
+    public String getBackNums() {
+        return backNums;
+    }
+
+    public void setBackNums(String backNums) {
+        this.backNums = backNums;
+    }
+
+    public BigDecimal getAllFee() {
+        return allFee;
+    }
+
+    public void setAllFee(BigDecimal allFee) {
+        this.allFee = allFee;
+    }
+
+    public Long getSingleCount() {
+        return singleCount;
+    }
+
+    public void setSingleCount(Long singleCount) {
+        this.singleCount = singleCount;
+    }
+
+    public Long getSingleSportCount() {
+        return singleSportCount;
+    }
+
+    public void setSingleSportCount(Long singleSportCount) {
+        this.singleSportCount = singleSportCount;
+    }
+
+    public Long getQiCount() {
+        return qiCount;
+    }
+
+    public void setQiCount(Long qiCount) {
+        this.qiCount = qiCount;
+    }
+
+    public Long getQiSportCount() {
+        return qiSportCount;
+    }
+
+    public void setQiSportCount(Long qiSportCount) {
+        this.qiSportCount = qiSportCount;
+    }
 
     public Long getIndexOrder() {
         return indexOrder;

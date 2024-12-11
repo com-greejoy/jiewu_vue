@@ -40,7 +40,8 @@ export function getTeamScheduleInfoList(data) {
   return request({
     url: '/jiewu/JwMatchTeam/getTeamScheduleInfoList',
     method: 'post',
-    params: data
+    params: data,
+    headers: {repeatSubmit: false}
   })
 }
 

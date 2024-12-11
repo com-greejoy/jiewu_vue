@@ -18,6 +18,8 @@ public interface JwGameItemMapper {
 
     public int updateJwGameItem(JwGameItem jwGameItem);
 
+    public JwGameItem selectJwGameItemByName(@Param("name") String name, @Param("matchId")Long matchId);
+
     public int deleteJwGameItemById(Long id);
 
     public int deleteJwGameItemByIds(Long[] ids);

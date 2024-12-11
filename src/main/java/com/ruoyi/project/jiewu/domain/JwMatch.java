@@ -8,65 +8,88 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 import java.util.Date;
 
-/**
- * 赛事管理对象 jw_match
- * 
- * @author ruoyi
- * @date 2024-05-27
- */
-public class JwMatch extends BaseEntity
-{
+public class JwMatch extends BaseEntity {
+
     private static final long serialVersionUID = 1L;
 
-    /** ID */
     private Long id;
 
-    /** 比赛名称 */
     @Excel(name = "比赛名称")
     private String matchName;
 
-    /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date beginTime;
 
-    /** 结束时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Excel(name = "结束时间", width = 30, dateFormat = "yyyy-MM-dd")
     private Date endTime;
 
-    /** 报名开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "报名开始时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date signBeginTime;
 
-    /** 报名结束时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "报名结束时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date signEndTime;
 
-    /** 地址 */
     @Excel(name = "地址")
     private String addr;
 
-    /** 海报 */
     @Excel(name = "海报")
     private String posterImg;
 
-    /** 状态 */
     @Excel(name = "状态")
     private String state;
 
-    /** 赛事详情 */
     @Excel(name = "赛事详情")
     private String matchDetails;
 
-    /** 竞赛规程 */
     @Excel(name = "竞赛规程")
     private String matchRegulations;
 
     @Excel(name = "盖章单位")
     private String sealUnit;
+
+    private String isShow;
+
+    private String mainImg;
+
+    private String battleImg;
+
+    private Long startBackNum;
+
+    public Long getStartBackNum() {
+        return startBackNum;
+    }
+
+    public void setStartBackNum(Long startBackNum) {
+        this.startBackNum = startBackNum;
+    }
+
+    public String getMainImg() {
+        return mainImg;
+    }
+
+    public void setMainImg(String mainImg) {
+        this.mainImg = mainImg;
+    }
+
+    public String getBattleImg() {
+        return battleImg;
+    }
+
+    public void setBattleImg(String battleImg) {
+        this.battleImg = battleImg;
+    }
+
+    public String getIsShow() {
+        return isShow;
+    }
+
+    public void setIsShow(String isShow) {
+        this.isShow = isShow;
+    }
 
     public String getSealUnit() {
         return sealUnit;

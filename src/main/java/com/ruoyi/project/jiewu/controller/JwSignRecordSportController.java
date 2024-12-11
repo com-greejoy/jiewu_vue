@@ -1,7 +1,10 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ruoyi.project.jiewu.domain.JwSportExport;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -45,17 +48,7 @@ public class JwSignRecordSportController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 导出报名记录选手列表
-     */
-    @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecordSport:export')")
-    @Log(title = "报名记录选手", businessType = BusinessType.EXPORT)
-    @PostMapping("/export")
-    public void export(HttpServletResponse response, JwSignRecordSport jwSignRecordSport) {
-        List<JwSignRecordSport> list = jwSignRecordSportService.selectJwSignRecordSportList(jwSignRecordSport);
-        ExcelUtil<JwSignRecordSport> util = new ExcelUtil<JwSignRecordSport>(JwSignRecordSport.class);
-        util.exportExcel(response, list, "报名记录选手数据");
-    }
+
 
     /**
      * 获取报名记录选手详细信息

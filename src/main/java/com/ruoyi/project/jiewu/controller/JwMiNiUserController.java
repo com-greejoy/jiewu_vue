@@ -69,6 +69,9 @@ public class JwMiNiUserController extends BaseController {
     private JwSignRecordSportService jwSignRecordSportService;
 
     @Autowired
+    private JwHaiScoreService jwHaiScoreService;
+
+    @Autowired
     private JwMatchService jwMatchService;
 
     @PostMapping("/auth")
@@ -86,7 +89,7 @@ public class JwMiNiUserController extends BaseController {
             return AjaxResult.error("授权错误");
         }
 
-//      String openId = "oZ8ZX5GAKN6aG0R_K46h5UpHCC4s";
+//        openId = "op3oK7SCph0vYzUnxgpNmPDxK0rA";
 
         JwWxUser jwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (jwWxUser == null) {
@@ -96,7 +99,6 @@ public class JwMiNiUserController extends BaseController {
 
             jwWxUserService.insertJwWxUser(jwWxUser);
         }
-
 
         ServletUtils.getSession().setAttribute("OPENID", jwWxUser.getOpenId());
         return AjaxResult.success(jwWxUser);
@@ -226,6 +228,31 @@ public class JwMiNiUserController extends BaseController {
         }
     }
 
+    // 删除选手
+    @PostMapping("/deleteSport")
+    @ResponseBody
+    public AjaxResult deleteSport(@RequestHeader("Authorization") String openId, Long id)   {
+
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+
+            // 删除选手的时候，要判断他有没有报名，如果有报名，就把他的报名数据一起删除了
+            List<JwSignRecordSport> jwSignRecordSportList = jwSignRecordSportService.selectJwSignRecordSportBySportId(id);
+            if(jwSignRecordSportList != null && jwSignRecordSportList.size() > 0){
+                for (JwSignRecordSport jwSignRecordSport : jwSignRecordSportList) {
+                    // 如果是单人报名，就直接把报名记录一起删了
+                    jwSignRecordSportService.deleteJwSignRecordSportById(jwSignRecordSport.getId());
+                }
+            }
+            if(StringUtils.isLongNotNull(id)){
+                jwSportService.deleteJwSportById(id);
+            }
+            return AjaxResult.success(1);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
     @PostMapping("/getWxSportList")
     @ResponseBody
     public AjaxResult getWxSportList(@RequestHeader("Authorization") String openId, String searchName){
@@ -321,6 +348,17 @@ public class JwMiNiUserController extends BaseController {
     public AjaxResult deleteSignRecord(@RequestHeader("Authorization") String openId, Long id){
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
+
+            // 判断报名时间过没过
+            JwMatch jwMatch = jwMatchService.selectJwMatchById(jwSignRecordService.selectJwSignRecordById(id).getMatchId());
+            Date now = DateUtils.getNowDate();
+            if (now.after(jwMatch.getSignEndTime())) {
+                return AjaxResult.error("报名已结束");
+            }
+            if (now.before(jwMatch.getSignBeginTime())) {
+                return AjaxResult.error("报名未开始");
+            }
+
             return AjaxResult.success(jwSignRecordService.deleteJwSignRecordById(id));
         }else{
             return AjaxResult.error("错误");
@@ -349,23 +387,25 @@ public class JwMiNiUserController extends BaseController {
                     JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
                     if(BigDecimalUtil.isNotNull(jwGameItem.getFee())){
 
-                        if("1".equals(jwGameItem.getSportLimit())){
-                            //  单人
-                            allFee = allFee.add(jwGameItem.getFee());
-                        }else if("3".equals(jwGameItem.getSportLimit())){
-                            // 多人
-                            if(jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0){
-                                int sportCount = jwSignRecord.getJwSignRecordSportList().size();
-                                BigDecimal fee = jwGameItem.getFee();
-                                if(BigDecimalUtil.isNotNull(fee)){
-                                    // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
-                                    if(sportCount > jwGameItem.getFeeMaxSport()){
-                                        fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
-                                    }
-                                    allFee = allFee.add(fee);
-                                }
-                            }
-                        }
+                        allFee = allFee.add(jwTeamService.getSignRecordFee(jwGameItem, jwSignRecord));
+
+//                        if("1".equals(jwGameItem.getSportLimit())){
+//                            //  单人
+//                            allFee = allFee.add(jwGameItem.getFee());
+//                        }else if("3".equals(jwGameItem.getSportLimit())){
+//                            // 多人
+//                            if(jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0){
+//                                int sportCount = jwSignRecord.getJwSignRecordSportList().size();
+//                                BigDecimal fee = jwGameItem.getFee();
+//                                if(BigDecimalUtil.isNotNull(fee)){
+//                                    // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
+//                                    if(sportCount > jwGameItem.getFeeMaxSport()){
+//                                        fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
+//                                    }
+//                                    allFee = allFee.add(fee);
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
@@ -424,16 +464,19 @@ public class JwMiNiUserController extends BaseController {
                                 jwSportList.add(jwSport);
                             }
 
-                        }else if("3".equals(jwGameItem.getSportLimit())){
+                        }else if("3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())){
 
                             // 多人
                             if(jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0){
                                 int sportCount = jwSignRecord.getJwSignRecordSportList().size();
                                 BigDecimal fee = jwGameItem.getFee();
+
+                                fee = jwTeamService.getSignRecordFee(jwGameItem, jwSignRecord);
+
                                 // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
-                                if(sportCount > jwGameItem.getFeeMaxSport() && BigDecimalUtil.isNotNull(fee)){
-                                    fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
-                                }
+//                                if(sportCount > jwGameItem.getFeeMaxSport() && BigDecimalUtil.isNotNull(fee)){
+//                                    fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
+//                                }
                                 jwSignRecord.setFee(fee);
 
                                 BigDecimal avgfee = jwSignRecord.getFee().divide(new BigDecimal(sportCount), 0, RoundingMode.DOWN);
@@ -542,7 +585,6 @@ public class JwMiNiUserController extends BaseController {
         }
     }
 
-
     // 修改齐舞作品名称
     @PostMapping("/updateQiWuWorksName")
     @ResponseBody
@@ -550,6 +592,18 @@ public class JwMiNiUserController extends BaseController {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
             return AjaxResult.success(jwSignRecordService.updateJwSignRecord(jwSignRecord));
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+    // 获取代表队成绩
+    @PostMapping("/getTeamGrade")
+    @ResponseBody
+    public AjaxResult getTeamGrade(@RequestHeader("Authorization") String openId, JwSignRecord jwSignRecord){
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            List<JwMatchTeamGrade> gradeList = jwHaiScoreService.listTeamGradeDes(jwSignRecord);
+            return AjaxResult.success(gradeList!= null && gradeList.size() > 0 ? gradeList.get(0) : null);
         }else{
             return AjaxResult.error("错误");
         }
@@ -562,7 +616,7 @@ public class JwMiNiUserController extends BaseController {
         if (jwWxUser == null) return AjaxResult.error("错误");
         String avatar = "";
         try {
-            avatar = FileUploadUtils.upload(RuoYiConfig.getAvatarPath(), file, MimeTypeUtils.MEDIA_EXTENSION);
+            avatar = FileUploadUtils.uploadMatch(RuoYiConfig.getMatchPath() + jwSignRecordService.selectJwSignRecordById(jwSignRecordId).getMatchId(), file, MimeTypeUtils.MEDIA_EXTENSION);
         } catch (Exception e) {
             e.printStackTrace();
             return AjaxResult.error("错误");
@@ -574,5 +628,4 @@ public class JwMiNiUserController extends BaseController {
         jwSignRecordService.updateJwSignRecord(jwSignRecord);
         return AjaxResult.success(avatar);
     }
-
 }

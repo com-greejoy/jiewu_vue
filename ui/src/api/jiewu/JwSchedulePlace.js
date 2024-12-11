@@ -30,7 +30,8 @@ export function addJwSchedulePlace(data) {
   return request({
     url: '/jiewu/JwSchedulePlace',
     method: 'post',
-    data: data
+    data: data,
+    headers: {repeatSubmit: false}
   })
 }
 

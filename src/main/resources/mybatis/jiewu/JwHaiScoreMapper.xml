@@ -14,6 +14,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="score"    column="score"    />
         <result property="scoreType"    column="score_type"    />
         <result property="createTime"    column="create_time"    />
+
+        <result property="judgeName"    column="judge_name"    />
+        <result property="backNumber"    column="back_number"    />
     </resultMap>
 
     <sql id="selectJwHaiScoreVo">
@@ -21,15 +24,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </sql>
 
     <select id="selectJwHaiScoreList" parameterType="JwHaiScore" resultMap="JwHaiScoreResult">
-        <include refid="selectJwHaiScoreVo"/>
-        <where>  
-            <if test="matchId != null "> and match_id = #{matchId}</if>
-            <if test="gameItemId != null "> and game_item_id = #{gameItemId}</if>
-            <if test="scheduleItemId != null "> and schedule_item_id = #{scheduleItemId}</if>
-            <if test="sportId != null "> and sport_id = #{sportId}</if>
-            <if test="judgeId != null "> and judge_id = #{judgeId}</if>
-            <if test="score != null  and score != ''"> and score = #{score}</if>
-            <if test="scoreType != null  and scoreType != ''"> and score_type = #{scoreType}</if>
+        select hs.*, jj.judge_name, jsr.back_number from jw_hai_score hs
+        left join jw_sign_record jsr on jsr.id = hs.sport_id
+        left join jw_judge jj on jj.id = hs.judge_id
+        <where>
+            <if test="matchId != null "> and hs.match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and hs.game_item_id = #{gameItemId}</if>
+            <if test="scheduleItemId != null "> and hs.schedule_item_id = #{scheduleItemId}</if>
+            <if test="sportId != null "> and hs.sport_id = #{sportId}</if>
+            <if test="judgeId != null "> and hs.judge_id = #{judgeId}</if>
+            <if test="score != null  and score != ''"> and hs.score = #{score}</if>
+            <if test="scoreType != null  and scoreType != ''"> and hs.score_type = #{scoreType}</if>
         </where>
     </select>
     
@@ -37,7 +42,37 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectJwHaiScoreVo"/>
         where id = #{id}
     </select>
-        
+
+    <select id="selectJwHaiScoreByJudgeAndSport" parameterType="Long" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        <where>
+            <if test="judgeId != null "> and judge_id = #{judgeId}</if>
+            <if test="sportId != null "> and sport_id = #{sportId}</if>
+        </where>
+    </select>
+
+
+    <select id="selectJwHaiScoreListBySport" parameterType="Long" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        <where>
+            <if test="sportId != null "> and sport_id = #{sportId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwHaiScoreListByGameItem" parameterType="Long" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        <where>
+            <if test="gameItemId != null "> and game_item_id = #{gameItemId}</if>
+        </where>
+    </select>
+
+    <select id="selectJwHaiScoreListByScheduleItem" parameterType="Long" resultMap="JwHaiScoreResult">
+        <include refid="selectJwHaiScoreVo"/>
+        <where>
+            <if test="gameItemId != null "> and schedule_item_id = #{scheduleItemId}</if>
+        </where>
+    </select>
+
     <insert id="insertJwHaiScore" parameterType="JwHaiScore" useGeneratedKeys="true" keyProperty="id">
         insert into jw_hai_score
         <trim prefix="(" suffix=")" suffixOverrides=",">

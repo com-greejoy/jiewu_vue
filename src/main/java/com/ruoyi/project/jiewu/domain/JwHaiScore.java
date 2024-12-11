@@ -28,7 +28,40 @@ public class JwHaiScore extends BaseEntity{
 
     private String scoreType;
 
-    public void setId(Long id) 
+    private String judgeName;
+    private String backNumber;
+
+
+    public JwHaiScore(Long matchId, Long gameItemId, Long scheduleItemId, Long sportId, Long judgeId, String score, String scoreType) {
+        this.matchId = matchId;
+        this.gameItemId = gameItemId;
+        this.scheduleItemId = scheduleItemId;
+        this.sportId = sportId;
+        this.judgeId = judgeId;
+        this.score = score;
+        this.scoreType = scoreType;
+    }
+
+    public JwHaiScore() {
+    }
+
+    public String getJudgeName() {
+        return judgeName;
+    }
+
+    public void setJudgeName(String judgeName) {
+        this.judgeName = judgeName;
+    }
+
+    public String getBackNumber() {
+        return backNumber;
+    }
+
+    public void setBackNumber(String backNumber) {
+        this.backNumber = backNumber;
+    }
+
+    public void setId(Long id)
     {
         this.id = id;
     }

@@ -15,10 +15,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="area"    column="area"    />
         <result property="itemProcess"    column="item_process"    />
         <result property="sportCount"    column="sportCount"    />
+        <result property="lockScore"    column="lock_score"    />
     </resultMap>
 
     <sql id="selectJwScheduleItemVo">
-        select id, match_id, game_item_id, schedule_info_id, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
+        select id, match_id, game_item_id, schedule_info_id, lock_score, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
     </sql>
 
     <select id="selectJwScheduleItemByGameItemId" parameterType="Long" resultMap="JwScheduleItemResult">
@@ -47,6 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shceduleTime != null "> and jsi.shcedule_time = #{shceduleTime}</if>
             <if test="area != null  and area != ''"> and jsi.area = #{area}</if>
             <if test="itemProcess != null  and itemProcess != ''"> and jsi.item_process = #{itemProcess}</if>
+            <if test="lockScore != null  and lockScore != ''"> and jsi.lock_score = #{lockScore}</if>
         </where>
         group by jsi.id
     </select>
@@ -67,6 +69,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shceduleTime != null">shcedule_time,</if>
             <if test="area != null">area,</if>
             <if test="itemProcess != null">item_process,</if>
+            <if test="lockScore != null">lock_score,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -77,6 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shceduleTime != null">#{shceduleTime},</if>
             <if test="area != null">#{area},</if>
             <if test="itemProcess != null">#{itemProcess},</if>
+            <if test="lockScore != null">#{lockScore},</if>
          </trim>
     </insert>
 
@@ -91,6 +95,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="shceduleTime != null">shcedule_time = #{shceduleTime},</if>
             <if test="area != null">area = #{area},</if>
             <if test="itemProcess != null">item_process = #{itemProcess},</if>
+            <if test="lockScore != null">lock_score = #{lockScore},</if>
         </trim>
         where id = #{id}
     </update>
@@ -107,6 +112,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </update>
 
+    <update id="changeItemName">
+        update jw_schedule_item
+        set item_name = REPLACE(item_name, #{oldName}, #{newName})
+        where game_item_id = #{gameItemId}
+    </update>
+
     <update id="clearSchedulePlace">
         update jw_schedule_item
         set schedule_info_id = null, schedule_place_id = null
@@ -117,6 +128,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update jw_schedule_item
         set schedule_info_id = null, schedule_place_id = null
         where id = #{id}
+    </update>
+
+
+    <update id="lockScoreByGameItem">
+        update jw_schedule_item
+        set lock_score = 'Y'
+        where game_item_id = #{id} and item_process = 1
     </update>
 
     <delete id="deleteJwScheduleItemById" parameterType="Long">

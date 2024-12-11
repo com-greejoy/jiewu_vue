@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.ruoyi.project.jiewu.mapper.JwSignRecordMapper;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.rowset.Joinable;
+
 @Service
 public class JwSignRecordService {
 
@@ -43,10 +45,13 @@ public class JwSignRecordService {
     @Autowired
     private JwScheduleItemService jwScheduleItemService;
 
+    public static String T = "000";
+
     @Transactional
     public int changeGameItem(Long id, Long changeGameItemId) {
         // 单人组别 判断下 改的组是不是已经存在 该选手
         JwSignRecord jwSignRecord = jwSignRecordService.selectJwSignRecordById(id);
+        Long oldGameItemId = jwSignRecord.getGameItemId();
         if ("1".equals(jwSignRecord.getSportLimit())) {
 
             List<JwSignRecordSport> jwSignRecordSportList = jwSignRecordSportService.selectJwSignRecordSportListById(id);
@@ -68,19 +73,45 @@ public class JwSignRecordService {
         // 改完组之后, 如果已经分组，还要把小项一起改了
         addNewSignToScheduleItem(jwSignRecord, jwGameItemService.selectJwGameItemById(changeGameItemId));
 
+        // 改完组之后，如果已经分组, 把组别的排序重新整理
+//        if ("1".equals(jwSignRecord.getSportLimit())) {
+            // 单人的直接排序 齐舞的手动排
+            arrangeOrder(oldGameItemId);
+//        }
+
         return re;
+    }
+
+    // 重新整理组别里面的选手排序
+    public void arrangeOrder(Long gameItemId){
+        List<JwScheduleItem> jwScheduleItemList = jwScheduleItemService.selectJwScheduleItemByGameItemId(gameItemId);
+        if(jwScheduleItemList != null && jwScheduleItemList.size() > 0){
+            jwScheduleItemList.forEach(jwScheduleItem -> {
+                List<JwSignRecord> jwSignRecordList = selectJwSignRecordListByScheduleItem(jwScheduleItem.getId());
+                jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getIndexOrder));
+                for(int i = 1; i <= jwSignRecordList.size(); i++){
+                    JwSignRecord updateD = new JwSignRecord();
+                    updateD.setId(jwSignRecordList.get(i-1).getId());
+                    updateD.setIndexOrder(Long.valueOf(i));
+                    updateJwSignRecord(updateD);
+                }
+            });
+        }
     }
 
     // 修改分组小项
     public int changeJwScheduleItem(Long id, Long changeScheduleItemId) {
 
-        List<JwSignRecord> jwSignRecordList  = jwSignRecordService.selectJwSignRecordListByScheduleItem(changeScheduleItemId);
+        List<JwSignRecord> jwSignRecordList = selectJwSignRecordListByScheduleItem(changeScheduleItemId);
         JwSignRecord jwSignRecord = jwSignRecordList.stream().max(Comparator.comparingLong(JwSignRecord::getIndexOrder)).get();
         JwSignRecord updateD = new JwSignRecord();
         updateD.setId(id);
         updateD.setScheduleItemId(changeScheduleItemId);
-        updateD.setIndexOrder(jwSignRecord.getIndexOrder()+1l);
-        jwSignRecordService.updateJwSignRecord(updateD);
+        updateD.setIndexOrder(jwSignRecord.getIndexOrder() + 1l);
+        updateJwSignRecord(updateD);
+
+        // 如果已经分组, 把组别的排序重新整理
+        arrangeOrder(jwSignRecord.getGameItemId());
 
         return 1;
     }
@@ -108,28 +139,43 @@ public class JwSignRecordService {
         return jwSignRecordMapper.selectJwSignRecordListByScheduleItem(scheduleItemId);
     }
 
+    // 获取比赛项目的选手名单
+    public List<JwSignRecord> selectJwSignRecordListByGameItem(Long gameItemId) {
+        return jwSignRecordMapper.selectJwSignRecordListByGameItem(gameItemId);
+    }
+
     //  获取代表队 比赛的所有报名信息
     public List<JwSignRecord> selectJwSignRecordListWithUserMatch(Long teamId, Long matchId) {
         return jwSignRecordMapper.selectJwSignRecordListWithUserMatch(teamId, matchId);
     }
 
-    public List<JwSignRecord> selectJwSignRecordListByMatchId(Long matchId){
+    public List<JwSignRecord> selectJwSignRecordListByMatchId(Long matchId) {
         return jwSignRecordMapper.selectJwSignRecordListByMatchId(matchId);
     }
 
     // 获取 单人 运动员 得所有记录
-    public List<JwSignRecord> selectJwSignRecordBySportId(Long matchId, Long sportId){
+    public List<JwSignRecord> selectJwSignRecordBySportId(Long matchId, Long sportId) {
         return jwSignRecordMapper.selectJwSignRecordBySportId(matchId, sportId);
     }
 
     // 查询比赛最大背号
-    public String selectMaxBackNum(Long matchId){
+    public String selectMaxBackNum(Long matchId) {
         return jwSignRecordMapper.selectMaxBackNum(matchId);
     }
 
     // 获取代表队全部赛程
-    public List<JwSignRecord> getTeamScheduleInfoList(Long matchId, Long teamId){
+    public List<JwSignRecord> getTeamScheduleInfoList(Long matchId, Long teamId) {
         return jwSignRecordMapper.getTeamScheduleInfoList(matchId, teamId);
+    }
+
+    // 获取代表队所有背号
+    public List<String> selectSignBackNumList(Long matchId, Long teamId) {
+        return jwSignRecordMapper.selectSignBackNumList(matchId, teamId);
+    }
+
+    // 根据背号获取赛程
+    public List<JwSignRecord> selectScheduleByBackNum(Long matchId, String backNumber) {
+        return jwSignRecordMapper.selectScheduleByBackNum(matchId, backNumber);
     }
 
     //获取齐舞的报名记录
@@ -203,6 +249,50 @@ public class JwSignRecordService {
                         throw new GlobalException(jwSport.getPlayerName() + " 已经报名 " + jwGameItem.getCode() + " 组别");
                     }
                 }
+            } else if ("2".equals(jwGameItem.getSportLimit())) {
+
+                if (StringUtils.isLongNotNull(editId)) {
+                    // 修改多人报名
+                    JwSignRecord jwSignRecord = jwSignRecordService.selectJwSignRecordById(editId);
+                    if (jwSignRecord != null) {
+                        // 删除之前的
+                        jwSignRecordSportService.deleteJwSignRecordSportBySignRecordId(editId);
+                        // 插入新的
+                        for (Long sportId : sportIds) {
+                            JwSignRecordSport jwSignRecordSport = new JwSignRecordSport();
+                            jwSignRecordSport.setMatchId(jwGameItem.getMatchId());
+                            jwSignRecordSport.setSignRecordId(editId);
+                            jwSignRecordSport.setSportId(sportId);
+                            jwSignRecordSport.setTeamId(teamId);
+                            jwSignRecordSport.setGameItemId(jwGameItem.getId());
+                            jwSignRecordSportService.insertJwSignRecordSport(jwSignRecordSport);
+                        }
+                    }
+                } else {
+                    // 新增多人报名
+                    JwSignRecord jwSignRecord = new JwSignRecord();
+                    jwSignRecord.setMatchId(jwGameItem.getMatchId());
+                    jwSignRecord.setSportLimit(jwGameItem.getSportLimit());
+                    jwSignRecord.setGameItemId(jwGameItem.getId());
+                    jwSignRecord.setTeamId(teamId);
+                    insertJwSignRecord(jwSignRecord);
+
+                    for (Long sportId : sportIds) {
+                        JwSignRecordSport jwSignRecordSport = new JwSignRecordSport();
+                        jwSignRecordSport.setMatchId(jwGameItem.getMatchId());
+                        jwSignRecordSport.setSignRecordId(jwSignRecord.getId());
+                        jwSignRecordSport.setSportId(sportId);
+                        jwSignRecordSport.setTeamId(teamId);
+                        jwSignRecordSport.setGameItemId(jwGameItem.getId());
+                        jwSignRecordSportService.insertJwSignRecordSport(jwSignRecordSport);
+                    }
+
+                    // 如果该项目已经分组 则新加的报名也要分组
+                    addNewSignToScheduleItem(jwSignRecord, jwGameItem);
+
+                    // 判断需不需加背号
+                    addNewBackNum(jwSignRecord);
+                }
             } else if ("3".equals(jwGameItem.getSportLimit())) {
 
                 if (StringUtils.isLongNotNull(editId)) {
@@ -253,50 +343,50 @@ public class JwSignRecordService {
     }
 
     // 新增报名增加到分组里面
-    private void addNewSignToScheduleItem(JwSignRecord jwSignRecord, JwGameItem jwGameItem){
+    private void addNewSignToScheduleItem(JwSignRecord jwSignRecord, JwGameItem jwGameItem) {
         // 如果该项目已经分组 则新加的报名也要分组
         List<JwScheduleItem> jwScheduleItemList = jwScheduleItemService.selectJwScheduleItemByGameItemId(jwGameItem.getId());
         jwScheduleItemList = jwScheduleItemList.stream().filter(jwScheduleItem -> "1".equals(jwScheduleItem.getItemProcess())).collect(Collectors.toList());
-        if(jwScheduleItemList != null && jwScheduleItemList.size() > 0){
+        if (jwScheduleItemList != null && jwScheduleItemList.size() > 0) {
             // 找到最少的一个组加进去
             JwScheduleItem jwScheduleItem = jwScheduleItemList.stream().min(Comparator.comparingLong(JwScheduleItem::getSportCount)).get();
-            if(jwScheduleItem.getSportCount() < 0) jwScheduleItem.setSportCount(0l);
+            if (jwScheduleItem.getSportCount() < 0) jwScheduleItem.setSportCount(0l);
             JwSignRecord updateD = new JwSignRecord();
             updateD.setId(jwSignRecord.getId());
             updateD.setScheduleItemId(jwScheduleItem.getId());
-            updateD.setIndexOrder(jwScheduleItem.getSportCount()+1);
+            updateD.setIndexOrder(jwScheduleItem.getSportCount() + 1);
             jwSignRecordService.updateJwSignRecord(updateD);
         }
     }
 
     //  新增加报报名 判断需不需加背号
-    private void addNewBackNum(JwSignRecord jwSignRecord){
+    private void addNewBackNum(JwSignRecord jwSignRecord) {
         JwSignRecord updateJ = new JwSignRecord();
         updateJ.setId(jwSignRecord.getId());
         String backNum = selectMaxBackNum(jwSignRecord.getMatchId());
-        if(StringUtils.isNotEmpty(backNum) && Long.valueOf(backNum) > 0){
-            if("1".equals(jwSignRecord.getSportLimit())){
+        if (StringUtils.isNotEmpty(backNum) && Long.valueOf(backNum) > 0) {
+            if ("1".equals(jwSignRecord.getSportLimit())) {
                 // 单人的背号，先判断他有没有背号，没有就加一  有就用原来的
                 List<JwSignRecordSport> jwSignRecordSportList = jwSignRecordSportService.selectJwSignRecordSportListById(jwSignRecord.getId());
-                if(jwSignRecordSportList != null && jwSignRecordSportList.size() > 0){
+                if (jwSignRecordSportList != null && jwSignRecordSportList.size() > 0) {
                     JwSignRecordSport jwSignRecordSport = jwSignRecordSportList.get(0);
                     List<JwSignRecord> hasBackNumList = jwSignRecordService.selectJwSignRecordBySportId(jwSignRecord.getMatchId(), jwSignRecordSport.getSportId());
-                    if(hasBackNumList != null && hasBackNumList.size() > 0){
+                    if (hasBackNumList != null && hasBackNumList.size() > 0) {
                         JwSignRecord b = hasBackNumList.get(0);
-                        if(b != null && StringUtils.isNotEmpty(b.getBackNumber())){
+                        if (b != null && StringUtils.isNotEmpty(b.getBackNumber())) {
                             updateJ.setBackNumber(b.getBackNumber());
-                        }else{
-                            updateJ.setBackNumber(new DecimalFormat("0000").format(Long.valueOf(backNum)+1));
+                        } else {
+                            updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
                         }
-                    }else{
-                        updateJ.setBackNumber(new DecimalFormat("0000").format(Long.valueOf(backNum)+1));
+                    } else {
+                        updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
                     }
-                }else{
-                    updateJ.setBackNumber(new DecimalFormat("0000").format(Long.valueOf(backNum)+1));
+                } else {
+                    updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
                 }
-            }else if("3".equals(jwSignRecord.getSportLimit())){
+            } else if ("3".equals(jwSignRecord.getSportLimit()) || "2".equals(jwSignRecord.getSportLimit())) {
                 // 齐舞的背号 直接加一
-                updateJ.setBackNumber(new DecimalFormat("0000").format(Long.valueOf(backNum)+1));
+                updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
             }
             jwSignRecordService.updateJwSignRecord(updateJ);
         }
@@ -321,6 +411,36 @@ public class JwSignRecordService {
     }
 
     public int deleteJwSignRecordById(Long id) {
-        return jwSignRecordMapper.deleteJwSignRecordById(id);
+        Long oldGameItemId = selectJwSignRecordById(id).getGameItemId();
+        int re = jwSignRecordMapper.deleteJwSignRecordById(id);
+        // 如果已经分组, 把组别的排序重新整理
+        arrangeOrder(oldGameItemId);
+        return re;
     }
+
+    // 获取选手的打分明细
+    public List<JwSignRecord> selectJwSignRecordHaiScore(JwSignRecord jwSignRecord) {
+        return jwSignRecordMapper.selectJwSignRecordHaiScore(jwSignRecord);
+    }
+
+    // 清除一个组别的打分排名
+    public int clearScoreByGameItem(Long gameItemId) {
+        return jwSignRecordMapper.clearScoreByGameItem(gameItemId);
+    }
+
+    // 修改海选排名
+    public int saveCustomOrder(Long id, Long rankOrder) {
+        return jwSignRecordMapper.saveCustomOrder(id, rankOrder);
+    }
+
+    // 获取海选晋级选手
+    public List<JwSignRecord> selectHaiXuanJinJiSportList(Long gameItemId) {
+        return jwSignRecordMapper.selectHaiXuanJinJiSportList(gameItemId);
+    }
+
+    // 获取裁判打分列表
+    public List<JwSignRecord> selectJwSignRecordListWithJudgeScore(Long judgeId, Long scheduleItemId) {
+        return jwSignRecordMapper.selectJwSignRecordListWithJudgeScore(judgeId, scheduleItemId);
+    }
+
 }

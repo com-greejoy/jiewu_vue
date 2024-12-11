@@ -24,9 +24,19 @@ public class JwSchedulePlace extends BaseEntity {
     @Excel(name = "场次")
     private Long placeOrder;
 
+    private String lockScore;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
     private Date placeTime;
+
+    public String getLockScore() {
+        return lockScore;
+    }
+
+    public void setLockScore(String lockScore) {
+        this.lockScore = lockScore;
+    }
 
     private List<JwScheduleItem> jwScheduleItemList;
 

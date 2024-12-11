@@ -25,47 +25,78 @@ public class JwGameItem extends BaseEntity {
     @Excel(name = "项目名")
     private String name;
 
-    @Excel(name = "分组数")
-    private Long groupLimit;
-
-    @Excel(name = "项目类型")
-    private String sportLimit;
-
-    @Excel(name = "人数限制")
-    private Integer maxSport;
-    private Integer minSport;
-    @Excel(name = "选手时长(秒)")
-    private Long singleDuration;
-
-    @Excel(name = "比赛模式")
+//    @Excel(name = "比赛模式")
     private String matchType;
 
-    @Excel(name = "晋级人数")
-    private Long promotionNum;
-
-    @Excel(name = "最小年龄")
-    private Long minYear;
-
-    @Excel(name = "最大年龄")
-    private Long maxYear;
+//    @Excel(name = "项目类型")
+    private String sportLimit;
 
     @Excel(name = "报名费")
     private BigDecimal fee;
 
+    @Excel(name = "最多人数")
     private Long feeMaxSport;
 
-    @Excel(name = "成绩奖项")
-    private Long resultDesId;
+//    @Excel(name = "分组模式")
+    private String groupMode;
 
-    @Excel(name = "投屏背景图")
+
+//    @Excel(name = "最小年龄")
+    private Long minYear;
+
+//    @Excel(name = "最大年龄")
+    private Long maxYear;
+    @Excel(name = "显示最小年龄")
+    private Long showMinYear;
+    @Excel(name = "显示最大年龄")
+    private Long showMaxYear;
+
+    @Excel(name = "备注")
+    private String remark;
+
+//    @Excel(name = "分组数")
+    private Long groupLimit;
+
+//    @Excel(name = "人数限制")
+    private Integer maxSport;
+    private Integer minSport;
+//    @Excel(name = "选手时长(秒)")
+    private Long singleDuration;
+
+
+
+//    @Excel(name = "晋级人数")
+    private Long promotionNum;
+
+
+
+//    @Excel(name = "成绩奖项")
+    private String resultDesId;
+
+//    @Excel(name = "投屏背景图")
     private String screenImg;
 
-    @Excel(name = "性别限制")
+//    @Excel(name = "性别限制")
     private String sexCon;
 
     private Long signCount;
 
-    private String groupMode;
+
+    public Long getShowMinYear() {
+        return showMinYear;
+    }
+
+    public void setShowMinYear(Long showMinYear) {
+        this.showMinYear = showMinYear;
+    }
+
+    public Long getShowMaxYear() {
+        return showMaxYear;
+    }
+
+    public void setShowMaxYear(Long showMaxYear) {
+        this.showMaxYear = showMaxYear;
+    }
 
     public String getGroupMode() {
         return groupMode;
@@ -250,12 +281,12 @@ public class JwGameItem extends BaseEntity {
     {
         return fee;
     }
-    public void setResultDesId(Long resultDesId) 
+    public void setResultDesId(String resultDesId)
     {
         this.resultDesId = resultDesId;
     }
 
-    public Long getResultDesId() 
+    public String getResultDesId()
     {
         return resultDesId;
     }
@@ -267,6 +298,16 @@ public class JwGameItem extends BaseEntity {
     public String getScreenImg() 
     {
         return screenImg;
+    }
+
+    @Override
+    public String getRemark() {
+        return remark;
+    }
+
+    @Override
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     @Override

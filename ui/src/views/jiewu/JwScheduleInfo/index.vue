@@ -16,8 +16,10 @@
         <ELSelectMatch :matchId.sync="queryParams.matchId"/>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="el-icon-refresh" icon="el-icon-search" size="mini" @click="handleQuery">刷新</el-button>
+        <el-button icon="el-icon-c-scale-to-original" type="success"  size="mini" @click="handelALLSchedcule('schedule')">竞赛日程表</el-button>
+        <el-button icon="el-icon-date" type="warning"  size="mini" @click="handelALLSchedcule('scheduleDetail')">详细赛程表</el-button>
+        <el-button icon="el-icon-data-analysis" type="danger"  size="mini" @click="handelALLSchedcule('jianluPai')">检录举牌</el-button>
       </el-form-item>
       <el-button style="float: right;" type="warning" size="mini" @click="handleCalculateTime">计算时间</el-button>
 
@@ -151,6 +153,106 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="赛程表明细" :visible.sync="downLoadScheduleInfo" width="950px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handlePrint('printScheduleDetail')">打印</el-button>
+
+        <el-button type="success" plain size="mini" @click="saveAsImage()">图片</el-button>
+      </div>
+      <div class="fee-items" id="printScheduleDetail" ref="capture" v-if="downLoadScheduleInfo" v-loading="scheduleLoading">
+        <div class="match-name" v-html="JwScheduleInfoList[0].matchName"></div>
+        <div class="title-name">赛程表明细</div>
+        <div class="fee-item">
+          <div class="index-v h time">比赛时间</div>
+          <div class="index-v h game-item s">比赛组别</div>
+          <div class="index-v h area">场地</div>
+          <div class="sport-rows">
+            <div class="sport-row">
+              <div class="index-v h index">上场序号</div>
+              <div class="index-v h back">背号</div>
+              <div class="index-v h sport s">选手</div>
+              <div class="index-v h team-name">代表队</div>
+            </div>
+          </div>
+        </div>
+        <div class="fee-item" v-for="(item, key) in scheduleInfoList">
+          <div class="index-v time">
+            <!--<br> {{item[0].scheduleName}}-->
+            {{item[0].placeTime.split(" ")[1]}} 第{{item[0].placeOrder}}场
+          </div>
+          <div class="index-v game-item s">{{key}}</div>
+          <div class="index-v area">{{getAreaLabel(item[0])}}</div>
+
+          <div class="sport-rows">
+            <div class="sport-row" v-for="itemm in item">
+              <div class="index-v index">{{itemm.indexOrder}}</div>
+              <div class="index-v back">{{itemm.backNumber }}</div>
+              <div class="index-v sport s">
+                <span v-for="sport in itemm.jwSignRecordSportList">
+                  <span v-if="itemm.sportLimit != 1" class="m-sport">{{sport.playerName}}</span>
+                  <span v-else>{{sport.playerName}}</span>
+                </span>
+              </div>
+              <div class="index-v team-name">{{itemm.jwTeam.teamName}}</div>
+            </div>
+          </div>
+          <!--<div style='page-break-after:always;'></div>-->
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="竞赛日程表" :visible.sync="downLoadSchedule" width="950px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handlePrint('printSchedule')">打印</el-button>
+      </div>
+      <div class="fee-items schedule"  id="printSchedule" v-if="downLoadSchedule" v-loading="scheduleLoading">
+        <div class="match-name" v-html="JwScheduleInfoList[0].matchName"></div>
+        <div class="title-name" >竞赛日程表</div>
+        <div class="fee-item">
+          <div class="index-v h time">比赛时间</div>
+          <div class="index-v h game-item s">比赛组别</div>
+          <div class="index-v h area">场地</div>
+        </div>
+        <div v-for="schedulePlace in JwScheduleInfoList">
+          <div class="fee-item" v-for="item in schedulePlace.schedulePlaceList">
+            <div class="index-v time">
+              {{parseTime(item.placeTime, '{h}:{i}')}} 第{{item.placeOrder}}场
+            </div>
+            <div class="index-v game-item sd">
+              <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList">
+                <div class="index-v name">{{itemm.itemName}} ({{itemm.sportCount}} 人)</div>
+                <div class="index-v area">{{getAreaLabel(itemm)}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="检录举牌" :visible.sync="showJuPai" width="1400px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handlePrintC('printJuPai')">打印</el-button>
+      </div>
+      <div class="jupai-items" id="printJuPai" v-if="showJuPai" v-loading="scheduleLoading">
+        <div class="jupai-item" v-for="(jupai, key) in juPaiList">
+          <div class="item-game" v-for="(item, key2) in jupai">
+            <div class="item-time">第{{key}}场</div>
+            <div class="item-name">
+              <div class="name-t">{{item[0].itemName}}</div>
+              <div class="item-area">{{getAreaLabel2(key2)}}</div>
+            </div>
+            <div class="item-sports">
+              <div class="item-sport" v-for="itemm in item">
+                <div class="sport-index">{{itemm.indexOrder}}</div>
+                <div class="sport-num">{{itemm.backNumber}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -158,12 +260,22 @@
   import {listJwScheduleInfo, getJwScheduleInfo, delJwScheduleInfo, addJwScheduleInfo, updateJwScheduleInfo} from "@/api/jiewu/JwScheduleInfo";
   import {listJwSchedulePlace, listJwSchedulePlaceWithScheduleItem, getJwSchedulePlace, delJwSchedulePlace, addJwSchedulePlace, updateJwSchedulePlace} from "@/api/jiewu/JwSchedulePlace";
   import {listNoPlaceJwScheduleItem, updateJwScheduleItem, updateJwScheduleItemPlace, clearSchedulePlaceById, calculateTime} from "@/api/jiewu/JwScheduleItem";
+  import { getTeamScheduleInfoList} from "@/api/jiewu/JwMatchTeam";
+  import 'core-js/actual/array/group';
+  import printJS from 'print-js';
+  import html2canvas from 'html2canvas';
 
   export default {
     name: "JwScheduleInfo",
     dicts: ['jw_area'],
     data() {
       return {
+        showJuPai: false,
+        downLoadSchedule: false,
+        showType: "",
+        scheduleLoading: false,
+        scheduleInfoList: [],
+        downLoadScheduleInfo: false,
         changeArea: null,
         updatePlaceForm: {},
         updatePlaceOpen: false,
@@ -176,6 +288,7 @@
         loading: true,
         // 选中数组
         ids: [],
+        juPaiList: {},
         // 非单个禁用
         single: true,
         // 非多个禁用
@@ -217,6 +330,73 @@
       this.getList();
     },
     methods: {
+      async saveAsImage() {
+        try {
+          const canvas = await html2canvas(this.$refs.capture, {scale: 4});
+          const img = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.href = img;
+          link.download = 'capture.png';
+          link.click();
+        } catch (error) {
+          console.error('Error capturing the image:', error);
+        }
+      },
+      handlePrintC(id) {
+        printJS({
+          printable: id,
+          maxWidth: "1200",
+          type: 'html',
+          //为了样式生效需要添加 targetStyles:['*'] 和 font_size:''
+          targetStyles: ['*'],
+          font_size: '',
+          //margin0 默认打印页边距为0
+          style: `
+          @page {
+            size:auto;
+            margin: 16;
+          }
+        `
+        });
+      },
+      //导出赛程表
+      handelALLSchedcule(type){
+        let that = this;
+        if("scheduleDetail" == type){
+          // 详细赛程表
+          this.scheduleLoading = true;
+          getTeamScheduleInfoList({matchId: this.queryParams.matchId, teamId: null}).then(res => {
+            this.showType = type;
+            let scheduleInfoList = res.data || [];
+            this.scheduleInfoList = scheduleInfoList.group((b) => b.itemName);
+            this.scheduleLoading = false;
+            this.downLoadScheduleInfo = true;
+          })
+        }else if("schedule" == type){
+          // 竞赛日程表
+          this.downLoadSchedule = true;
+
+        }else if("jianluPai" == type){
+          getTeamScheduleInfoList({matchId: this.queryParams.matchId, teamId: null}).then(res => {
+            this.showType = type;
+            let scheduleInfoList = res.data || [];
+            this.juPaiList = scheduleInfoList.group((b) => b.placeOrder);
+            for(let key in this.juPaiList){
+              this.juPaiList[key] = this.juPaiList[key].group((b) => b.area);
+            }
+            console.log(this.juPaiList)
+            this.scheduleLoading = false;
+            this.showJuPai = true;
+          })
+        }
+
+      },
+      getAreaLabel(item) {
+        return this.selectDictLabel(this.dict.type.jw_area, item.area);
+      },
+      getAreaLabel2(item) {
+        return this.selectDictLabel(this.dict.type.jw_area, item);
+      },
       // 计算时间
       handleCalculateTime() {
         let that = this;
@@ -343,6 +523,7 @@
         this.open = false;
         this.updatePlaceOpen = false;
         this.addItemOpen = false;
+        this.updatePlaceForm = {}
         this.reset();
       },
       // 表单重置
@@ -432,6 +613,254 @@
 </script>
 
 <style lang="scss" scoped>
+
+
+  .match-name {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .jupai-item{
+    display: flex;
+    color: #000000;
+    flex-direction: column;
+    page-break-before: always;
+    page-break-after:always;
+    .item-time{
+      text-align: center;
+      font-size: 36px;
+      font-weight: 600;
+    }
+    .item-game{
+      page-break-before: always;
+      page-break-after:always;
+      display: flex;
+      flex-direction: column;
+      height: 85vh;
+
+      .item-name{
+        font-size: 36px;
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 24px;
+        margin-top: 12px;
+        align-items: center;
+        .name-t{
+
+        }
+        .item-area{
+          margin-top: 8px;
+          margin-left: 32px;
+        }
+      }
+      .item-sports{
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        .item-sport{
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          font-size: 48px;
+          margin-right: 8px;
+          margin-bottom: 8px;
+          padding: 8px 16px;
+          border: 1px solid #000000;
+          border-radius: 4px;
+          width: 120px;
+          .sport-index{
+            text-align: center;
+            border-bottom: 3px solid #888;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+          }
+        }
+      }
+    }
+
+  }
+  .title-name {
+    text-align: center;
+    margin-bottom: 32px;
+    font-weight: 600;
+    font-size: 18px;
+  }
+  .btn-row {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 12px;
+    justify-content: end;
+  }
+  .fee-items {
+    display: flex;
+    flex-direction: column;
+    margin-right: 12px;
+    color: #000;
+    width: 520pt;
+
+    width: 620pt;
+    padding: 24pt;
+    page-break-inside: avoid;
+    &.schedule{
+      .fee-item{
+        .index-v{
+          padding: 6px 0;
+          &.time {
+            width: 120px;
+
+            padding-left: 8px;
+          }
+          &.game-item.s{
+            flex: 1;
+          }
+        }
+      }
+    }
+    .gama-item-s{
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      border-bottom: 1px solid #000;
+
+      &:last-child {
+        border-bottom: none;
+      }
+      .name{
+        flex: 1;
+      }
+    }
+
+    .fee-item {
+      display: flex;
+      flex-direction: row;
+      border: 1px solid #000;
+      /*border-bottom: none;*/
+      page-break-inside: avoid;
+
+      &:last-child {
+        border-bottom: 1px solid #000;
+      }
+
+      .index-v {
+        /*text-align: center;*/
+        border-right: 1px solid #000;
+        padding: 2px 0;
+        font-size: 14px;
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: center;
+
+        &.h {
+          font-weight: 600;
+          font-size: 16px;
+        }
+
+        &:last-child {
+          border-right: none;
+        }
+
+        &.index {
+          width: 36px;
+        }
+
+        &.back {
+          width: 48px;
+        }
+
+        &.sport {
+          width: 0;
+          flex: 1;
+          padding-left: 4px;
+          padding-right: 4px;
+          line-height: 12px;
+          white-space: nowrap;
+
+          &.s {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+          }
+
+          .m-sport {
+            margin-right: 8px;
+            white-space: nowrap;
+            font-size: 12px;
+          }
+
+          &.all-fee {
+            height: 40px;
+          }
+        }
+
+        &.game-item {
+          width: 20px;
+          flex: 1;
+          padding-left: 4px;
+          padding-right: 4px;
+
+          &.s {
+            width: 160px;
+            flex: none;
+          }
+          &.sd{
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+          }
+        }
+
+        &.fee {
+          width: 100px;
+          line-height: 12px;
+        }
+
+        &.remark {
+          width: 80px;
+        }
+
+        &.time {
+          width: 100px;
+          justify-content: flex-start;
+          padding-left: 4px;
+        }
+
+        &.area {
+          width: 40px;
+        }
+        &.team-name{
+          width: 176px;
+        }
+      }
+
+      .sport-rows {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        page-break-inside: avoid;
+
+        .sport-row {
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+          border-bottom: 1px solid #000;
+          page-break-inside: avoid;
+
+          &:last-child {
+            border-bottom: none;
+          }
+        }
+      }
+
+    }
+  }
+
+
   .checkbox-game-item {
     display: flex;
     flex-direction: row;
@@ -461,13 +890,15 @@
     }
 
     .box-card {
-      width: 30%;
+      width: 100%;
       min-width: 450px;
       margin-right: 24px;
 
       ::v-deep.el-card__body {
         overflow: auto;
         max-height: calc(100% - 64px);
+        display: flex;
+        flex-wrap: wrap;
       }
     }
 
@@ -476,11 +907,20 @@
     }
 
     .schedule-place-card {
-      margin-bottom: 24px;
+      margin-bottom: 8px;
+      width: 30%;
+      margin-right: 8px;
+      ::v-deep.el-card__body {
+        overflow: visible;
+      }
     }
 
     .schedule-item-card {
       margin-bottom: 4px;
+      width: 100%;
+      &:last-child{
+        margin-bottom: 0;
+      }
 
       ::v-deep.el-card__body {
         display: flex;

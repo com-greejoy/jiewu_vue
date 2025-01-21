@@ -93,6 +93,15 @@
           v-hasPermi="['jiewu:JwGameItem:remove']"
         >统一设奖项
         </el-button>
+
+        <el-button
+          style="padding: 6px;"
+          size="mini"
+          type="primary"
+          @click="handleSetJudge()"
+          v-hasPermi="['jiewu:JwGameItem:remove']"
+        >设置决赛裁判
+        </el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -372,7 +381,7 @@
       <el-tabs v-model="currentTab" type="border-card">
         <el-tab-pane :label="key" :name="key" v-for="(value, key) in signRecordList" :key="key">
           <el-table :data="value" height="65vh">
-            <el-table-column label="ID" align="left" prop="id" width="50"/>
+            <el-table-column label="ID" align="left" prop="id" width="60"/>
             <el-table-column label="赛程小项" align="left" prop="jwScheduleItem.itemName"/>
             <el-table-column label="代表队" align="left" prop="jwTeam.teamName"/>
             <el-table-column label="选手" align="center" prop="backNumber">
@@ -412,6 +421,27 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="设置裁判" :visible.sync="showSetJudge" width="75vw" append-to-body>
+      <el-form ref="form" :model="judgeForm" :rules="rules" label-width="120px">
+        <el-form-item label="项目名" prop="name">
+          <el-input v-model="judgeForm.name" placeholder="请输入项目名"/>
+        </el-form-item>
+
+        <el-form-item label="裁判" prop="judgeIds">
+          <el-checkbox-group v-model="judgeForm.judgeIds" style="height: 50vh;overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+            <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
+              <div class="item-name">{{item.judgeName}}  </div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitJudgeForm">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+      </div>
+    </el-dialog>
+
+
 
     <el-dialog title="导入报名" :visible.sync="upload.open" width="400px" append-to-body>
 
@@ -450,12 +480,16 @@
   import {listJwSignRecordByGameItem} from "@/api/jiewu/JwSignRecord";
   import {listJwAwardsItem} from "@/api/jiewu/JwAwardsItem";
   import {getToken} from "@/utils/auth";
+  import {listJwJudgeMatch} from "@/api/jiewu/JwJudgeMatch";
+
 
   export default {
     name: "JwGameItem",
     dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode'],
     data() {
       return {
+        showSetJudge: false,
+        judgeForm: {},
         JwAwardsItemList: [],
         awardForm: {},
         awardOpen: false,
@@ -463,6 +497,7 @@
         cardLoadIng: false,
         viewSignOpen: false,
         signRecordList: {},
+        matchJudgeList: [],
         // 用户导入参数
         upload: {
           // 是否显示弹出层（用户导入）
@@ -499,7 +534,7 @@
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 10,
+          pageSize: 50,
           matchId: (this.Cookies.get("matchId") * 1) || null,
           code: null,
           name: null,
@@ -523,6 +558,41 @@
       this.getList();
     },
     methods: {
+      submitJudgeForm(){
+        (this.ids || []).forEach(id => {
+          updateJwGameItem({id: id, judgeId: this.judgeForm.judgeIds.join(",")}).then(res => {
+            this.showSetJudge = false;
+            this.getList();
+          });
+        });
+      },
+      handleSetJudge() {
+        if (this.queryParams.matchId && this.ids && this.ids.length > 0) {
+          this.judgeForm = {judgeIds: []};
+          listJwJudgeMatch({
+            matchId: this.queryParams.matchId, pageNum: 1,
+            pageSize: 1000,
+          }).then(response => {
+
+            let names = [];
+            (this.ids || []).forEach(id => {
+              let item = this.JwGameItemList.find((item) => item.id == id);
+              names.push(item.name)
+            });
+
+
+            this.judgeForm = {ids: this.ids, name: names.join(", "), judgeIds: []};
+
+
+            this.matchJudgeList = response.rows || [];
+            this.matchJudgeList.sort((a, b) => a.judgeId - b.judgeId);
+            this.showSetJudge = true;
+          });
+        } else {
+          this.$modal.msgError("选择比赛");
+        }
+
+      },
       // 设置奖项
       submitAwardForm() {
         if (this.awardForm.id) {
@@ -537,9 +607,7 @@
               this.getList();
             });
           });
-
         }
-
       },
       handleAwardAll() {
         this.awardForm = {resultDesId: []};
@@ -602,8 +670,9 @@
       },
       // 取消按钮
       cancel() {
-        this.awardOpen = false,
-          this.open = false;
+        this.awardOpen = false;
+        this.open = false;
+        this.showSetJudge = false;
         this.reset();
       },
       // 表单重置
@@ -734,7 +803,7 @@
           ...this.queryParams
         }, `JwGameItem_${new Date().getTime()}.xlsx`)
       },
-      handleImport(){
+      handleImport() {
         this.upload.title = "导入";
         this.upload.open = true;
       },
@@ -751,7 +820,7 @@
         this.upload.open = false;
         this.upload.isUploading = false;
         this.$refs.upload.clearFiles();
-        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
         this.getList();
       },
     }

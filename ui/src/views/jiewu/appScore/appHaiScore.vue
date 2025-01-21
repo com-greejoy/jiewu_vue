@@ -15,6 +15,7 @@
           <div class="sport-item-box" v-for="sport in sportList">
             <div class="sport-item" :class="{select: currentSport.id == sport.id}" @click="selectSport(sport)">
               <div class="sport-index">{{sport.indexOrder}}</div>
+              <!--<div class="sport-index">{{sport.backNumber}}</div>-->
               <div class="sport-name">({{sport.backNumber}}) {{sport.playerName}}</div>
               <div class="sport-score">{{sport.judgeScore || ""}}</div>
             </div>
@@ -26,34 +27,34 @@
         <div class="score-row zong-fen">
           <span class="demonstration">总分（100分制）</span>
           <div class="zw-tip">{{scoreAll}}</div>
-          <el-slider v-model="scoreAll" :marks="marks" :min="60" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChangeALL" @change="saveScoreHandel"></el-slider>
+          <el-slider v-model="scoreAll" :marks="marks" :min="80" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChangeALL" @change="saveScoreHandel"></el-slider>
         </div>
         <div class="xiao-fen">
           <div class="score-left">
             <div class="score-row">
               <span class="demonstration">音乐性（20%）</span>
               <div class="zw-tip">{{score1}}%</div>
-              <el-slider v-model="score1" :min="60" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
+              <el-slider v-model="score1" :min="80" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
             </div>
             <div class="score-row">
               <span class="demonstration">技巧性（20%）</span>
               <div class="zw-tip">{{score2}}%</div>
-              <el-slider v-model="score2" :min="60" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
+              <el-slider v-model="score2" :min="80" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
             </div>
             <div class="score-row">
               <span class="demonstration">创意性（20%）</span>
               <div class="zw-tip">{{score3}}%</div>
-              <el-slider v-model="score3" :min="60" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
+              <el-slider v-model="score3" :min="80" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
             </div>
             <div class="score-row">
               <span class="demonstration">多样性（20%）</span>
               <div class="zw-tip">{{score4}}%</div>
-              <el-slider v-model="score4" :min="60" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
+              <el-slider v-model="score4" :min="80" :max="100" input-size="large" :step="0.1" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
             </div>
             <div class="score-row">
               <span class="demonstration">完整性（20%）</span>
               <div class="zw-tip">{{score5}}%</div>
-              <el-slider v-model="score5" :min="60" :max="100" input-size="large" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
+              <el-slider v-model="score5" :min="80" :max="100" input-size="large" :show-tooltip="false" @input="scoreChange" @change="saveScoreHandel"></el-slider>
             </div>
           </div>
           <div class="score-right">
@@ -66,6 +67,7 @@
               </div>
             </div>
             <div class="all-score">{{scoreAll || ""}}</div>
+            <div class="save-btn danger" @click="clearScoreHandel">清除分数</div>
             <div class="save-btn" @click="saveScoreHandel">提交分数</div>
           </div>
         </div>
@@ -75,6 +77,7 @@
     <div class="hai-score-body" v-if="isJueSai" v-loading="loadSport">
       <juesai :currentJudge="currentJudge" :currentGameItem="currentGameItem"></juesai>
     </div>
+
     <transition name="el-zoom-in-center">
       <div class="show-select-game" v-show="showSelectGameItem" @click.stop="aaac">
         <div class="game-item-con" @click.stop="aaac">
@@ -147,14 +150,14 @@
         isJueSai: false,
         eightList: [],
         marks: {
-          60: '60',
+          80: '80',
           // 65: '65',
           // 70: '70',
           // 75: '75',
           // 80: '80',
-          // 85: '85',
-          // 90: '90',
-          // 95: '95',
+          85: '85',
+          90: '90',
+          95: '95',
           100: '100',
         }
       }
@@ -185,7 +188,6 @@
         this.score4 = (avg * 5).toFixed(2) * 1;
         this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
 
-
         // this.score1 = 0;
         // this.score2 = 0;
         // this.score3 = 0;
@@ -193,6 +195,25 @@
         // this.score5 = 0;
         this.currentSport = sport;
         this.scoreAll = sport.judgeScore;
+      },
+      async clearScoreHandel(){
+        if (this.currentSport.id) {
+          await saveScore({"judgeId": this.currentJudge.id, "score": null, "sportId": this.currentSport.id}).then(res => {
+            this.score1 = 0;
+            this.score2 = 0;
+            this.score3 = 0;
+            this.score4 = 0;
+            this.score5 = 0;
+            this.scoreAll = 0;
+            this.currentSport.judgeScore = null;
+            this.$notify({
+              title: '成功',
+              message: '清除成功',
+              type: 'success',
+              offset: 300
+            });
+          })
+        }
       },
       async saveScoreHandel() {
         if (this.currentSport.id) {
@@ -202,7 +223,7 @@
         }
       },
       scoreChangeALL(v) {
-        if(v === 60){
+        if(v === 80){
           return;
         }
         this.currentSport.judgeScore = this.scoreAll;
@@ -215,7 +236,7 @@
         // this.saveScoreHandel()
       },
       scoreChange(v, e) {
-        if(v === 60){
+        if(v === 80){
           return;
         }
         console.log(e)
@@ -299,6 +320,8 @@
                   id: item["id"]
                 });
               });
+              scheduleItemList = scheduleItemList.sort((a, b) => a.area > b.area ? 1 : -1);
+              console.log(scheduleItemList)
               schedulePlaceList.push({placeOrder: place["placeOrder"], scheduleItemList: scheduleItemList});
             })
             this.gameItemList = schedulePlaceList;
@@ -446,11 +469,11 @@
               }
 
               .sport-index {
-                width: 20pt;
+                width: 24pt;
                 height: 20pt;
                 min-width: 20pt;
                 min-height: 20pt;
-                line-height: 20pt;
+                line-height: 22pt;
                 border-radius: 10pt;
                 text-align: center;
                 background: #E6A23C;
@@ -603,12 +626,21 @@
           .save-btn {
             height: 32pt;
             text-align: center;
-            line-height: 32pt;
+            line-height: 36pt;
             padding: 0 12pt;
             background: #1572E5;
             /*padding: 8pt 16pt;*/
             color: #fff;
             border-radius: 16pt;
+            &.danger{
+              background: #ff4949;
+              height: 24pt;
+              line-height: 28pt;
+              font-size: 10pt;
+              text-align: center;
+
+              margin-bottom: 8pt;
+            }
           }
         }
       }

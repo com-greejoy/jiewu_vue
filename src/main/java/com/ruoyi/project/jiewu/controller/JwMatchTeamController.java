@@ -1,5 +1,7 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -9,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.file.PdfGenerator;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.service.*;
 import org.checkerframework.checker.units.qual.A;
@@ -21,7 +24,10 @@ import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.framework.web.page.TableDataInfo;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 @RestController
 @RequestMapping("/jiewu/JwMatchTeam")
 public class JwMatchTeamController extends BaseController {
@@ -40,6 +46,9 @@ public class JwMatchTeamController extends BaseController {
 
     @Autowired
     private JwTeamService jwTeamService;
+
+    @Autowired
+    private JwMatchService jwMatchService;
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwMatchTeam:list')")
     @GetMapping("/list")
@@ -189,7 +198,34 @@ public class JwMatchTeamController extends BaseController {
     @PostMapping("/getTeamScheduleInfoList")
     @ResponseBody
     public AjaxResult getTeamScheduleInfoList(Long matchId, Long teamId) {
-        return AjaxResult.success(jwSignRecordService.getTeamScheduleInfoList(matchId, teamId));
+        List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
+
+        return AjaxResult.success(jwSignRecordList);
+    }
+
+    // 获取代表队赛程 下载
+    @PostMapping("/getTeamScheduleInfoListDownload")
+    @ResponseBody
+    public ResponseEntity<byte[]> getTeamScheduleInfoListDownload(Long matchId, Long teamId) {
+        List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
+        try {
+            // 调用服务生成Word文档并返回字节数组
+            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList,  jwMatchService.selectJwMatchById(matchId).getMatchName());
+
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "schedule.docx");
+
+            // 返回带有字节数据和响应头的ResponseEntity
+            return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
+
+        } catch (IOException e) {
+            // 处理异常情况
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwMatchTeam:query')")

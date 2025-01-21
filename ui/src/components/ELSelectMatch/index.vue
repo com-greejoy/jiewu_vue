@@ -20,7 +20,7 @@
     props: {
       matchId: {
         type: Number,
-        default: null,
+        default: 14,
       },
       width:{
         type: Number,

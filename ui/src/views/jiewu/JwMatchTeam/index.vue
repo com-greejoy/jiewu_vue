@@ -28,39 +28,39 @@
 
     <el-row :gutter="10" class="mb8">
       <!--<el-col :span="1.5">-->
-        <!--<el-button-->
-          <!--type="primary"-->
-          <!--plain-->
-          <!--icon="el-icon-plus"-->
-          <!--size="mini"-->
-          <!--@click="handleAdd"-->
-          <!--v-hasPermi="['jiewu:JwMatchTeam:add']"-->
-        <!--&gt;新增-->
-        <!--</el-button>-->
+      <!--<el-button-->
+      <!--type="primary"-->
+      <!--plain-->
+      <!--icon="el-icon-plus"-->
+      <!--size="mini"-->
+      <!--@click="handleAdd"-->
+      <!--v-hasPermi="['jiewu:JwMatchTeam:add']"-->
+      <!--&gt;新增-->
+      <!--</el-button>-->
       <!--</el-col>-->
       <!--<el-col :span="1.5">-->
-        <!--<el-button-->
-          <!--type="success"-->
-          <!--plain-->
-          <!--icon="el-icon-edit"-->
-          <!--size="mini"-->
-          <!--:disabled="single"-->
-          <!--@click="handleUpdate"-->
-          <!--v-hasPermi="['jiewu:JwMatchTeam:edit']"-->
-        <!--&gt;修改-->
-        <!--</el-button>-->
+      <!--<el-button-->
+      <!--type="success"-->
+      <!--plain-->
+      <!--icon="el-icon-edit"-->
+      <!--size="mini"-->
+      <!--:disabled="single"-->
+      <!--@click="handleUpdate"-->
+      <!--v-hasPermi="['jiewu:JwMatchTeam:edit']"-->
+      <!--&gt;修改-->
+      <!--</el-button>-->
       <!--</el-col>-->
       <!--<el-col :span="1.5">-->
-        <!--<el-button-->
-          <!--type="danger"-->
-          <!--plain-->
-          <!--icon="el-icon-delete"-->
-          <!--size="mini"-->
-          <!--:disabled="multiple"-->
-          <!--@click="handleDelete"-->
-          <!--v-hasPermi="['jiewu:JwMatchTeam:remove']"-->
-        <!--&gt;删除-->
-        <!--</el-button>-->
+      <!--<el-button-->
+      <!--type="danger"-->
+      <!--plain-->
+      <!--icon="el-icon-delete"-->
+      <!--size="mini"-->
+      <!--:disabled="multiple"-->
+      <!--@click="handleDelete"-->
+      <!--v-hasPermi="['jiewu:JwMatchTeam:remove']"-->
+      <!--&gt;删除-->
+      <!--</el-button>-->
       <!--</el-col>-->
       <el-col :span="1.5">
         <el-button
@@ -95,7 +95,17 @@
         >全部赛程
         </el-button>
       </el-col>
-
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-download"
+          size="mini"
+          @click="handleDownLoadAllGrade"
+          v-hasPermi="['jiewu:JwMatchTeam:export']"
+        >全部成绩
+        </el-button>
+      </el-col>
 
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getTeamList"></right-toolbar>
     </el-row>
@@ -320,7 +330,7 @@
         <el-button type="primary" plain size="mini" @click="handlePrint('printFeeConT')">打印</el-button>
       </div>
       <div class="fee-items" id="printFeeConT">
-        <div class="match-name">2024乐山市中小学生运动会体育舞蹈比赛 街舞项目</div>
+        <div class="match-name">体育六艺系列活动（川渝） 街舞大赛</div>
         <div class="title-name">代表队赛程表</div>
         <div class="team-name">代表队：{{currentTeam.indexOrder}} {{currentTeam.teamName}}</div>
         <div class="fee-item">
@@ -370,11 +380,12 @@
     <el-dialog title="打印全部赛程表" :visible.sync="downLoadAllScheduleInfo" width="750px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="primary" plain size="mini" @click="handlePrint('printFeeConTA')">打印</el-button>
+        <el-button type="primary" plain size="mini" @click="downloadWord()">下载word</el-button>
       </div>
-      <div id="printFeeConTA">
+      <div id="printFeeConTA" ref="contentToExport">
         <div class="ssh" v-for="(itemmm, index) in allscheduleInfoList">
           <div class="fee-items">
-            <div class="match-name">2024乐山市中小学生运动会体育舞蹈比赛 街舞项目</div>
+            <div class="match-name">体育六艺系列活动（川渝） 街舞大赛</div>
             <div class="title-name">代表队赛程表</div>
             <div class="team-name">代表队：{{getTeamIndexName(itemmm)}}</div>
             <div class="fee-item">
@@ -419,7 +430,6 @@
       </div>
     </el-dialog>
 
-
     <el-dialog title="代表队成绩" :visible.sync="showDownloadGrade" width="740px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="primary" plain size="mini" @click="handlePrint('printTeamGrade')">打印</el-button>
@@ -437,6 +447,7 @@
           <div class="index-v  back-num">{{item.backNumber}}</div>
           <div class="index-v  sport-name">{{item.jwSignRecordSportList.map(itemm => itemm.playerName).join(" ")}}</div>
           <div class="index-v  grade">{{item.rankOrderDes}}</div>
+          <!--<div class="index-v  grade">{{ item.rankOrder}}</div>-->
           <div class="index-v  game-item">{{ item.jwGameItem.code+":"+item.jwGameItem.name }}</div>
         </div>
         <div class="sub-grade t">成绩统计</div>
@@ -460,6 +471,54 @@
 
     </el-dialog>
 
+
+    <el-dialog title="全部代表队成绩" :visible.sync="showDownloadGradeAll" width="740px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="primary" plain size="mini" @click="handlePrint('printTeamGradeAll')">打印</el-button>
+      </div>
+      <div class="grade-items" v-loading="loadGradeing" id="printTeamGradeAll" v-if="showDownloadGradeAll">
+        <div class="ssh" v-for="(itemmm, index) in allgradeAwardsItemList" >
+          <div class="team-name" v-if="itemmm && itemmm[0]">{{itemmm[0].teamName}}</div>
+          <div class="sub-grade">成绩单</div>
+          <div class="grade-item">
+            <div class="index-v h back-num">背号</div>
+            <div class="index-v h sport-name">选手</div>
+            <div class="index-v h grade">成绩</div>
+            <div class="index-v h game-item">项目</div>
+          </div>
+          <div class="grade-item" v-if="itemmm && itemmm[0]" v-for="(item, key) in itemmm">
+            <div class="index-v  back-num">{{item.backNumber}}</div>
+            <div class="index-v  sport-name">{{item.jwSignRecordSportList.map(itemm => itemm.playerName).join(" ")}}</div>
+            <div class="index-v  grade">
+              <span v-if="item.rankOrder == 1">[冠军]</span>
+              <span v-if="item.rankOrder == 2">[亚军]</span>
+              <span v-if="item.rankOrder == 3">[季军]</span>
+              {{item.rankOrderDes}}</div>
+            <!--<div class="index-v  grade">{{ item.rankOrder}}</div>-->
+            <div class="index-v  game-item">{{ item.jwGameItem.code+":"+item.jwGameItem.name }}</div>
+          </div>
+        </div>
+
+        <!--<div class="sub-grade t">成绩统计</div>-->
+        <!--<div class="grade-item">-->
+          <!--<div class="index-v h grade-text">奖项</div>-->
+          <!--&lt;!&ndash;<div class="index-v h grade-text">奖项</div>&ndash;&gt;-->
+          <!--<div class="index-v h num">数量</div>-->
+          <!--<div class="index-v h num">证书</div>-->
+          <!--<div class="index-v h num">奖杯</div>-->
+          <!--<div class="index-v h num">奖牌</div>-->
+        <!--</div>-->
+        <!--<div class="grade-item" v-for="(item, key) in gradeAwardsItemList">-->
+          <!--<div class="index-v grade-text">{{item.awardName}}</div>-->
+          <!--&lt;!&ndash;<div class="index-v grade-text">{{item.rankText}}</div>&ndash;&gt;-->
+          <!--<div class="index-v num">{{item.countNum}}</div>-->
+          <!--<div class="index-v num">{{item.zhengShu}}</div>-->
+          <!--<div class="index-v num">{{item.jiangBei}}</div>-->
+          <!--<div class="index-v num">{{item.jiangPai}}</div>-->
+        <!--</div>-->
+      </div>
+
+    </el-dialog>
   </div>
 </template>
 
@@ -472,11 +531,19 @@
   import 'core-js/actual/array/group';
   import {listMatchJwSport} from "@/api/jiewu/JwSport";
 
+  import {jsPDF} from 'jspdf';
+  import 'jspdf-autotable';
+  import font from '@/assets/font/SimHei.ttf'; // 引入字体文件
+
+  import "../../../utils/simhei-normal"
+
   export default {
     name: "JwMatchTeam",
     dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode', 'jw_area'],
     data() {
       return {
+        allgradeAwardsItemList:[],
+        showDownloadGradeAll: false,
         loadGradeing: false,
         showDownloadGrade: false,
         gradeAwardsItemList: [],
@@ -535,12 +602,30 @@
       this.getTeamList();
     },
     methods: {
+      downloadWord: function () {
+        let i = 0;
+
+       let ss = setInterval(() => {
+          let item = this.JwTeamList[i];
+          if(item){
+            this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload',
+              {matchId: this.queryParams.matchId, teamId: item.id},
+              `${item.indexOrder}_${item.teamName}_赛程明细.docx`);
+          }
+
+          i++;
+          if(i==this.JwTeamList.length){
+            clearInterval(ss)
+          }
+        }, 2000)
+
+      },
       getTeamIndexName(itemss) {
         for (let key in itemss) {
-          if(itemss[key] && itemss[key][0]){
+          if (itemss[key] && itemss[key][0]) {
             if (this.JwTeamList && this.JwTeamList.find((item) => item.teamName == itemss[key][0].teamName)) {
               let team = this.JwTeamList.find((item) => item.teamName == itemss[key][0].teamName);
-              return team.indexOrder +"."+ team.teamName;
+              return team.indexOrder + "." + team.teamName;
             }
           }
         }
@@ -557,6 +642,34 @@
           this.gradeSignRecordList = res.data[0].jwSignRecordList || [];
           this.loadGradeing = false;
         })
+      },
+      // 全部成绩
+      handleDownLoadAllGrade(){
+        let allgradeAwardsItemList = [];
+        let i = 0;
+        let ss = setInterval(() => {
+          let item = this.JwTeamList[i];
+          if(item){
+            listTeamGradeDes({matchId: this.queryParams.matchId, teamId: item.id}).then(res => {
+              allgradeAwardsItemList.push((res.data[0].jwSignRecordList || []))
+              this.allgradeAwardsItemList = allgradeAwardsItemList;
+              this.$forceUpdate()
+            })
+          }
+
+          i++;
+          if(i==this.JwTeamList.length){
+            clearInterval(ss)
+          }
+        }, 2000)
+
+        // this.JwTeamList.forEach(item => {
+        //   listTeamGradeDes({matchId: this.queryParams.matchId, teamId: item.id}).then(res => {
+        //     allgradeAwardsItemList.push((res.data[0].jwSignRecordList || []))
+        //   })
+        // });
+        this.showDownloadGradeAll = true;
+        // this.allgradeAwardsItemList = allgradeAwardsItemList;
       },
       getSummaries(param) {
         const {columns, data} = param;
@@ -635,8 +748,6 @@
             allscheduleInfoList.push(scheduleInfoList.group((b) => b.itemName));
           })
           this.scheduleLoading = false;
-
-
         })
         this.downLoadAllScheduleInfo = true;
         this.allscheduleInfoList = allscheduleInfoList;
@@ -886,9 +997,10 @@
   }
 
   .ssh {
-    page-break-inside: avoid;
-    page-break-before: always;
-    page-break-after: always;
+    margin-bottom: 56px;
+    /*page-break-inside: avoid;*/
+    /*page-break-before: always;*/
+    /*page-break-after: always;*/
   }
 
   .fee-items {

@@ -81,6 +81,15 @@ public class JwGameItem extends BaseEntity {
 
     private Long signCount;
 
+    private String judgeId;
+
+    public String getJudgeId() {
+        return judgeId;
+    }
+
+    public void setJudgeId(String judgeId) {
+        this.judgeId = judgeId;
+    }
 
     public Long getShowMinYear() {
         return showMinYear;

@@ -43,9 +43,9 @@ public class PdfUtils {
 	private JwGameItemService jwGameItemService;
 
 	private static String GAMENAME = "\n“全域天府 舞遍四川”体育舞蹈比赛暨\n四川省第三十一届体育舞蹈（国标舞）锦标赛";
-	private static String tempFile = "E:/jz/项目/jieWu/2024乐山小学生/赛程/模板.pdf";
+//	private static String tempFile = "E:/jz/项目/jieWu/2024街舞重庆/赛程/模板.pdf";
 
-	public static PdfReader getStampedReader(Map<String, String> map) throws Exception {
+	public static PdfReader getStampedReader(Map<String, String> map, String tempFile) throws Exception {
         // 读取pdf模板
 		PdfReader reader = new PdfReader(tempFile);
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -112,49 +112,59 @@ public class PdfUtils {
 
 				if(jwSignRecords != null && jwSignRecords.size() > 0){
 					for(String backNumber : jwSignRecords){
-						String userNameS = "";
-						String gameItemName = "";
-						String indexOrder = "";
-						// 获取 背号 的全部赛程
-						List<JwSignRecord> backList = jwSignRecordService.selectScheduleByBackNum(matchId, backNumber);
-						if(backList != null && backList.size() > 0){
-							for(JwSignRecord jwSignRecord : backList){
-								List<JwSignRecordSport> jwSignRecordSportList = jwSignRecord.getJwSignRecordSportList();
-								userNameS = (jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")));
-								gameItemName += DateUtils.parseDateToStr("HH:mm", jwSignRecord.getPlaceTime()) +"  " + jwSignRecord.getItemName() +"\r\n";
-								indexOrder += (jwSignRecord.getItemName().split(":")[0]) + " : " + jwSignRecord.getIndexOrder() +"\r\n";
+//						if(Long.valueOf(backNumber) >= 417 ){
+							String userNameS = "";
+							String gameItemName = "";
+							String indexOrder = "";
+							// 获取 背号 的全部赛程
+							List<JwSignRecord> backList = jwSignRecordService.selectScheduleByBackNum(matchId, backNumber);
+							if(backList != null && backList.size() > 0){
+								for(JwSignRecord jwSignRecord : backList){
+									List<JwSignRecordSport> jwSignRecordSportList = jwSignRecord.getJwSignRecordSportList();
+									userNameS = (jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")));
+									gameItemName += DateUtils.parseDateToStr("HH:mm", jwSignRecord.getPlaceTime()) +"  " + jwSignRecord.getItemName() +"\r\n";
+									indexOrder += (jwSignRecord.getPlaceOrder()) + " : " + jwSignRecord.getIndexOrder() +"\r\n";
+								}
+								if(backList.size() > 1){
+									System.out.println(userNameS);
+								}
 							}
-						}
-						Map<String, String> map = new HashMap<String, String>();
-						map.put("gameName", GAMENAME);
-						map.put("backNumber", backNumber);
-						map.put("department", jwTeam.getIndexOrder() +". "+ jwTeam.getTeamName());
-						map.put("name", userNameS);
-						map.put("game1", gameItemName);
-						map.put("indexOrder", String.valueOf(indexOrder));
+							Map<String, String> map = new HashMap<String, String>();
+							map.put("gameName", GAMENAME);
+							map.put("backNumber", backNumber);
+							map.put("department", jwTeam.getIndexOrder() +". "+ jwTeam.getTeamName());
+							map.put("name", userNameS);
+							map.put("game1", gameItemName);
+							map.put("indexOrder", String.valueOf(indexOrder));
+							if(gameItemName.contains("齐舞")){
+								list.add(getStampedReader(map, "E:\\jz\\项目\\jieWu\\2024 米奇奥 温江\\赛程/模板.pdf"));
+							}else{
+								list.add(getStampedReader(map, "E:\\jz\\项目\\jieWu\\2024 米奇奥 温江\\赛程/模板单人.pdf"));
+							}
 
-						list.add(getStampedReader(map));
 
-						if(lastBackNum < Long.valueOf(backNumber)){
-							lastBackNum = Long.valueOf(backNumber);
-						}
+							if(lastBackNum < Long.valueOf(backNumber)){
+								lastBackNum = Long.valueOf(backNumber);
+							}
+//						}
+
 					}
 				}
 			}
 
-			// 再多增加 20个背号
-			for(int i = 1; i<= 5; i++){
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("gameName", GAMENAME);
-				map.put("backNumber", new DecimalFormat("000").format(lastBackNum + i));
-				map.put("department", "");
-				map.put("name", "");
-				map.put("game1", "");
-				map.put("indexOrder", "");
-
-
-				list.add(getStampedReader(map));
-			}
+//			// 再多增加 20个背号
+//			for(int i = 1; i<= 8; i++){
+//				Map<String, String> map = new HashMap<String, String>();
+//				map.put("gameName", GAMENAME);
+//				map.put("backNumber", new DecimalFormat("000").format(lastBackNum + i));
+//				map.put("department", "");
+//				map.put("name", "");
+//				map.put("game1", "");
+//				map.put("indexOrder", "");
+//
+//
+//				list.add(getStampedReader(map, "E:/jz/项目/jieWu/2024街舞重庆/赛程/模板单人.pdf"));
+//			}
 		}
 		return list;
 	}
@@ -190,7 +200,7 @@ public class PdfUtils {
 	public void genPdf(Long matchId)  {
 		try {
 			long t1 = System.currentTimeMillis();
-			OutputStream out = new FileOutputStream("E:/jz/项目/jieWu/2024乐山小学生/赛程/全部.pdf");
+			OutputStream out = new FileOutputStream("E:\\jz\\项目\\jieWu\\2024 米奇奥 温江\\赛程/全部背号.pdf");
 			generatePdf(out, matchId);
 			System.out.println("耗时："+(System.currentTimeMillis()-t1)/1000+"秒");
 		} catch (Exception e) {

@@ -159,6 +159,9 @@
         <el-button type="primary" plain size="mini" @click="handlePrint('printScheduleDetail')">打印</el-button>
 
         <el-button type="success" plain size="mini" @click="saveAsImage()">图片</el-button>
+        <el-button type="warning" plain size="mini" @click="getTeamScheduleInfoListDownload()">下载</el-button>
+
+
       </div>
       <div class="fee-items" id="printScheduleDetail" ref="capture" v-if="downLoadScheduleInfo" v-loading="scheduleLoading">
         <div class="match-name" v-html="JwScheduleInfoList[0].matchName"></div>
@@ -189,6 +192,7 @@
               <div class="index-v index">{{itemm.indexOrder}}</div>
               <div class="index-v back">{{itemm.backNumber }}</div>
               <div class="index-v sport s">
+                <div style="width: 100%; text-align: center;margin-bottom: 2pt;" v-if="itemm.worksName">{{itemm.worksName}}</div>
                 <span v-for="sport in itemm.jwSignRecordSportList">
                   <span v-if="itemm.sportLimit != 1" class="m-sport">{{sport.playerName}}</span>
                   <span v-else>{{sport.playerName}}</span>
@@ -220,7 +224,7 @@
               {{parseTime(item.placeTime, '{h}:{i}')}} 第{{item.placeOrder}}场
             </div>
             <div class="index-v game-item sd">
-              <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList">
+              <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList.sort((a, b)=> a.area - b.area)">
                 <div class="index-v name">{{itemm.itemName}} ({{itemm.sportCount}} 人)</div>
                 <div class="index-v area">{{getAreaLabel(itemm)}}</div>
               </div>
@@ -230,29 +234,36 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="检录举牌" :visible.sync="showJuPai" width="1400px" center :append-to-body="false">
+    <el-dialog title="检录举牌" :visible.sync="showJuPai" width="950px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="primary" plain size="mini" @click="handlePrintC('printJuPai')">打印</el-button>
       </div>
       <div class="jupai-items" id="printJuPai" v-if="showJuPai" v-loading="scheduleLoading">
-        <div class="jupai-item" v-for="(jupai, key) in juPaiList">
-          <div class="item-game" v-for="(item, key2) in jupai">
-            <div class="item-time">第{{key}}场</div>
+        <div class="jupai-item" v-for="(item, key2) in juPaiList">
+          <!--<div class="item-game" v-for="(item, key2) in jupai">-->
+            <div class="item-time">第{{item[0].placeOrder}}场</div>
             <div class="item-name">
-              <div class="name-t">{{item[0].itemName}}</div>
-              <div class="item-area">{{getAreaLabel2(key2)}}</div>
+              <div class="name-t">{{key2}}</div>
+              <!--<div class="item-area">{{getAreaLabel2(key2)}}</div>-->
             </div>
             <div class="item-sports">
-              <div class="item-sport" v-for="itemm in item">
+              <div class="item-sport" v-for="itemm in item.filter(ss=>ss.indexOrder <= 64)">
                 <div class="sport-index">{{itemm.indexOrder}}</div>
                 <div class="sport-num">{{itemm.backNumber}}</div>
+                <div v-if="itemm.indexOrder == 64"></div>
               </div>
             </div>
+          <div class="item-sports bra" v-if="item.length > 64">
+            <div class="item-sport" v-for="itemm in item.filter(ss=>ss.indexOrder > 64)">
+              <div class="sport-index">{{itemm.indexOrder}}</div>
+              <div class="sport-num">{{itemm.backNumber}}</div>
+              <div v-if="itemm.indexOrder == 64"></div>
+            </div>
           </div>
+          <!--</div>-->
         </div>
       </div>
     </el-dialog>
-
   </div>
 </template>
 
@@ -330,6 +341,9 @@
       this.getList();
     },
     methods: {
+      getTeamScheduleInfoListDownload(){
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null}, `${this.JwScheduleInfoList[0].matchName} 赛程表明细.docx`)
+      },
       async saveAsImage() {
         try {
           const canvas = await html2canvas(this.$refs.capture, {scale: 4});
@@ -380,10 +394,11 @@
           getTeamScheduleInfoList({matchId: this.queryParams.matchId, teamId: null}).then(res => {
             this.showType = type;
             let scheduleInfoList = res.data || [];
-            this.juPaiList = scheduleInfoList.group((b) => b.placeOrder);
-            for(let key in this.juPaiList){
-              this.juPaiList[key] = this.juPaiList[key].group((b) => b.area);
-            }
+            // this.juPaiList = scheduleInfoList.group((b) => b.placeOrder);
+            this.juPaiList = scheduleInfoList;
+            // for(let key in this.juPaiList){
+              this.juPaiList = this.juPaiList.group((b) => `${b.itemName }  【${that.getAreaLabel2(b.area)} : ${b.placeTime.split(" ")[1]}】`);
+            // }
             console.log(this.juPaiList)
             this.scheduleLoading = false;
             this.showJuPai = true;
@@ -503,7 +518,10 @@
         listJwSchedulePlaceWithScheduleItem({matchId: matchId, scheduleInfoId: scheduleInfoId}).then(res => {
           let index = that.JwScheduleInfoList.findIndex(item => item.id === scheduleInfoId);
           that.JwScheduleInfoList[index].schedulePlaceList = res.data || [];
-          that.componentKey = new Date()
+          console.log( that.JwScheduleInfoList[index].schedulePlaceList)
+          // that.JwScheduleInfoList[index].schedulePlaceList.jwScheduleItemList.sort((a, b) => a.area - b.area)
+          // that.componentKey = new Date()
+          that.$forceUpdate()
         })
       },
       getList() {
@@ -614,7 +632,13 @@
 
 <style lang="scss" scoped>
 
+  .bra{
 
+    page-break-before: always;
+    page-break-after:always;
+    page-break-inside: avoid;
+    /*margin-bottom: 500px;*/
+  }
   .match-name {
     text-align: center;
     font-size: 24px;
@@ -627,17 +651,21 @@
     flex-direction: column;
     page-break-before: always;
     page-break-after:always;
+    page-break-inside: avoid;
+
+    /*height: 1700px;*/
     .item-time{
       text-align: center;
       font-size: 36px;
       font-weight: 600;
     }
-    .item-game{
-      page-break-before: always;
-      page-break-after:always;
+    /*.item-game{*/
+      /*page-break-before: always;*/
+      /*page-break-after:always;*/
+      /*page-break-inside: avoid;*/
       display: flex;
       flex-direction: column;
-      height: 85vh;
+      min-height: 85vh;
 
       .item-name{
         font-size: 36px;
@@ -667,20 +695,21 @@
           font-size: 48px;
           margin-right: 8px;
           margin-bottom: 8px;
-          padding: 8px 16px;
+          padding: 8px 8px;
           border: 1px solid #000000;
           border-radius: 4px;
-          width: 120px;
+          width: 104px;
           .sport-index{
             text-align: center;
             border-bottom: 3px solid #888;
             border-radius: 50%;
-            width: 56px;
+            min-width: 56px;
             height: 56px;
+            white-space: nowrap;
           }
         }
       }
-    }
+    /*}*/
 
   }
   .title-name {

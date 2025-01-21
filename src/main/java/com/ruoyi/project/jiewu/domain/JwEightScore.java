@@ -27,6 +27,16 @@ public class JwEightScore extends BaseEntity{
 
     private Long lun;
 
+    private String subScore;
+
+    public String getSubScore() {
+        return subScore;
+    }
+
+    public void setSubScore(String subScore) {
+        this.subScore = subScore;
+    }
+
     public Long getLun() {
         return lun;
     }

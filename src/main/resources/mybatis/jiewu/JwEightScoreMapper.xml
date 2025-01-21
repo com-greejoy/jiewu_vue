@@ -15,10 +15,11 @@
         <result property="equally" column="equally"/>
         <result property="lun"    column="lun"    />
         <result property="judgeName"    column="judge_name"    />
+        <result property="subScore"    column="subScore"    />
     </resultMap>
 
     <sql id="selectJwEightScoreVo">
-        select id, judge_id, player_id, lun, player_pk_group, create_time, player_group, judge_num, equally from jw_eight_score
+        select id, judge_id, player_id, lun, subScore, player_pk_group, create_time, player_group, judge_num, equally from jw_eight_score
     </sql>
 
     <select id="selectJwEightScoreList" parameterType="JwEightScore" resultMap="JwEightScoreResult">
@@ -40,7 +41,7 @@
     </select>
 
     <select id="selectJwEightScoreListByPkGroup" resultMap="JwEightScoreResult">
-        select hs.id, hs.judge_id, hs.player_id, hs.lun, hs.player_pk_group,
+        select hs.id, hs.judge_id, hs.player_id, hs.lun, hs.player_pk_group, hs.subScore,
          hs.create_time, hs.player_group, hs.judge_num, hs.equally, jj.judge_name from jw_eight_score  hs
         left join jw_judge jj on jj.id = hs.judge_id
         <where>
@@ -66,6 +67,7 @@
             <if test="judgeNum != null">judge_num,</if>
             <if test="equally != null">equally,</if>
             <if test="lun != null">lun,</if>
+            <if test="subScore != null">subScore,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="judgeId != null">#{judgeId},</if>
@@ -76,6 +78,7 @@
             <if test="judgeNum != null">#{judgeNum},</if>
             <if test="equally != null">#{equally},</if>
             <if test="lun != null">#{lun},</if>
+            <if test="subScore != null">#{subScore},</if>
         </trim>
     </insert>
 
@@ -90,6 +93,7 @@
             <if test="judgeNum != null">judge_num = #{judgeNum},</if>
             <if test="equally != null">equally = #{equally},</if>
             <if test="lun != null">lun = #{lun},</if>
+            <if test="subScore != null">subScore = #{subScore},</if>
         </trim>
         where id = #{id}
     </update>

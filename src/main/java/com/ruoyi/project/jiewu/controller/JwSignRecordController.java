@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.exception.GlobalException;
 import com.ruoyi.common.utils.IDCardUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.jiewu.domain.*;
@@ -60,6 +61,9 @@ public class JwSignRecordController extends BaseController {
         }
         // 以组别的形式显示
         List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordList(jwSignRecord);
+        if(list != null && list.size() > 0){
+            list.forEach(jwSignRecord1 -> jwSignRecord1.setJwSignRecordSportList(jwSignRecordSportService.selectJwSignRecordSportListById(jwSignRecord1.getId())));
+        }
         return getDataTable(list);
     }
 
@@ -108,7 +112,7 @@ public class JwSignRecordController extends BaseController {
     @PostMapping
     public AjaxResult add(@RequestBody JwSignRecord jwSignRecord) {
         JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
-        return jwSignRecordService.saveSign(jwGameItem, jwSignRecord.getSportIds(), jwSignRecord.getTeamId(), null);
+        return jwSignRecordService.saveSign(jwGameItem, jwSignRecord.getSportIds(), jwSignRecord.getTeamId(), null, null);
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:add')")
@@ -143,6 +147,7 @@ public class JwSignRecordController extends BaseController {
         return toAjax(jwSignRecordService.deleteJwSignRecordById(id));
     }
 
+    // 报名导入
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file, Long matchId) throws Exception {
         if (matchId != null && matchId != 0) {
@@ -157,6 +162,7 @@ public class JwSignRecordController extends BaseController {
                 List<Long> sportIds = new ArrayList<>();
                 String[] playerNames = jwSportImport.getPlayerName().replaceAll(" " , "").split("&");
                 for (String playerName : playerNames) {
+                    System.out.println(playerName +"----"+jwSportImport.getPlayerTeam());
                     JwSport jwSport = jwSportService.selectJwSportByName(playerName, null, jwTeam.getCreateUserId());
                     if (jwSport != null && StringUtils.isNotEmpty(jwSport.getPlayerName())) {
                         sportIds.add(jwSport.getId());
@@ -169,7 +175,11 @@ public class JwSignRecordController extends BaseController {
                         sportIds.add(jwSport.getId());
                     }
                 }
-                jwSignRecordService.saveSign(jwGameItem, sportIds.toArray(new Long[0]), jwTeam.getId(), null);
+                if(jwGameItem == null){
+                    throw new GlobalException(jwSportImport.getPlayerGroup());
+
+                }
+                jwSignRecordService.saveSign(jwGameItem, sportIds.toArray(new Long[0]), jwTeam.getId(), null, jwSportImport.getBackNum());
             }
         }
         return success();

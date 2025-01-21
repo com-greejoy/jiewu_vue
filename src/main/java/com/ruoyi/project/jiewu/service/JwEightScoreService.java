@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.jiewu.domain.JwScheduleItem;
@@ -46,7 +47,7 @@ public class JwEightScoreService {
     }
 
     @Transactional
-    public synchronized int saveEightScore(String judgeId, String currentPkGroup, Long jinJiId, Long lun) {
+    public synchronized int saveEightScore(String judgeId, String currentPkGroup, Long jinJiId, Long lun, String subScore) {
         if(!StringUtils.isLongNotNull(lun)){
             lun = 1l;
         }
@@ -64,6 +65,7 @@ public class JwEightScoreService {
         jwScore.setPlayerGroup(gameItemId);
         jwScore.setCreateTime(DateUtils.getNowDate());
         jwScore.setLun(lun);
+        jwScore.setSubScore(subScore);
 //        jwScore.setJudgeNum(judgeNum);
 
         List<JwEightScore> jwEightScoreList;
@@ -118,6 +120,11 @@ public class JwEightScoreService {
 //                completeEightOrder(currentPkGroup, gameItemId);
 //            }
 //        }
+
+        JSONObject msg = new JSONObject();
+        msg.put("type", "refreshJudgeScoreList");
+
+        WebsocketServe.sendUserListTypeMessage("juesai-", msg.toJSONString());
         return row;
     }
 

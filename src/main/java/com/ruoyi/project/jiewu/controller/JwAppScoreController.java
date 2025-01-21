@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,6 +147,7 @@ public class JwAppScoreController extends BaseController {
         msg.put("type", "startPk");
         msg.put("gameItemId", gameItemId);
         msg.put("currentPkGroup", currentPkGroup);
+        msg.put("currentPosition", currentPosition);
 
         String area  = JSONObject.parse(currentPkGroup).getString("area");
         JwEight query = new JwEight();
@@ -171,24 +173,73 @@ public class JwAppScoreController extends BaseController {
         return AjaxResult.success(1);
     }
 
+    // 显示对阵的裁判打分
+    @PostMapping("/xianshidafen")
+    @ResponseBody
+    public AjaxResult xianshidafen() {
+        JSONObject msg = new JSONObject();
+        msg.put("type", "showScore");
+
+        WebsocketServe.sendUserListTypeMessage("juesai-", msg.toJSONString());
+        return AjaxResult.success(1);
+    }
+
+
     @PostMapping("/getCurrentPk")
     @ResponseBody
-    public AjaxResult getCurrentPk(String area) {
+    public AjaxResult getCurrentPk(String area, Long judgeId) {
         JSONObject msg = redisCache.getCacheObject("currentPk:" + area);
+        JSONObject currentPkGroup = msg.getJSONObject("currentPkGroup");
+        if(currentPkGroup != null){
+            String currentPk = currentPkGroup.getString("currentPk");
+            if(StringUtils.isNotEmpty(currentPk)){
+                JwEightScore query = new JwEightScore();
+                query.setJudgeId(judgeId);
+                query.setPlayerPkGroup(currentPk);
+                query.setPlayerGroup(msg.getLong("gameItemId"));
+                List<JwEightScore> jwEightScoreList = jwEightScoreService.selectJwEightScoreList(query);
+                msg.put("jwEightScoreList", jwEightScoreList);
+            }
+        }
         return AjaxResult.success(msg);
     }
 
     // 保存对阵打分
     @PostMapping("/saveEightScore")
     @ResponseBody
-    public AjaxResult saveEightScore(String judgeId, String currentPkGroup, Long jinJiId , Long lun) {
-        return AjaxResult.success(jwEightScoreService.saveEightScore(judgeId, currentPkGroup, jinJiId, lun));
+    public AjaxResult saveEightScore(String judgeId, String currentPkGroup, Long jinJiId , Long lun, String subScore) {
+        return AjaxResult.success(jwEightScoreService.saveEightScore(judgeId, currentPkGroup, jinJiId, lun, subScore));
     }
 
     // 获取对阵打分记录
     @PostMapping("/getPkScores")
     @ResponseBody
     public AjaxResult getPkScores(String currentPkGroup, Long gameItemId) {
-        return AjaxResult.success(jwEightScoreMapper.selectJwEightScoreListByPkGroup(currentPkGroup, gameItemId));
+//        List<JwJudge> judgeList = new ArrayList<>();
+
+//        JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(gameItemId);
+
+//        if(StringUtils.isNotEmpty(jwGameItem.getJudgeId())){
+////             judgeList = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeId().split(","));
+//        }
+
+        List<JwEightScore> jwEightScoreList = jwEightScoreMapper.selectJwEightScoreListByPkGroup(currentPkGroup, gameItemId);
+//        if(jwEightScoreList != null && jwEightScoreList.size() > 0){
+//            for(JwEightScore  jwEightScore : jwEightScoreList){
+//                judgeList.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
+//            }
+//
+//            if(judgeList.size() > 0){
+//                judgeList.forEach(jwJudge -> {
+//                    JwEightScore jwEightScore = new JwEightScore();
+//                    jwEightScore.setJudgeId(jwJudge.getId());
+//                    jwEightScore.setJudgeName(jwJudge.getJudgeName());
+//                    jwEightScore.setLun(1l);
+//                    jwEightScoreList.add(jwEightScore);
+//                });
+//            }
+//        }
+
+        return AjaxResult.success(jwEightScoreList);
     }
 }

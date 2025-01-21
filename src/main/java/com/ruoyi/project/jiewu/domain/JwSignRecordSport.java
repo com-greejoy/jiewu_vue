@@ -34,6 +34,16 @@ public class JwSignRecordSport extends BaseEntity {
 
     private Long[] sportIds;
 
+    private String showImg;
+
+    public String getShowImg() {
+        return showImg;
+    }
+
+    public void setShowImg(String showImg) {
+        this.showImg = showImg;
+    }
+
     public Long[] getSportIds() {
         return sportIds;
     }

@@ -50,7 +50,8 @@ export function listGameItemGradeDes(data) {
   return request({
     url: '/jiewu/JwHaiScore/listGameItemGradeDes',
     method: 'post',
-    params: data
+    params: data,
+    headers: {repeatSubmit: false}
   })
 }
 
@@ -87,7 +88,8 @@ export function listTeamGradeDes(data) {
   return request({
     url: '/jiewu/JwHaiScore/listTeamGradeDes',
     method: 'post',
-    params: data
+    params: data,
+    headers: {repeatSubmit: false}
   })
 }
 

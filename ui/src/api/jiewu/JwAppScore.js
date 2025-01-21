@@ -18,6 +18,16 @@ export function startPk(data) {
   })
 }
 
+export function xianshidafen(data) {
+  return request({
+    url: '/app/score/api/xianshidafen',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
+
 export function  getScheduleItems(data) {
   return request({
     url: '/app/score/api/getScheduleItems',

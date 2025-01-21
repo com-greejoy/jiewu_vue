@@ -23,7 +23,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
         </where>
     </select>
-    
+
+    <select id="selectJwJudgeByIds" parameterType="String" resultMap="JwJudgeResult">
+        select * from jw_judge
+        where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+
+
+
+
+
     <select id="selectJwJudgeById" parameterType="Long" resultMap="JwJudgeResult">
         <include refid="selectJwJudgeVo"/>
         where id = #{id}

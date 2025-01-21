@@ -29,6 +29,7 @@
         <result property="rankOrder"    column="rank_order"    />
         <result property="teamName"    column="team_name"    />
         <result property="judgeScore"    column="judgeScore"    />
+        <result property="showImg"    column="show_img"    />
     </resultMap>
 
     <resultMap id="JwSignRecordJwSignRecordSportResult" type="JwSignRecord" extends="JwSignRecordResult">
@@ -58,7 +59,7 @@
     </resultMap>
 
     <sql id="selectJwSignRecordVo">
-        select id, back_number, schedule_item_id, index_order, all_score, avg_score, rank_order, match_id, works_music_name, team_id, game_item_id, sport_limit, works_name, works_music, works_video, create_time, update_time from jw_sign_record
+        select id, back_number, schedule_item_id, show_img, index_order, all_score, avg_score, rank_order, match_id, works_music_name, team_id, game_item_id, sport_limit, works_name, works_music, works_video, create_time, update_time from jw_sign_record
     </sql>
 
     <select id="selectJwSignRecordList" parameterType="JwSignRecord" resultMap="JwSignRecordResult">
@@ -207,7 +208,7 @@
 
     <!--根据背号获取赛程-->
     <select id="selectScheduleByBackNum" resultMap="JwSignRecordJwSignRecordSportResult">
-        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit,
+        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.show_img, a.match_id, a.game_item_id, a.sport_limit,
         a.works_name, a.works_music, a.works_music_name, a.works_video,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex,
@@ -226,7 +227,7 @@
 
     <!--获取齐舞的报名记录-->
     <select id="listMatchQiWuSignRecord" resultMap="JwSignRecordWithMusicResult">
-        select a.id, a.team_id, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
+        select a.id, a.team_id, a.schedule_item_id, a.show_img, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
         a.create_time, a.update_time,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex,
@@ -274,6 +275,7 @@
             <if test="allScore != null">all_score,</if>
             <if test="avgScore != null">avg_score,</if>
             <if test="rankOrder != null">rank_order,</if>
+            <if test="showImg != null">show_img,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="teamId != null">#{teamId},</if>
@@ -292,6 +294,7 @@
             <if test="allScore != null">#{allScore},</if>
             <if test="avgScore != null">#{avgScore},</if>
             <if test="rankOrder != null">#{rankOrder},</if>
+            <if test="showImg != null">#{showImg},</if>
         </trim>
     </insert>
 
@@ -314,6 +317,7 @@
             <if test="allScore != null and allScore != ''">all_score = #{allScore},</if>
             <if test="avgScore != null and avgScore != ''">avg_score = #{avgScore},</if>
             <if test="rankOrder != null">rank_order = #{rankOrder},</if>
+            <if test="showImg != null">show_img = #{showImg},</if>
         </trim>
         where id = #{id}
     </update>

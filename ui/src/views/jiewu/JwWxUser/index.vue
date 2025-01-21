@@ -252,7 +252,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1;
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -261,6 +261,44 @@ export default {
       this.form.openId = this.generateRandomString(20)+new Date().getTime();
       this.open = true;
       this.title = "添加微信用户";
+
+
+      // const units = [
+      //   "同心新区幼儿园",
+      //   "崇州市金星幼儿园",
+      //   "肯维诺幼儿园",
+      //   "崇州市实验幼儿园",
+      //   "正东幼儿园乐田园区",
+      //   "蜀南小学",
+      //   "辰居小学",
+      //   "七一实验小学校",
+      //   "城北学校",
+      //   "崇州市隆兴小学",
+      //   "仁里学校",
+      //   "崇州市第二实验小学校",
+      //   "学府小学",
+      //   "崇州市怀远小学校",
+      //   "崇州市观胜镇中心小学",
+      //   "崇州市羊马学校",
+      //   "崇州市明湖小学",
+      //   "崇州市三江小学",
+      //   "崇庆中学实验学校",
+      //   "崇州市怀远百丽中学",
+      //   "实验二小",
+      //   "街子学校",
+      //   "怀远小学校",
+      //   "四川省崇州市蜀城中学"
+      // ];
+      // units.forEach(item=>{
+      //   let formm = {openId: this.generateRandomString(20)+new Date().getTime(), name: item};
+      //
+      //   addJwWxUser(formm).then(response => {
+      //
+      //     this.getList();
+      //   });
+      // })
+
+
     },
     generateRandomString(length) {
       const characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

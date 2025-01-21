@@ -21,7 +21,9 @@
 
     <el-row class="mb8">
       <el-button type="warning" plain size="mini" @click="handleLockScore">锁定打分</el-button>
-      <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem">计算成绩</el-button>
+      <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem('zhijiepingjun')">直接平均分</el-button>
+      <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem('zuigaozuidi')">去最高最低</el-button>
+      <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem('xiuzheng')">修正系数</el-button>
       <el-button type="success" plain size="mini" @click="printHaiScore">海选成绩</el-button>
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
       <el-button type="warning" plain size="mini" v-if="currentGameItem.matchType == 2" @click="haiXuanComplete">海选完成</el-button>
@@ -37,7 +39,7 @@
 
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
       <el-button type="primary" plain size="mini" @click="handlePrintAllZhengshu">全部证书</el-button>
-
+      <el-button type="primary" plain size="mini" @click="handlePrintAllGrage">全部成绩</el-button>
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
       <el-button type="danger" plain size="mini" @click="handleClearScreen">清屏</el-button>
 
@@ -68,9 +70,9 @@
             </div>
             <div class="score-item" v-for="sport in item.items">
               <div class="si index-order">{{sport.indexOrder}}</div>
-              <div class="si back-num">{{sport.backNumber}}</div>
+              <div class="si back-num" :title="sport.teamName">{{sport.backNumber}}</div>
               <div class="si judge-name" v-for="judge in sport.jwHaiScoreList">
-                <input class="score-input" type="number" v-model="judge.score" @change="scoreChange(sport, judge)">
+                <input :class="'score-input' + getScoreClass(judge.score, sport.jwHaiScoreList)" type="number" v-model="judge.score" @change="scoreChange(sport, judge)">
               </div>
               <div class="si all-score">{{sport.allScore || '-'}}</div>
               <div class="si avg-score">{{sport.avgScore || '-'}}</div>
@@ -146,6 +148,43 @@
       </div>
     </el-dialog>
 
+
+    <el-dialog title="全部成绩" :visible.sync="showAllGrade" width="750px" center :append-to-body="false">
+      <div class="btn-row">
+        <el-button type="warning" size="mini" @click="handlePrint('haiScoreAll')">打印</el-button>
+      </div>
+      <div class="print-sport-items" id="haiScoreAll" v-if="showAllGrade">
+        <div class="match-name" v-if="allGrade && allGrade[0]" v-html="allGrade[0].gameItem.matchName"></div>
+        <div style="margin-bottom: 56px" v-for="(itemmm, index) in allGrade">
+
+          <div class="game-item-name">{{itemmm.gameItem.code}}:{{itemmm.gameItem.name}} 成绩</div>
+          <div class="sport-item">
+            <div class="index-v h order">名次</div>
+            <div class="index-v h order-des">奖项</div>
+            <!--<div class="index-v h grade" v-if="itemmm.gameItem.matchType == 1">成绩</div>-->
+            <!--<div class="index-v h grade" v-if="itemmm.gameItem.matchType == 2">决赛成绩</div>-->
+            <!--<div class="index-v h grade" v-if="itemmm.gameItem.matchType == 2">海选成绩</div>-->
+            <div class="index-v h back-num">背号</div>
+            <div class="index-v h sport" :class="{qiwu: itemmm.gameItem.sportLimit != 1}">选手</div>
+            <div class="index-v h team">代表队</div>
+          </div>
+          <div class="sport-item" v-for="item in itemmm.grades">
+            <div class="index-v order">{{item.rankOrder}}</div>
+            <div class="index-v order-des">
+              <span v-if="item.rankOrder == 1">[冠军]</span>
+              <span v-if="item.rankOrder == 2">[亚军]</span>
+              <span v-if="item.rankOrder == 3">[季军]</span>
+              {{item.rankOrderDes}} </div>
+            <!--<div class="index-v h grade" v-if="itemmm.gameItem.matchType == 2">{{item.description}}</div>-->
+            <!--<div class="index-v grade">{{item.avgScore}}</div>-->
+            <div class="index-v back-num">{{item.backNumber}}</div>
+            <div class="index-v sport" :class="{qiwu: itemmm.gameItem.sportLimit != 1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
+            <div class="index-v team">{{item.jwTeam.teamName}}</div>
+          </div>
+        </div>
+
+      </div>
+    </el-dialog>
     <el-dialog title="海选成绩" :visible.sync="showHaiGrade" width="750px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="warning" size="mini" @click="handlePrint('haiScore')">打印</el-button>
@@ -165,7 +204,8 @@
         </div>
         <div class="sport-item" v-for="item in signRecordJinJiGradeList">
           <div class="index-v order">{{item.rankOrder}}</div>
-          <div class="index-v order-des">{{item.rankOrderDes}}</div>
+          <!--<div class="index-v order-des">{{item.rankOrderDes}}</div>-->
+          <div class="index-v order-des"></div>
           <div class="index-v h grade" v-if="currentGameItem.matchType == 2">{{item.description}}</div>
           <div class="index-v grade">{{item.avgScore}}</div>
           <div class="index-v back-num">{{item.backNumber}}</div>
@@ -174,13 +214,14 @@
         </div>
       </div>
     </el-dialog>
+
     <el-dialog title="证书打印" :visible.sync="showZhengShu" width="750px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="warning" size="mini" @click="handlePrint('zhengshu')">打印</el-button>
       </div>
       <div class="print-con-zhengshu" id="zhengshu" v-if="showZhengShu">
         <div class="page-con-box" :style="{height: item.jwSignRecordSportList.length * 1000 + 'px'} " v-for="item in signRecordJinJiGradeList">
-          <div class="page-con" v-for="itemm in item.jwSignRecordSportList" >
+          <div class="page-con" v-for="itemm in item.jwSignRecordSportList">
             <div class="row-item name">
               <div class="item-label">姓名</div>
               <div class="colon">:</div>
@@ -223,6 +264,8 @@
     name: "JwHaiScore",
     data() {
       return {
+        allGrade: [],
+        showAllGrade: false,
         showZhengShu: false,
         showJinJiSport: false,
         showJinJiSportGrade: false,
@@ -279,13 +322,46 @@
       },
     },
     methods: {
-      handleClearScreen(item){
-        sendMusic({ worksMusic: "", matchId: this.queryParams.matchId}).then(res=>{
+      getScoreClass(score, jwHaiScoreList) {
+        if (score && jwHaiScoreList && jwHaiScoreList.length > 1) {
+          const minScore = [...jwHaiScoreList].filter(aa => aa.score).sort((a, b) => a.score * 1 - b.score * 1)[0];
+          const maxScore = [...jwHaiScoreList].filter(aa => aa.score).sort((b, a) => a.score * 1 - b.score * 1)[0];
+
+          if (score - minScore.score === 0) {
+            return ' min';
+          }
+          if (score - maxScore.score === 0) {
+            return ' max';
+          }
+        }
+
+        return '';
+      },
+      handleClearScreen(item) {
+        sendMusic({worksMusic: "", matchId: this.queryParams.matchId}).then(res => {
           this.$modal.msgSuccess("发送成功");
         })
       },
+      // 打印全部成绩
+      handlePrintAllGrage(){
+        let allGrade = [];
+        this.JwGameItemList.forEach(item=>{
+          listGameItemGradeDes({
+
+            matchId: (this.Cookies.get("matchId") * 1) || null,
+            gameItemId: item.id,
+
+          },).then(res => {
+
+            allGrade.push({gameItem: item, grades: ([].concat(res.data || []).filter(item => item.rankOrder).sort((a, b) => a.rankOrder - b.rankOrder))})
+          })
+        })
+        this.allGrade = allGrade;
+        this.showAllGrade = true;
+
+      },
       // 打印全部证书
-      handlePrintAllZhengshu(){
+      handlePrintAllZhengshu() {
         listAllGameItemGradeDes({matchId: this.queryParams.matchId}).then(res => {
           this.signRecordJinJiGradeList = [].concat(res.data || []).filter(item => item.rankOrder);
           this.showZhengShu = true;
@@ -377,11 +453,11 @@
         }
       },
       // 计算成绩
-      handleJiSuanGameItem() {
+      handleJiSuanGameItem(type) {
         let that = this;
         if (that.queryParams.gameItemId) {
           that.$modal.confirm('是否确认重新计算成绩').then(function () {
-            return jiSuanGameItem({gameItemId: that.queryParams.gameItemId});
+            return jiSuanGameItem({gameItemId: that.queryParams.gameItemId, type: type});
           }).then(() => {
             that.getList();
             that.$modal.msgSuccess("计算完成");
@@ -415,7 +491,7 @@
             let JwHaiScoreList = response.data || [];
 
             // 排名数据
-            this.sportRankList = [].concat(JwHaiScoreList).sort((a, b) => a.rankOrder - b.rankOrder);
+            this.sportRankList = [].concat(JwHaiScoreList).sort((a, b) => a.rankOrder - b.rankOrder).filter(item => item.rankOrder);
 
             // 晋级名单数据
             this.signRecordList = [].concat(JwHaiScoreList).filter(item => (item.rankOrder && item.rankOrder <= that.currentGameItem.promotionNum)).sort((a, b) => a.rankOrder - b.rankOrder);
@@ -586,10 +662,12 @@
     padding-left: 80px;
     padding-right: 80px;
     color: #000;
-    .page-con-box{
+
+    .page-con-box {
       page-break-before: always;
       /*page-break-after:always;*/
     }
+
     .page-con {
       padding-top: 380px;
       font-family: '华文中宋';
@@ -602,15 +680,18 @@
         display: flex;
         flex-direction: row;
         white-space: nowrap;
+
         &.name .item-value {
           padding-left: 30px;
           letter-spacing: 30px;
         }
+
         &.order .item-value {
           padding-left: 30px;
           letter-spacing: 30px;
         }
       }
+
       .item-label {
         text-justify: distribute-all-lines;
         float: left;
@@ -620,6 +701,7 @@
         margin-right: 6px;
         white-space: nowrap;
       }
+
       .item-value {
         flex: 1;
         text-align: center;
@@ -689,7 +771,7 @@
         }
 
         &.order-des {
-          width: 72px;
+          width: 92px;
         }
 
         &.grade {
@@ -703,7 +785,8 @@
         &.sport {
           word-break: keep-all;
           width: 96px;
-          &.qiwu{
+
+          &.qiwu {
             width: 220px;
             padding-left: 4px;
             padding-right: 4px;
@@ -864,6 +947,14 @@
           &::-webkit-outer-spin-button {
             -webkit-appearance: none;
             margin: 0;
+          }
+
+          &.min {
+            color: #ff4949;
+          }
+
+          &.max {
+            color: #1890ff;
           }
         }
       }

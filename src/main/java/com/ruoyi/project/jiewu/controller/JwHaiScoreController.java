@@ -67,8 +67,8 @@ public class JwHaiScoreController extends BaseController {
     @Log(title = "计算成绩", businessType = BusinessType.INSERT)
     @PostMapping("/jiSuanGameItem")
     @ResponseBody
-    public AjaxResult jiSuanGameItem(Long gameItemId) {
-        return toAjax(jwHaiScoreService.jiSuanGameItem(gameItemId));
+    public AjaxResult jiSuanGameItem(Long gameItemId, String type) {
+        return toAjax(jwHaiScoreService.jiSuanGameItem(gameItemId, type));
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")

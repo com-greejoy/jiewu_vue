@@ -3,41 +3,41 @@
     <div class="eight-box" @click="cancelShow">
       <div class="game-item-name">{{currentGameItem.name}}</div>
       <div class="title-desc">决赛对阵</div>
-      <div class="eight-con" :class="{four: currentGameItem.promotionNum == 4, eight: currentGameItem.promotionNum == 8, sixteen: currentGameItem.promotionNum == 16, thirtyTwo: currentGameItem.promotionNum == 32}">
+      <div class="eight-con" :class="{four: currentGameItem.promotionNum == 4, eight: currentGameItem.promotionNum == 8, sixteen: currentGameItem.promotionNum == 16, thirtyTwo: currentGameItem.promotionNum == 32, fvf: currentGameItem.name.indexOf('5V5') > -1}">
         <div class="order-row" data-p="32" v-if="currentGameItem.promotionNum == 32">
           <div class="order-item player-name" data-position="32" data-pk="16.1" data-t="1" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 1)}}</div>
           <!--<div class="order-item vs">vs</div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.1" data-t="32" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 32)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.16" data-t="16" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 16)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.9" data-t="9" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 9)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.16" data-t="20" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 20)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.12" data-t="12" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 12)}}</div>
-          <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.12" data-t="24" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 24)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.8" data-t="28" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 28)}}</div>
-          <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.8" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 8)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.9" data-t="28" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 28)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.5" data-t="5" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 5)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.5" data-t="25" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 25)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.5" data-t="24" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 24)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.9" data-t="21" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 21)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.12" data-t="12" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 12)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.9" data-t="9" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 9)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.12" data-t="20" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 20)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.13" data-t="13" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 13)}}</div>
           <!--<div class="order-item vs">vs</div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.13" data-t="17" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 17)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.4" data-t="29" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 29)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.8" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 8)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 4)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.8" data-t="21" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 21)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.16" data-t="16" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 16)}}</div>
+          <!--<div class="order-item vs">vs</div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.16" data-t="25" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 25)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.3" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 3)}}</div>
+          <!--<div class="order-item vs">vs</div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.3" data-t="30" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 30)}}</div>
         </div>
-        <div class="line-row" data-p="32" v-if="currentGameItem.promotionNum == 32" style="height: 1058px;">
+        <div class="line-row" data-p="32" v-if="currentGameItem.promotionNum == 32" style="height: 800px;">
           <div class="line-item" data-p="4.1">
             <div class="line"></div>
           </div>
@@ -69,16 +69,7 @@
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.1" data-t="16" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 16)}}</div>
-          <div class="order-item"></div>
-          <!--<div class="order-item"></div>-->
-
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.8" data-t="12" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 12)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item vs">vs</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.8" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 8)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.1" data-t="9" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 9)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
 
@@ -87,16 +78,25 @@
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.5" data-t="9" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 9)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.5" data-t="13" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 13)}}</div>
+          <div class="order-item"></div>
+          <!--<div class="order-item"></div>-->
+
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="16" data-pk="8.3" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 3)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item vs">vs</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="16" data-pk="8.3" data-t="11" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 11)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
 
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.4" data-t="13" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 13)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.7" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 7)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 4)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.7" data-t="15" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 15)}}</div>
           <!--<div class="order-item"></div>-->
         </div>
         <div class="line-row" data-p="16" v-if="currentGameItem.promotionNum >= 16">
@@ -125,7 +125,7 @@
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.1" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 8)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.1" data-t="5" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 5)}}</div>
           <div class="order-item"></div>
 
           <!--<div class="order-item"></div>-->
@@ -134,7 +134,7 @@
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.4" data-t="5" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 5)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.3" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 3)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
@@ -142,17 +142,17 @@
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 4)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.3" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 7)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
 
         </div>
-        <div class="line-row" data-p='8' v-if="currentGameItem.promotionNum >= 8" style="height: 816px;">
-          <div class="line-item" style="height: 272px;" data-p="4.1">
+        <div class="line-row" data-p='8' v-if="currentGameItem.promotionNum >= 8" style="height: 650px;">
+          <div class="line-item" style="height: 220px;" data-p="4.1">
             <div class="line"></div>
           </div>
-          <div class="line-item" style="height: 272px;" data-p="4.3">
+          <div class="line-item" style="height: 220px;" data-p="4.3">
             <div class="line"></div>
           </div>
         </div>
@@ -160,7 +160,7 @@
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="4" data-d="4" data-pk="2.1" data-t="1" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 1)}}</div>
+          <div class="order-item player-name" data-position="4" data-d="3" data-pk="2.1" data-t="1" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 1)}}</div>
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
@@ -172,7 +172,7 @@
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="4" data-d="1" data-pk="2.1" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 4)}}</div>
+          <div class="order-item player-name" data-position="4" data-d="1" data-pk="2.1" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 3)}}</div>
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
@@ -206,7 +206,7 @@
           <div class="order-item"></div>
           <div class="order-item guanjun" data-position>
             <div class="guanjun-box bottom">
-              <div class="guanjun-line" style="height: 60px; margin-left: 35px; margin-bottom: 51px;transform: skew(-30deg);"></div>
+              <div class="guanjun-line" style="height: 32px; margin-left: 16px; margin-bottom: 30px;transform: skew(-30deg);"></div>
             </div>
           </div>
           <div class="order-item player-name" data-position="3" data-t="0" @contextmenu.prevent="onRightClick">{{getSportName(3, 0)}}</div>
@@ -229,7 +229,7 @@
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="4" data-d="3" data-pk="2.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 2)}}</div>
+          <div class="order-item player-name" data-position="4" data-d="4" data-pk="2.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 2)}}</div>
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
@@ -242,17 +242,17 @@
           <div class="order-item"></div>
           <div class="order-item"></div>
 
-          <div class="order-item player-name" data-position="4" data-d="2" data-pk="2.2" data-t="3" @click.stop="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 3)}}</div>
+          <div class="order-item player-name" data-position="4" data-d="2" data-pk="2.2" data-t="4" @click.stop="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(4, 4)}}</div>
           <div class="order-item"></div>
           <div class="order-item"></div>
           <div class="order-item"></div>
         </div>
 
-        <div class="line-row right-line" data-p='8' style="height: 816px;" v-if="currentGameItem.promotionNum >= 8">
-          <div class="line-item" style="height: 272px;" data-p="4.1">
+        <div class="line-row right-line" data-p='8' style="height: 650px;" v-if="currentGameItem.promotionNum >= 8">
+          <div class="line-item" style="height: 220px;" data-p="4.1">
             <div class="line"></div>
           </div>
-          <div class="line-item" style="height: 272px;" data-p="4.3">
+          <div class="line-item" style="height: 220px;" data-p="4.3">
             <div class="line"></div>
           </div>
         </div>
@@ -260,7 +260,7 @@
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.2" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 3)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 2)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
@@ -277,7 +277,7 @@
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.3" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 7)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 4)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
@@ -285,7 +285,7 @@
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
           <div class="order-item"></div>
-          <div class="order-item player-name" data-position="8" data-pk="4.3" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 2)}}</div>
+          <div class="order-item player-name" data-position="8" data-pk="4.4" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(8, 8)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
           <!--<div class="order-item"></div>-->
@@ -307,42 +307,42 @@
         </div>
         <div class="order-row" data-p='16' v-if="currentGameItem.promotionNum >= 16">
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.3" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 3)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 2)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.3" data-t="14" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 14)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.2" data-t="10" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 10)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
 
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.6" data-t="10" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 10)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item player-name" data-position="16" data-pk="8.6" data-t="6" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 6)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item vs">vs</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="16" data-pk="8.6" data-t="14" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 14)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
 
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.7" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 7)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 4)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.7" data-t="11" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 11)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.4" data-t="12" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 12)}}</div>
           <div class="order-item"></div>
           <!--<div class="order-item"></div>-->
 
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.2" data-t="15" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 15)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.8" data-t="8" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 8)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item vs">vs</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="16" data-pk="8.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 2)}}</div>
+          <div class="order-item player-name" data-position="16" data-pk="8.8" data-t="16" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(16, 16)}}</div>
           <!--<div class="order-item"></div>-->
         </div>
 
-        <div class="line-row right-line" data-p="32" style="height: 1058px;" v-if="currentGameItem.promotionNum >= 32">
+        <div class="line-row right-line" data-p="32" style="height: 800px;" v-if="currentGameItem.promotionNum >= 32">
           <div class="line-item" data-p="4.1">
             <div class="line"></div>
           </div>
@@ -369,58 +369,50 @@
           </div>
         </div>
         <div class="order-row" data-p="32" v-if="currentGameItem.promotionNum >= 32">
-          <div class="order-item player-name" data-position="32" data-pk="16.3" data-t="3" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 3)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 2)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.3" data-t="30" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 30)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.2" data-t="31" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 31)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.14" data-t="22" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 22)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.10" data-t="10" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 10)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.14" data-t="10" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 10)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.10" data-t="27" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 27)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.10" data-t="14" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 14)}}</div>
-          <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.10" data-t="18" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 18)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.6" data-t="26" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 26)}}</div>
-          <!--<div class="order-item vs">vs</div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.6" data-t="6" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 6)}}</div>
-          <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.7" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 7)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.7" data-t="27" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 27)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.6" data-t="23" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 23)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.11" data-t="11" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 11)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.11" data-t="23" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 23)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.11" data-t="19" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 19)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.14" data-t="14" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 14)}}</div>
+          <!--<div class="order-item vs">vs</div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.14" data-t="18" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 18)}}</div>
+          <!--<div class="order-item"></div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.7" data-t="7" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 7)}}</div>
+          <!--<div class="order-item vs">vs</div>-->
+          <div class="order-item player-name" data-position="32" data-pk="16.7" data-t="22" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 22)}}</div>
           <!--<div class="order-item"></div>-->
           <div class="order-item player-name" data-position="32" data-pk="16.15" data-t="15" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 15)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.15" data-t="19" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 19)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.15" data-t="26" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 26)}}</div>
           <!--<div class="order-item"></div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.2" data-t="31" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 31)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.4" data-t="4" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 4)}}</div>
           <!--<div class="order-item vs">vs</div>-->
-          <div class="order-item player-name" data-position="32" data-pk="16.2" data-t="2" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 2)}}</div>
+          <div class="order-item player-name" data-position="32" data-pk="16.4" data-t="29" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 29)}}</div>
         </div>
       </div>
     </div>
-    <div class="battle-p" :class="{showScore: !showScore, two: p3.playerName && p4.playerName}" v-if="!isPhone && ((p1.playerName && p2.playerName) || (p3.playerName && p4.playerName))">
-      <div class="step-text">
-        <div v-if="currentPk.split('.')[0] == '16'">{{currentGameItem.name}}  ※  32 进 16</div>
-        <div v-if="currentPk.split('.')[0] == '8'">{{currentGameItem.name}}  ※  16 进 8</div>
-        <div v-if="currentPk.split('.')[0] == '4'">{{currentGameItem.name}}  ※  8 进 4</div>
-        <div v-if="currentPk.split('.')[0] == '2'">{{currentGameItem.name}}  ※  半决赛</div>
-        <div v-if="currentPk.split('.')[0] == '3'">{{currentGameItem.name}}  ※  季军赛</div>
-        <div v-if="currentPk.split('.')[0] == '1'">{{currentGameItem.name}}  ※  决赛</div>
-      </div>
+    <div class="battle-p" :class="{showScore: !showScore, two: p3.playerName && p4.playerName, fvf: currentGameItem.name.indexOf('5V5') > -1}" v-if="!isPhone && ((p1.playerName && p2.playerName) || (p3.playerName && p4.playerName))">
       <div class="current-battle" v-if="!isPhone && p1.playerName && p2.playerName">
         <div class="changdi-label">
           <div class="lab-text">A 场地</div>
         </div>
         <div class="sport-con">
-          <div class="sport-left">
+          <div class="sport-left" :style="{ backgroundImage: 'url(' + getUserImg(p1) + ')' }">
             <div class="sport-info">
               <!--<div class="sport-img">-->
-              <!--<el-image src="http://localhost:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
+                <!--<el-image src="http://localhost:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
               <!--</div>-->
               <div class="sport-name">{{p1.playerName}}</div>
               <div class="sport-back">{{p1.backNumber}}</div>
@@ -428,10 +420,10 @@
             </div>
           </div>
           <div class="PK">VS</div>
-          <div class="sport-right">
+          <div class="sport-right" :style="{ backgroundImage: 'url(' + getUserImg(p2) + ')' }">
             <div class="sport-info">
               <!--<div class="sport-img">-->
-              <!--<el-image src="http://localhost:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
+                <!--<el-image src="http://localhost:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
               <!--</div>-->
               <div class="sport-name">{{p2.playerName}}</div>
               <div class="sport-back">{{p2.backNumber}}</div>
@@ -478,7 +470,6 @@
         <div class="sport-con">
           <div class="sport-left">
             <div class="sport-info">
-
               <div class="sport-name">{{p3.playerName}}</div>
               <div class="sport-back">{{p3.backNumber}}</div>
               <div class="sport-score">{{p3Score}}</div>
@@ -507,22 +498,19 @@
             <div class="score-judges ">
               <div class="score-judge j-s" v-if="scoreLun4 && scoreLun4.length > 0" v-for="item in scoreLun4" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>
             </div>
+            <div class="score-row" v-if="scoreLun5 && scoreLun5.length > 0">
+              <div class="score-label">第二轮</div>
+              <div class="score-judges">
+                <div class="score-judge j-s"  v-for="item in scoreLun5" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>
+              </div>
+            </div>
+            <div class="score-row" v-if="scoreLun6 && scoreLun6.length > 0">
+              <div class="score-label">第三轮</div>
+              <div class="score-judges">
+                <div class="score-judge j-s"  v-for="item in scoreLun6" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>
+              </div>
+            </div>
           </div>
-          <!--<div class="score-row" v-if="scoreLun5 && scoreLun5.length > 0">-->
-          <!--<div class="score-label">第二轮</div>-->
-          <!--<div class="score-judges">-->
-          <!--<div class="score-judge j-s"  v-for="item in scoreLun5" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>-->
-          <!--&lt;!&ndash;<div class="score-judge" v-if="item.lun == 2" v-for="item in pkScoreList2" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>&ndash;&gt;-->
-          <!--</div>-->
-          <!--</div>-->
-          <!--<div class="score-row" v-if="scoreLun6 && scoreLun6.length > 0">-->
-          <!--<div class="score-label">第三轮</div>-->
-          <!--<div class="score-judges">-->
-          <!--<div class="score-judge j-s"  v-for="item in scoreLun6" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>-->
-
-          <!--&lt;!&ndash;<div class="score-judge" v-if="item.lun == 3" v-for="item in pkScoreList2" :class="{blue: item.playerId == p3.playerId, red: item.playerId == p4.playerId}"></div>&ndash;&gt;-->
-          <!--</div>-->
-          <!--</div>-->
         </div>
       </div>
     </div>
@@ -537,7 +525,7 @@
   import {getPkScores} from "@/api/jiewu/JwAppScore";
 
   export default {
-    name: 'battle321',
+    name: 'battle',
     props: {
       isPhone: {
         type: Boolean,
@@ -611,6 +599,14 @@
       }
     },
     methods: {
+      getUserImg(p){
+        if(p.jwSignRecordSportList[0].showImg){
+          return process.env.VUE_APP_BASE_URL + p.jwSignRecordSportList[0].showImg;
+        }else{
+          return null;
+        }
+
+      },
       startHeartbeat() {
         let that = this;
         // 心跳检测
@@ -694,10 +690,11 @@
               that.getList();
             } else if (data.type == "showScore") {
               that.showScore = true;
-            } else if (data.type == "refreshJudgeScoreList") {
+            }else if (data.type == "refreshJudgeScoreList") {
               console.log("refreshJudgeScoreList")
               that.getPkScores();
             }
+
 
           }
         };
@@ -718,12 +715,12 @@
           let pkScoreList1 = (res.data || []).filter(item => ((item.playerPkGroup == this.p1.currentPk || item.playerPkGroup == this.p2.currentPk) && (item.playerId == this.p1.playerId || item.playerId == this.p2.playerId)));
           pkScoreList1.sort((a, b) => a.judgeId - b.judgeId);
           this.pkScoreList1 = pkScoreList1 || [];
+
           let p1Score = 0;
           let p2Score = 0;
           let p3Score = 0;
           let p4Score = 0;
-          let judgeNum1 = 3;
-          let judgeNum2 = 3;
+
           let scoreLun1 = [];
           let scoreLun2 = [];
           let scoreLun3 = [];
@@ -734,10 +731,9 @@
 
           // 所有裁判名字
           let judeNames = [...new Set((res.data || []).map(({judgeName}) => judgeName))].sort();
-          // judeNames = ["赵亮", "李志强", "关键", "袁禕", "傅沐沙"];
+          judeNames = [...new Set(pkScoreList1.map(jd => jd.judgeName))].sort();
           // 计算轮次分数
           // A场地
-          judeNames = [...new Set(pkScoreList1.map(jd => jd.judgeName))].sort();
           for (let lun = 1; lun <= 3; lun++) {
             if (((pkScoreList1 || []).filter(item => (item.lun == lun)).length) > 0) {
               let pk1ScoreList1 = (pkScoreList1 || []).filter(item => (item.lun == lun && item.playerPkGroup == this.p1.currentPk && item.playerId == this.p1.playerId));
@@ -778,6 +774,7 @@
                   }
                 }
               }
+
               // judgeNum1 = judgeNum1 < pk1ScoreList1.length + pk1ScoreList2.length ? pk1ScoreList1.length + pk1ScoreList2.length : judgeNum1;
             }
           }
@@ -788,12 +785,10 @@
           this.scoreLun3 = scoreLun3 || [];
 
           let pkScoreList2 = (res.data || []).filter(item => ((item.playerPkGroup == this.p3.currentPk || item.playerPkGroup == this.p4.currentPk) && (item.playerId == this.p3.playerId || item.playerId == this.p4.playerId)));
-          this.judgeNum2 = pkScoreList2.length >= 3 ? pkScoreList2.length : 3;
+
           this.pkScoreList2 = pkScoreList2 || [];
 
-
           // B场地
-
           let judeNames2 = [...new Set(pkScoreList2.map(jd => jd.judgeName))].sort();
           for (let lun = 1; lun <= 3; lun++) {
             if (((pkScoreList2 || []).filter(item => (item.lun == lun)).length) > 0) {
@@ -832,8 +827,6 @@
                   }
                 }
               }
-
-              // judgeNum1 = judgeNum1 < pk1ScoreList1.length + pk1ScoreList2.length ? pk1ScoreList1.length + pk1ScoreList2.length : judgeNum1;
             }
           }
           this.judgeNum2 = judeNames2;
@@ -842,7 +835,6 @@
           this.scoreLun5 = scoreLun5 || [];
           this.scoreLun6 = scoreLun6 || [];
 
-          // this.judgeNum2 = judgeNum2;
           this.p1Score = p1Score;
           this.p2Score = p2Score;
           this.p3Score = p3Score;
@@ -966,25 +958,36 @@
     background: rgba(151, 59, 42, .6);
     border-radius: 24pt;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
-    .step-text{
-      text-align: center;
-      font-size: 64pt;
-      position: absolute;
-      top: 40pt;
-      left: 0;
-      right: 0;
-      color: #fff;
-
+    &.fvf{
+      .current-battle .sport-con{
+        height: 772px;
+        .sport-left{
+          box-shadow: 0 20px 160px 20px #409EFF;
+        }
+        .sport-right{
+          box-shadow: 0 20px 160px 20px #F56C6C;
+        }
+        .sport-left, .sport-right{
+          height: 100%;
+          /*background-size: 100% 100%;*/
+          background-size: auto 100%;
+          background-repeat: no-repeat;
+          background-position-x: center;
+          .sport-info{
+            height: 100%;
+            justify-content: end;
+          }
+        }
+      }
     }
     &.showScore {
       .current-battle .score-con .score-row .score-judges .score-judge.j-s, .current-battle .score-con .score-row .score-judges .score-judge.j-s {
 
-        &::before {
+        &::before{
           background-image: none;
           background-color: #DCDFE6;
           transform: scale(1);
         }
-
         &.blue::before, &.red::before {
           background-image: url('../../../assets/images/duigou.png');
           background-size: 48pt;
@@ -1086,6 +1089,9 @@
           .sport-back, .sport-name {
             /*color: #409EFF;*/
           }
+
+          /*background-image: url("../../../assets/images/login-background.jpg");*/
+
         }
 
         .sport-right {
@@ -1205,7 +1211,7 @@
                 content: "";
                 background-image: none;
                 background-color: #DCDFE6;
-                transition: transform 1s ease;
+                transition: transform 0.6s ease;
                 transform: scale(0);
                 position: absolute;
                 left: 0;
@@ -1252,7 +1258,7 @@
   .game-item-name {
     font-size: 64px;
     text-align: center;
-    margin-top: 466px;
+    margin-top: 320px;
     letter-spacing: 4px;
     color: #fff;
   }
@@ -1278,40 +1284,50 @@
     flex: 1;
 
     &.four {
-      margin-top: -376px;
-      transform: scale(1.8);
+      margin-top: -96px;
+      transform: scale(2.2);
     }
 
     &.eight {
-      margin-top: -436px;
-      transform: scale(1.4);
+      margin-top: -96px;
+      transform: scale(1.6);
     }
 
     &.sixteen {
-      margin-top: -466px;
+      margin-top: -126px;
       transform: scale(1.4);
     }
 
     &.thirtyTwo {
-      margin-top: -436px;
+      margin-top: -96px;
       transform: scale(1.3);
+    }
 
-      .line-row {
-
+    &.fvf{
+      transform: scale(1.8);
+      .order-row .order-item[data-position]{
+        width: 240px;
+        height: 112px;
+        white-space: normal;
+        word-break: keep-all;
+        &[data-position="3"][data-t="0"]{
+          margin-left: -44px;
+        }
       }
-
-      [data-p="16"] {
-        .line-item {
-          height: 148px !important;
-        }
-
-        &.line-row {
-          height: 982px;
-        }
-
-        .vs {
-          height: 48px;
-        }
+       .line-row[data-p="2.1"]{
+        height: 510px;
+      }
+       .guanjun-line{
+        height: 88px !important;
+        margin-bottom: 88px!important;
+      }
+       .guanjun-item div{
+        width: 240px;
+        height: 112px;
+         min-height: 112px;
+        white-space: normal;
+        word-break: keep-all;
+         margin-left: 32px;
       }
     }
 
@@ -1323,8 +1339,8 @@
 
       .order-item {
         width: 140px;
-        height: 48px;
-        line-height: 48px;
+        height: 32px;
+        line-height: 32px;
         display: flex;
         visibility: hidden;
         align-items: center;
@@ -1333,7 +1349,7 @@
         border: 2px solid #fff;
         /*margin-right: 16px;*/
         margin-bottom: 22px;
-        font-size: 36px;
+        font-size: 28px;
         letter-spacing: 2px;
         color: #fff;
         border-radius: 4px;
@@ -1351,6 +1367,7 @@
           &:before {
             font-size: 28px;
           }
+
         }
 
         &[data-position] {
@@ -1359,9 +1376,8 @@
           border: none;
           border-radius: 0;
           transform: skew(-30deg);
-          /*background: linear-gradient(to right bottom, #e817a4, #8217f9);*/
+          background: linear-gradient(to right bottom, #e817a4, #8217f9);
           background: linear-gradient(to right bottom, #f6c328, #f83b01);
-          background: linear-gradient(to right, #d5282a, #444446);
 
           span {
             transform: skew(30deg);
@@ -1376,9 +1392,8 @@
       }
 
       .vs {
-        height: 32px;
         border: none;
-        font-size: 32px;
+        font-size: 28px;
         font-style: italic;
       }
 
@@ -1416,25 +1431,25 @@
       justify-content: space-between;
 
       &[data-p="16"] {
-        height: 926px;
+        height: 760px;
 
         .line-item {
-          height: 124px;
+          height: 112px;
         }
       }
 
       &[data-p="2.1"] {
         justify-content: center;
-        height: 546px;
+        height: 436px;
         /*margin-bottom: 16px;*/
       }
 
       .line-item {
         width: 50px;
-        height: 78px;
-        border-bottom: 6px solid #fff;
-        border-top: 6px solid #fff;
-        border-right: 6px solid #fff;
+        height: 50px;
+        border-bottom: 4px solid #fff;
+        border-top: 4px solid #fff;
+        border-right: 4px solid #fff;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1463,7 +1478,7 @@
     .line {
       margin-right: -100px;
       width: 50px;
-      border-bottom: 6px solid #fff;
+      border-bottom: 4px solid #fff;
     }
 
     .right-line {
@@ -1485,7 +1500,7 @@
         width: 140px;
         height: 56px;
         min-height: 56px;
-        font-size: 36px;
+        font-size: 26px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1515,16 +1530,16 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      border-bottom: 6px solid #fff;
+      border-bottom: 4px solid #fff;
 
     }
 
     .guanjun-line {
       border: none;
       width: 2px;
-      height: 60px;
-      margin-bottom: 50px;
-      border-left: 6px solid #fff;
+      height: 40px;
+      margin-bottom: 39px;
+      border-left: 4px solid #fff;
     }
 
     [data-position="2.0"] {

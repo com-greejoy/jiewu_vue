@@ -108,14 +108,28 @@ public class JwScheduleItemService {
                                     }else if(4l == jwGameItem.getPromotionNum()){
                                         placeTime = 10 * 60;
                                     }
+
                                 }else{
                                     List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordListByScheduleItem(jwScheduleItem.getId());
                                     if ("1".equals(jwGameItem.getSportLimit())) {
                                         // 单人
-                                        placeTime = jwSignRecordList.size() * 60;
+                                        if(placeTime<jwSignRecordList.size() * 60){
+                                            placeTime = jwSignRecordList.size() * 60;
+                                        }
+
+                                        // 单人作品的
+                                        if(jwGameItem.getName().contains("单人作品")){
+                                            placeTime = jwSignRecordList.size() * 120;
+                                        }
                                     } else if ("3".equals(jwGameItem.getSportLimit())) {
+                                       // 魏振宇中学生比赛的单独处理
+                                        if(jwGameItem.getName().contains("个人")){
+                                            placeTime = jwSignRecordList.size() * 120;
+                                        }else{
+                                            placeTime = jwSignRecordList.size() * 180;
+                                        }
                                         // 齐舞
-                                        placeTime = jwSignRecordList.size() * 180;
+//                                        placeTime = jwSignRecordList.size() * 180;
                                     }
                                 }
                             }
@@ -266,6 +280,9 @@ public class JwScheduleItemService {
                         updateD.setId(groupSign.getId());
                         updateD.setScheduleItemId(jwScheduleItem.getId());
                         updateD.setIndexOrder(Long.valueOf(indexOrder) + 1);
+
+//                        updateD.setIndexOrder(Long.valueOf(groupSign.getBackNumber()));
+
                         jwSignRecordService.updateJwSignRecord(updateD);
                     }
                 }

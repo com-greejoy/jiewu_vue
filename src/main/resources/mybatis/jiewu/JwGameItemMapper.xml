@@ -33,10 +33,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sportLimit"    column="sport_limit"    />
         <result property="signCount"    column="signCount"    />
         <result property="groupMode"    column="group_mode"    />
+        <result property="judgeId"    column="judge_id"    />
     </resultMap>
 
     <sql id="selectJwGameItemVo">
-        select id, match_id, code, show_min_year, show_max_year, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
+        select id, match_id, code, show_min_year, judge_id, show_max_year, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
         single_duration, match_type, promotion_num, min_year, max_year,
         fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
         screen_img, remark from jw_game_item
@@ -139,6 +140,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="groupMode != null">group_mode,</if>
             <if test="showMinYear != null">show_min_year,</if>
             <if test="showMaxYear != null">show_max_year,</if>
+            <if test="judgeId != null">judge_id,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -166,6 +168,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="groupMode != null">#{groupMode},</if>
             <if test="showMinYear != null">#{showMinYear},</if>
             <if test="showMaxYear != null">#{showMaxYear},</if>
+            <if test="judgeId != null">#{judgeId},</if>
          </trim>
     </insert>
 
@@ -197,6 +200,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="groupMode != null">group_mode = #{groupMode},</if>
             <if test="showMinYear != null">show_min_year = #{showMinYear},</if>
             <if test="showMaxYear != null">show_max_year = #{showMaxYear},</if>
+            <if test="judgeId != null">judge_id = #{judgeId},</if>
         </trim>
         where id = #{id}
     </update>

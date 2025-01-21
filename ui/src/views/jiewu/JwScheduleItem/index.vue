@@ -263,7 +263,7 @@
         <el-button type="success" plain size="mini" @click="handleOrderSignRecord()">重新排序</el-button>
       </div>
       <el-table :data="signRecordList" height="75vh">
-        <el-table-column label="ID" align="left" prop="id" width="50"/>
+        <el-table-column label="ID" align="left" prop="id" width="75"/>
         <el-table-column label="代表队" align="left" prop="jwTeam.teamName"/>
         <el-table-column label="选手" align="center" prop="backNumber">
           <template slot-scope="scope">

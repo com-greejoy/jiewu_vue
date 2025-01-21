@@ -12,6 +12,8 @@
       </div>
     </div>
 
+    <!--<div @click="goPhone">→</div>-->
+
     <transition name="el-zoom-in-center">
       <div class="show-queren" v-show="currentSelectJudge.id" @click.stop="hideJudge">
         <div class="judge-con" @click.stop="aaa">
@@ -58,11 +60,12 @@
         currentJudge: {},
         matchJudgeList: [],
         showScore: false,
-        matchId:  null,
+        matchId:  14,
       }
     },
     created() {
       this.matchId = this.$route.query.matchId;
+      this.matchId = 14;
       if (!this.matchId) {
         this.showMatchSelect = true;
       } else {
@@ -70,6 +73,9 @@
       }
     },
     methods: {
+      goPhone(){
+        this.$router.push("/battlePhoneNew");
+      },
       aaa() {
 
       },
@@ -102,7 +108,6 @@
             if(item.img){
               item.img = process.env.VUE_APP_BASE_URL + item.img;
             }
-
           })
           // this.currentJudge = this.matchJudgeList[0]
           // this.showScore = true;
@@ -167,8 +172,8 @@
 
       .judge-title {
         text-align: center;
-        font-weight: 900;
-        font-size: 16px;
+        font-weight: 400;
+        font-size: 18px;
       }
 
       .judge-item {
@@ -180,7 +185,9 @@
         text-align: center;
 
         .el-link {
-          margin-right: 56pt;
+          margin-right: 32pt;
+          margin-top: 20pt;
+          font-size: 18px;
 
           &:nth-child(2) {
             margin-right: 0;
@@ -215,6 +222,9 @@
         width: 32pt;
         height: 32pt;
         border-radius: 16pt;
+      }
+      div{
+        margin-top: 8pt;
       }
 
       i {

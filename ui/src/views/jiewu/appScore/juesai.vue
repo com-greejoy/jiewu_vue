@@ -2,11 +2,11 @@
   <div class="juesai-con" v-loading="loadingSave">
     <div class="select-chang">
       <el-radio size="mini" v-model="currentArea" label="A" border>A场地</el-radio>
-      <!--<el-radio size="mini" v-model="currentArea" label="B" border>B场地</el-radio>-->
+      <el-radio size="mini" v-model="currentArea" label="B" border>B场地</el-radio>
 
-      <el-radio size="mini" v-model="lun" label="1" border>第一轮</el-radio>
-      <el-radio size="mini" v-model="lun" label="2" v-if="currentPk == '1.1' || currentPk == '3.1'" border>第二轮</el-radio>
-      <el-radio size="mini" v-model="lun" label="3" v-if="currentPk == '1.1' || currentPk == '3.1'" border>第三轮</el-radio>
+      <el-radio size="mini" @change="lunChange" v-model="lun" label="1" border>第一轮</el-radio>
+      <el-radio size="mini" @change="lunChange" v-model="lun" label="2" v-if="currentPk == '1.1' || currentPk == '3.0'" border>第二轮</el-radio>
+      <el-radio size="mini" @change="lunChange" v-model="lun" label="3" v-if="currentPk == '1.1' || currentPk == '3.0'" border>第三轮</el-radio>
     </div>
     <!--{{aaa}}-->
     <div class="sport-con">
@@ -134,8 +134,8 @@
         area: ["A", "B"],
         currentArea: "A",
         eightList: [],
-        inte: null
-
+        inte: null,
+        jwEightScoreList: []
       }
     },
     destroyed() {
@@ -150,6 +150,30 @@
       this.inte = setInterval(this.getCurrentPkHandel, 1000)
     },
     methods: {
+      lunChange(){
+        let jwEightScore = (this.jwEightScoreList || []).filter(item => item.lun == this.lun)[0] || "";
+        if (jwEightScore && jwEightScore.subScore) {
+          let jss = jwEightScore.subScore.split(",");
+          this.score1l = jss[0] * 1;
+          this.score2l = jss[1] * 1;
+          this.score3l = jss[2] * 1;
+          this.score4l = jss[3] * 1;
+          this.score5l = jss[4] * 1;
+          this.scoreChange()
+        } else {
+          this.score1l = 50;
+          this.score1r = 0;
+          this.score2l = 50;
+          this.score2r = 0;
+          this.score3l = 50;
+          this.score3r = 0;
+          this.score4l = 50;
+          this.score4r = 0;
+          this.score5l = 50;
+          this.score5r = 0;
+          this.scoreChange()
+        }
+      },
       getGenScore(score) {
         if (score < 50) {
           return 50 - score;
@@ -160,11 +184,14 @@
         }
       },
       onmessage(currentPkGroup, data) {
+
         this.eightList = data.list || [];
         // if ((this.lun != currentPkGroup.lun || this.currentPk != currentPkGroup.currentPk) && (currentPkGroup.area == "全" || currentPkGroup.area == this.currentArea)) {
         //   this.lun = currentPkGroup.lun;
 
         if ((this.currentPk != currentPkGroup.currentPk) && (currentPkGroup.area == "全" || currentPkGroup.area == this.currentArea)) {
+
+          this.lun = currentPkGroup.lun;
 
           this.currentPk = currentPkGroup.currentPk;
           let p1 = this.eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk1);
@@ -176,22 +203,12 @@
 
           this.p1 = p1;
           this.p2 = p2;
-
-          this.score1l = 50;
-          this.score1r = 0;
-          this.score2l = 50;
-          this.score2r = 0;
-          this.score3l = 50;
-          this.score3r = 0;
-          this.score4l = 50;
-          this.score4r = 0;
-          this.score5l = 50;
-          this.score5r = 0;
+          this.jwEightScoreList = data.jwEightScoreList || [];
+          this.lunChange()
         }
-
       },
       getCurrentPkHandel() {
-        getCurrentPk({area: this.currentArea || "全"}).then(res => {
+        getCurrentPk({area: this.currentArea || "全", judgeId: this.currentJudge.id,}).then(res => {
           let data = res.data;
           let currentPkGroup = JSON.parse(data.currentPkGroup);
           this.onmessage(currentPkGroup, data)
@@ -213,7 +230,8 @@
               judgeId: this.currentJudge.id,
               currentPkGroup: this.currentPk,
               jinJiId: ((this.p1.score || 0) * 1) > ((this.p2.score || 0) * 1) ? this.p1.playerId : this.p2.playerId,
-              lun: this.lun
+              lun: this.lun,
+              subScore: [this.score1l, this.score2l, this.score3l, this.score4l, this.score5l].join(",")
             }).then(res => {
               this.loadingSave = false;
               this.$notify({
@@ -237,6 +255,8 @@
               this.score4r = 0
               this.score5l = 100
               this.score5r = 0
+
+              this.getCurrentPkHandel()
             }, () => {
               this.loadingSave = false;
             })

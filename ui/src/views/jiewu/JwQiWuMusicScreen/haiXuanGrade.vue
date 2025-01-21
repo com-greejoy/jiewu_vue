@@ -9,14 +9,15 @@
         <div class="si back-num">背号</div>
         <div class="si sport" :class="{longName: currentGameItem.sportLimit != 1}">选手</div>
         <div class="si team-name">代表队</div>
-        <div class="si avg-score">得分</div>
+        <!--<div class="si avg-score">成绩</div>-->
       </div>
       <div class="rank-item row-value" v-for="item in showSportRankList">
         <div class="si rank">{{item.rankOrder}}</div>
         <div class="si back-num">{{item.backNumber}}</div>
         <div class="si sport" :class="{longName: currentGameItem.sportLimit != 1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
         <div class="si team-name">{{item.jwTeam.teamName}}</div>
-        <div class="si avg-score">{{item.avgScore || '-'}}</div>
+        <!--<div class="si avg-score">{{item.avgScore || '-'}}</div>-->
+        <!--<div class="si avg-score">{{getdesc(item.rankOrder)}}</div>-->
       </div>
     </div>
   </div>
@@ -61,12 +62,13 @@
         background: "",
         sportRankList: [],
         showSportRankList: [],
-        inter: null
+        inter: null,
+        lockk: "N"
       };
     },
     computed: {},
-    destroyed(){
-      if(this.inter){
+    destroyed() {
+      if (this.inter) {
         clearInterval(this.inter);
       }
     },
@@ -75,6 +77,14 @@
       let that = this;
       that.getList();
       this.inter = setInterval(() => {
+        that.getshowSportRankList()
+      }, 8000);
+
+      that.getMatchInfo()
+    },
+    methods: {
+      getshowSportRankList(){
+        let that = this;
         that.showSportRankList = that.sportRankList.slice((that.page - 1) * that.pageSize, that.page * that.pageSize);
         if (that.page * that.pageSize > that.sportRankList.length) {
           this.page = 1;
@@ -82,17 +92,32 @@
         } else {
           this.page++;
         }
-      }, 4000);
-
-      that.getMatchInfo()
-    },
-    methods: {
+      },
+      getdesc(indexOrder) {
+        indexOrder = indexOrder * 1;
+        if (indexOrder >= 1 && indexOrder <= 5) {
+          return "最佳潜力奖"
+        } else if (indexOrder >= 6 && indexOrder <= 10) {
+          return "最佳表现奖"
+        } else if (indexOrder >= 11 && indexOrder <= 17) {
+          return "最佳人气奖"
+        }
+      },
       getList() {
+        let that = this;
         listJwHaiScore({gameItemId: this.gameItemId, matchId: this.matchId}).then(res => {
-          (res.data || []).forEach(item=>{
-            item.sortOr = item.rankOrder || 99;
+          let lockk = "Y";
+          (res.data || []).forEach(item => {
+            item.sortOr = item.rankOrder || 999;
+            if (item.jwScheduleItem.lockScore == 'N') {
+              lockk = "N";
+            }
           });
+
+          this.lockk = lockk;
           this.sportRankList = (res.data || []).sort((a, b) => a.sortOr - b.sortOr);
+
+          that.getshowSportRankList()
         })
       },
       getMatchInfo() {
@@ -115,18 +140,21 @@
     font-weight: 600;
     background-size: 100% 100%;
     background-repeat: no-repeat;
-    .match-name{
+
+    .match-name {
       font-size: 30px;
       text-align: center;
       /*margin-bottom: 24px;*/
     }
-    .game-item-name{
+
+    .game-item-name {
       font-size: 64px;
       text-align: center;
-      margin-top: 294px;
+      margin-top: 466px;
       letter-spacing: 4px;
     }
-    .title-desc{
+
+    .title-desc {
       font-size: 48px;
       text-align: center;
       margin-top: -12px;
@@ -153,10 +181,14 @@
         margin-bottom: 26px;
         padding: 8px 48px;
 
-        &.row-value{
+        &.row-value {
           color: #fff;
           background: linear-gradient(to right bottom, #f50d0d, #111d42);
+          background: linear-gradient(to right bottom, #f6c328, #f83b01);
+          background: linear-gradient(to right , #d5282a, #444446);
+
         }
+
         &:first-child {
           background: none;
           color: #fff;
@@ -174,10 +206,11 @@
 
         .sport {
           text-align: center;
-          width: 220px;
+          width: 320px;
           min-width: 220px;
           margin-right: 24px;
-          &.longName{
+
+          &.longName {
             width: 800px;
             overflow: hidden;
             white-space: nowrap;
@@ -187,7 +220,7 @@
 
         .back-num {
           text-align: center;
-          width: 160px;
+          width: 260px;
           min-width: 160px;
         }
 
@@ -202,7 +235,7 @@
 
         .avg-score {
           text-align: center;
-          width: 140px;
+          width: 340px;
           min-width: 140px;
         }
       }

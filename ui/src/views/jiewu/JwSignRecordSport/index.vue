@@ -163,7 +163,7 @@
         <el-button type="primary" plain size="mini" @click="handlePrint('printFeeConT')">打印</el-button>
       </div>
       <div class="fee-items" id="printFeeConT" v-if="showTeamSport" >
-        <div class="match-name">2024乐山市中小学生运动会体育舞蹈比赛 街舞项目</div>
+        <div class="match-name">体育六艺系列活动（川渝） 街舞大赛</div>
         <div class="title-name">代表队名单</div>
         <div class="team-item" v-for="(item, key) in teamSports">
           <div class="team-name">{{key}}</div>

@@ -9,6 +9,8 @@ public interface JwJudgeMapper {
 
     public List<JwJudge> selectJwJudgeList(JwJudge jwJudge);
 
+    public List<JwJudge> selectJwJudgeByIds(String[] ids);
+
     public int insertJwJudge(JwJudge jwJudge);
 
     public int updateJwJudge(JwJudge jwJudge);

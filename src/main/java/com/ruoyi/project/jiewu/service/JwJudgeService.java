@@ -32,6 +32,10 @@ public class JwJudgeService {
         return jwJudgeMapper.deleteJwJudgeByIds(ids);
     }
 
+    public List<JwJudge> selectJwJudgeByIds(String[] ids) {
+        return jwJudgeMapper.selectJwJudgeByIds(ids);
+    }
+
     public int deleteJwJudgeById(Long id) {
         return jwJudgeMapper.deleteJwJudgeById(id);
     }

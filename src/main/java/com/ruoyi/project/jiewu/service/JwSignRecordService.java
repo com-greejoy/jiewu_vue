@@ -76,7 +76,7 @@ public class JwSignRecordService {
         // 改完组之后，如果已经分组, 把组别的排序重新整理
 //        if ("1".equals(jwSignRecord.getSportLimit())) {
             // 单人的直接排序 齐舞的手动排
-            arrangeOrder(oldGameItemId);
+//            arrangeOrder(oldGameItemId);
 //        }
 
         return re;
@@ -111,7 +111,7 @@ public class JwSignRecordService {
         updateJwSignRecord(updateD);
 
         // 如果已经分组, 把组别的排序重新整理
-        arrangeOrder(jwSignRecord.getGameItemId());
+//        arrangeOrder(jwSignRecord.getGameItemId());
 
         return 1;
     }
@@ -192,7 +192,7 @@ public class JwSignRecordService {
     }
 
     @Transactional
-    public AjaxResult saveSign(JwGameItem jwGameItem, Long[] sportIds, Long teamId, Long editId) {
+    public AjaxResult saveSign(JwGameItem jwGameItem, Long[] sportIds, Long teamId, Long editId, String backNum) {
 
         if (jwGameItem != null && sportIds != null && sportIds.length > 0) {
 
@@ -228,6 +228,7 @@ public class JwSignRecordService {
                         jwSignRecord.setSportLimit(jwGameItem.getSportLimit());
                         jwSignRecord.setGameItemId(jwGameItem.getId());
                         jwSignRecord.setTeamId(teamId);
+                        jwSignRecord.setBackNumber(backNum);
                         insertJwSignRecord(jwSignRecord);
 
                         JwSignRecordSport jwSignRecordSport = new JwSignRecordSport();
@@ -242,8 +243,9 @@ public class JwSignRecordService {
                         addNewSignToScheduleItem(jwSignRecord, jwGameItem);
 
                         // 判断需不需加背号
-                        addNewBackNum(jwSignRecord);
-
+                        if(StringUtils.isEmpty(backNum)){
+                            addNewBackNum(jwSignRecord);
+                        }
                     } else {
                         JwSport jwSport = jwSportService.selectJwSportById(sportId);
                         throw new GlobalException(jwSport.getPlayerName() + " 已经报名 " + jwGameItem.getCode() + " 组别");
@@ -275,6 +277,7 @@ public class JwSignRecordService {
                     jwSignRecord.setSportLimit(jwGameItem.getSportLimit());
                     jwSignRecord.setGameItemId(jwGameItem.getId());
                     jwSignRecord.setTeamId(teamId);
+                    jwSignRecord.setBackNumber(backNum);
                     insertJwSignRecord(jwSignRecord);
 
                     for (Long sportId : sportIds) {
@@ -291,7 +294,10 @@ public class JwSignRecordService {
                     addNewSignToScheduleItem(jwSignRecord, jwGameItem);
 
                     // 判断需不需加背号
-                    addNewBackNum(jwSignRecord);
+
+                    if(StringUtils.isEmpty(backNum)){
+                        addNewBackNum(jwSignRecord);
+                    }
                 }
             } else if ("3".equals(jwGameItem.getSportLimit())) {
 
@@ -319,6 +325,7 @@ public class JwSignRecordService {
                     jwSignRecord.setSportLimit(jwGameItem.getSportLimit());
                     jwSignRecord.setGameItemId(jwGameItem.getId());
                     jwSignRecord.setTeamId(teamId);
+                    jwSignRecord.setBackNumber(backNum);
                     insertJwSignRecord(jwSignRecord);
 
                     for (Long sportId : sportIds) {
@@ -335,7 +342,10 @@ public class JwSignRecordService {
                     addNewSignToScheduleItem(jwSignRecord, jwGameItem);
 
                     // 判断需不需加背号
-                    addNewBackNum(jwSignRecord);
+                    if(StringUtils.isEmpty(backNum)){
+                        addNewBackNum(jwSignRecord);
+                    }
+
                 }
             }
         }

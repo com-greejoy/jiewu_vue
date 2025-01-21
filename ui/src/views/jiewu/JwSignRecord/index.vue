@@ -70,17 +70,18 @@
             <span v-for="itemm in item.jwSignRecordSportList"
                   class="sport-name"
                   :class="itemm.sex === 'f'? 'female' : (itemm.sex === 'm'? 'male' : '')"
-          >
+            >
             <el-popover
               placement="top"
-              width="320"
+              width="390"
               v-model="itemm.visible">
               <div style="text-align: center; margin: 0">
-                <el-link :underline="false"  style="margin-right: 12px" type="primary" @click="playMusic(item)">音乐</el-link>
-                <el-link :underline="false"  style="margin-right: 12px" type="danger" @click="delSport(itemm)">删除选手</el-link>
-                <el-link :underline="false"  style="margin-right: 12px" type="primary" @click="addSport(item, scope.row)">加人</el-link>
+                <el-link :underline="false" style="margin-right: 12px" type="primary" @click="playMusic(item)">音乐</el-link>
+                <el-link :underline="false" style="margin-right: 12px" type="danger" @click="delSport(itemm)">删除选手</el-link>
+                <el-link :underline="false" style="margin-right: 12px" type="primary" @click="addSport(item, scope.row)">加人</el-link>
                 <el-link :underline="false" type="warning" style="margin-right: 12px" @click="delRecord(item)">删除记录</el-link>
-                <el-link :underline="false" type="success" @click="handleChange(item)">改组</el-link>
+                <el-link :underline="false" type="success" style="margin-right: 12px" @click="handleChange(item)">改组</el-link>
+                <el-link :underline="false" type="primary" @click="handleUpImg(item)">上传图片</el-link>
               </div>
               <span slot="reference">{{itemm.playerName}}<span v-if="scope.row.sportLimit != 1" style="margin-right: 8px"></span></span>
             </el-popover>
@@ -298,6 +299,21 @@
       </div>
     </el-dialog>
 
+    <el-dialog title="上传图片" :visible.sync="upImgFormOpen" width="400px" append-to-body>
+
+      <el-form ref="form" :model="upImgForm" label-width="80px">
+        <el-form-item label="图片" prop="showImg">
+          <image-upload :limit="1" v-model="upImgForm.showImg"/>
+        </el-form-item>
+      </el-form>
+
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="saveUpImg">确 定</el-button>
+        <el-button @click="upImgFormOpen = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+
   </div>
 </template>
 
@@ -307,13 +323,15 @@
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {delJwSignRecordSport, addJwSignRecordSport} from "@/api/jiewu/JwSignRecordSport";
   import {listJwSport} from "@/api/jiewu/JwSport";
-  import { getToken } from "@/utils/auth";
+  import {getToken} from "@/utils/auth";
 
   export default {
     name: "JwSignRecord",
     dicts: ['jw_sport_limit', 'jw_sex'],
     data() {
       return {
+        upImgFormOpen: false,
+        upImgForm: {},
 
         // 用户导入参数
         upload: {
@@ -326,7 +344,7 @@
           // 是否更新已经存在的用户数据
           matchId: 0,
           // 设置上传的请求头部
-          headers: { Authorization: "Bearer " + getToken() },
+          headers: {Authorization: "Bearer " + getToken()},
           // 上传的地址
           url: process.env.VUE_APP_BASE_URL + "/jiewu/JwSignRecord/importData"
         },
@@ -411,7 +429,7 @@
         this.addSportForm = item;
         this.addSportForm.gameItem = gameItem;
 
-        if(!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)){
+        if (!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)) {
           this.$modal.msgError("先选择代表队");
           return;
         }
@@ -451,6 +469,18 @@
           })
         }
       },
+      // 上传选手图片
+      handleUpImg(row) {
+        this.upImgForm = row;
+        this.upImgFormOpen = true;
+      },
+      saveUpImg() {
+        if(this.upImgForm.id && this.upImgForm.showImg){
+          updateJwSignRecord({id: this.upImgForm.id, showImg: this.upImgForm.showImg}).then(res=>{
+            this.upImgFormOpen = false;
+          })
+        }
+      },
       handleChange(row) {
         this.changeGameItemForm = row;
         this.changeGameItemId = null;
@@ -473,7 +503,7 @@
       getTeamList() {
         listJwTeam({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000}).then(response => {
           this.JwTeamList = response.rows || [];
-          this.JwTeamList.sort((a,b)=>a.indexOrder - b.indexOrder)
+          this.JwTeamList.sort((a, b) => a.indexOrder - b.indexOrder)
         });
       },
       getList() {
@@ -526,7 +556,7 @@
         this.single = selection.length !== 1;
         this.multiple = !selection.length
       },
-      handleAddA(){
+      handleAddA() {
         this.reset();
 
         this.form.gameItem = this.JwGameItemList[0];
@@ -543,7 +573,7 @@
       handleAdd(item) {
         this.reset();
 
-        if(!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)){
+        if (!this.JwTeamList.find((item) => item.id == this.queryParams.teamId)) {
           this.$modal.msgError("先选择代表队");
           return;
         }
@@ -602,8 +632,8 @@
           ...this.queryParams
         }, `报名数据_${new Date().getTime()}.xlsx`)
       },
-      handleImport(){
-        if(!this.queryParams.matchId){
+      handleImport() {
+        if (!this.queryParams.matchId) {
           this.$modal.msgError("先选择比赛");
           return;
         }
@@ -624,7 +654,7 @@
         this.upload.open = false;
         this.upload.isUploading = false;
         this.$refs.upload.clearFiles();
-        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+        this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", {dangerouslyUseHTMLString: true});
         this.getList();
       },
     }
@@ -636,11 +666,13 @@
     font-size: 12px;
     color: #888888;
   }
-  .back-num{
+
+  .back-num {
     color: #07c160;
     font-weight: 600;
   }
-  .quick-edit{
+
+  .quick-edit {
     white-space: nowrap;
     margin-right: 12px;
   }
@@ -652,7 +684,8 @@
   .female {
     color: #FF3399;
   }
-  ::v-deep .el-table .cell{
+
+  ::v-deep .el-table .cell {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;

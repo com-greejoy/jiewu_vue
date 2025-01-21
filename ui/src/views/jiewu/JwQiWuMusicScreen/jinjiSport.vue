@@ -7,7 +7,7 @@
       <div class="rank-item" :class="{leftLast: index == sportRankList.length / 2 - 1 , mangSport: currentGameItem.promotionNum == 32}" v-for="(item, index) in sportRankList">
         <div class="si rank">{{item.rankOrder}}</div>
         <div class="si back-num">{{item.backNumber}}</div>
-        <div class="si sport">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
+        <div class="si sport" :class="{fvf: currentGameItem.name.indexOf('5V5') > -1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
         <div class="si team-name">{{item.jwTeam.teamName}}</div>
         <div class="si avg-score">晋级{{currentGameItem.promotionNum || '-'}}强</div>
       </div>
@@ -142,7 +142,8 @@
         margin-right: 120px;
         color: #fff;
         background: linear-gradient(to right bottom, #f50d0d, #111d42);
-
+        background: linear-gradient(to right bottom, #f6c328, #f83b01);
+        background: linear-gradient(to right , #d5282a, #444446);
         &.mangSport{
           margin-bottom: 4px;
           padding: 4px 48px;
@@ -159,8 +160,12 @@
 
         .sport {
           text-align: center;
-          width: 200px;
-          min-width: 200px;
+          width: 300px;
+          min-width: 300px;
+
+          &.fvf{
+            width: 920px;
+          }
         }
 
         .back-num {
@@ -170,8 +175,8 @@
         }
 
         .team-name {
-          width: 480px;
-          min-width: 480px;
+          width: 380px;
+          min-width: 380px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;

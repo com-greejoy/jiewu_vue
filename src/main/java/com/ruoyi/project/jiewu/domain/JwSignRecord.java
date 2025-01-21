@@ -92,6 +92,16 @@ public class JwSignRecord extends BaseEntity
     @JsonFormat(pattern = "MM月dd日 HH:mm")
     private Date placeTime;
 
+    private String showImg;
+
+    public String getShowImg() {
+        return showImg;
+    }
+
+    public void setShowImg(String showImg) {
+        this.showImg = showImg;
+    }
+
     public String getDescription() {
         return description;
     }

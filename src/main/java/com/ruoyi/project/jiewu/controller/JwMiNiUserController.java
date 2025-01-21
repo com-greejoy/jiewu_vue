@@ -320,7 +320,7 @@ public class JwMiNiUserController extends BaseController {
                 if (now.before(jwMatch.getSignBeginTime())) {
                     return AjaxResult.error("报名未开始");
                 }
-                jwSignRecordService.saveSign(jwGameItem, sportIds, teamId, editId);
+                jwSignRecordService.saveSign(jwGameItem, sportIds, teamId, editId, null);
             }
 
             return AjaxResult.success();

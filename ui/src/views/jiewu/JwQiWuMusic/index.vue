@@ -41,12 +41,12 @@
     <el-table v-loading="loading" :data="JwSignRecordList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="ID" width="55" align="center" prop="id" />
-      <el-table-column label="代表队" align="left" prop="teamId" >
+      <el-table-column label="代表队" width="220" align="left" prop="teamId" >
         <template slot-scope="scope">
           <span>{{ getTeamName(scope.row) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="组别" width="300" align="left" prop="gameItemId" >
+      <el-table-column label="组别" width="220" align="left" prop="gameItemId" >
         <template slot-scope="scope">
           <span>{{ getGameItemName(scope.row) }}</span>
         </template>
@@ -56,12 +56,36 @@
           <span style="color: #07c160; font-weight: 600;">{{ scope.row.backNumber }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="选手" align="left" prop="backNumber" >
+        <template slot-scope="scope">
+          <span style="color: #1890ff; font-weight: 600;margin-right: 8pt;" v-for="sport in scope.row.jwSignRecordSportList">{{ sport.playerName }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="出场顺序" width="88" align="center" prop="indexOrder" >
         <template slot-scope="scope">
           <span style="color: #E6A23C; font-weight: 600;">{{ scope.row.indexOrder }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="作品名称" align="left" prop="worksName" />
+      <el-table-column label="作品名称" align="left" width="220" prop="worksName" >
+        <template slot-scope="scope">
+          <el-popover
+            @show="WorksName = scope.row.worksName"
+            placement="top"
+            :width="200"
+            v-model="scope.row.visible">
+            <div style="text-align: center; margin: 0">
+              <el-input size="small" v-model="reWorksName" controls-position="right" :min="1"/>
+              <div class="area-btns" style="margin-top: 24px">
+                <el-link :underline="false" type="danger" @click="handleChangeWorksName(scope.row)">确认</el-link>
+              </div>
+            </div>
+            <div slot="reference" class="area-btn" >
+              <el-link :underline="false" type="danger"><div style="cursor: pointer">{{scope.row.worksName || '-'}}</div></el-link>
+            </div>
+          </el-popover>
+        </template>
+      </el-table-column>
+
       <el-table-column label="音乐/视频" align="left" prop="worksMusicName" />
 
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -85,7 +109,7 @@
 </template>
 
 <script>
-  import {listQiWuMusic} from "@/api/jiewu/JwSignRecord";
+  import {listQiWuMusic, updateJwSignRecord} from "@/api/jiewu/JwSignRecord";
   import {listJwTeam} from "@/api/jiewu/JwTeam";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {delJwSignRecordSport, addJwSignRecordSport} from "@/api/jiewu/JwSignRecordSport";
@@ -97,6 +121,7 @@
     dicts: ['jw_sport_limit', 'jw_sex'],
     data() {
       return {
+        reWorksName:"",
         loading: true,
         ids: [],
         // 非单个禁用
@@ -146,6 +171,14 @@
       },
     },
     methods: {
+      handleChangeWorksName(row){
+        if(this.reWorksName){
+          updateJwSignRecord({id: row.id, worksName: this.reWorksName}).then(res=>{
+            this.reWorksName = "";
+            this.getList()
+          })
+        }
+      },
       handlePlayMusic(item){
         sendMusic({ worksMusic: item.worksMusic, matchId: this.queryParams.matchId}).then(res=>{
           this.$modal.msgSuccess("发送成功");
@@ -190,7 +223,7 @@
       },
       getList() {
         this.loading = true;
-        // this.queryParams.sportLimit = 3;
+        this.queryParams.sportLimit = 3;
         listQiWuMusic(this.queryParams).then(response => {
           this.JwSignRecordList = response.rows;
           this.total = response.total;

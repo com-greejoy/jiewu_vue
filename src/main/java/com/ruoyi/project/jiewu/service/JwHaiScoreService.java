@@ -118,15 +118,45 @@ public class JwHaiScoreService {
 
     // 计算组别成绩
     @Transactional
-    public int jiSuanGameItem(Long gameItemId) {
+    public int jiSuanGameItem(Long gameItemId, String type) {
+        // type  计算分数方式   直接平均分   去最高最低分   修正计算法
 
         JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(gameItemId);
 
-        if (jwGameItem.getName().contains("齐舞")) {
-
+        if ("zhijiepingjun".equals(type)) {
             jwSignRecordService.clearScoreByGameItem(gameItemId);
 
-            // 齐舞打分，去除最高分最低分
+            // 每个组别的全部选手
+            List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordListByGameItem(jwGameItem.getId());
+
+            jwSignRecordList.forEach(jwSignRecord -> {
+                // 选手的全部得分
+                List<JwHaiScore> jwScoreListPlayer = selectJwHaiScoreListBySport(jwSignRecord.getId());
+
+                BigDecimal playerScoreAll = new BigDecimal("0");
+                int playerCount = 0;
+
+                jwScoreListPlayer.sort((u1, u2) -> new BigDecimal(u2.getScore()).compareTo(new BigDecimal(u1.getScore())));
+
+                for ( JwHaiScore jwScore : jwScoreListPlayer) {
+                    if (StringUtils.isNotEmpty(jwScore.getScore()) && new BigDecimal(jwScore.getScore()).compareTo(new BigDecimal("0")) > 0) {
+                        playerScoreAll = playerScoreAll.add(new BigDecimal(jwScore.getScore()));
+                        playerCount++;
+                    }
+                }
+
+                if (playerCount > 0) {
+                    BigDecimal playerAvg = playerScoreAll.divide(new BigDecimal(String.valueOf(playerCount)), 3, BigDecimal.ROUND_HALF_DOWN);
+                    JwSignRecord jwSignRecordUpdate = new JwSignRecord();
+                    jwSignRecordUpdate.setId(jwSignRecord.getId());
+                    jwSignRecordUpdate.setAllScore(playerScoreAll.toString());
+                    jwSignRecordUpdate.setAvgScore(playerAvg.toPlainString());
+                    jwSignRecordService.updateJwSignRecord(jwSignRecordUpdate);
+                }
+            });
+        } else if ("zuigaozuidi".equals(type)) {
+
+            jwSignRecordService.clearScoreByGameItem(gameItemId);
 
             // 每个组别的全部选手
             List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordListByGameItem(jwGameItem.getId());
@@ -157,7 +187,7 @@ public class JwHaiScoreService {
                 }
             });
 
-        } else {
+        } else if ("xiuzheng".equals(type)) {
 
             jwSignRecordService.clearScoreByGameItem(gameItemId);
 
@@ -440,7 +470,7 @@ public class JwHaiScoreService {
                     query.setGameItemId(jwGameItem.getId());
                     query.setMatchId(matchId);
                     List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordHaiScore(query);
-                    if(jwSignRecordList != null && jwSignRecordList.size() > 0){
+                    if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
                         // 如果有决赛， 获取决赛成绩
                         if ("2".equals(jwGameItem.getMatchType())) {
 

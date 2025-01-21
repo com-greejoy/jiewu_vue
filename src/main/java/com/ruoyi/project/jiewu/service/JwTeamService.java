@@ -101,17 +101,17 @@ public class JwTeamService {
                 fee = jwGameItem.getFee();
             }
             // 李金鑫星曜同辉的  按实际人数收费
-            if(jwGameItem.getMatchId().equals(13l) && Long.valueOf(jwGameItem.getCode()) >= 8 && Long.valueOf(jwGameItem.getCode()) <= 12){
-                if(jwSignRecord.getJwSignRecordSportList() != null ){
-                    if(jwSignRecord.getJwSignRecordSportList().size() == 1){
-                        fee = new BigDecimal("580");
-                    }else if(jwSignRecord.getJwSignRecordSportList().size() == 2){
-                        fee = new BigDecimal("960");
-                    }else if(jwSignRecord.getJwSignRecordSportList().size() == 3 || jwSignRecord.getJwSignRecordSportList().size() == 4){
-                        fee = new BigDecimal("380").multiply(new BigDecimal(jwSignRecord.getJwSignRecordSportList().size()));
-                    }
-                }
-            }
+//            if(jwGameItem.getMatchId().equals(13l) && Long.valueOf(jwGameItem.getCode()) >= 8 && Long.valueOf(jwGameItem.getCode()) <= 12){
+//                if(jwSignRecord.getJwSignRecordSportList() != null ){
+//                    if(jwSignRecord.getJwSignRecordSportList().size() == 1){
+//                        fee = new BigDecimal("580");
+//                    }else if(jwSignRecord.getJwSignRecordSportList().size() == 2){
+//                        fee = new BigDecimal("960");
+//                    }else if(jwSignRecord.getJwSignRecordSportList().size() == 3 || jwSignRecord.getJwSignRecordSportList().size() == 4){
+//                        fee = new BigDecimal("380").multiply(new BigDecimal(jwSignRecord.getJwSignRecordSportList().size()));
+//                    }
+//                }
+//            }
         } else if ("3".equals(jwGameItem.getSportLimit())) {
             // 多人
             if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {

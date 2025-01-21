@@ -22,6 +22,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="JwSignRecordSport" id="JwSignRecordSportResult">
         <result property="id" column="sub_id"/>
         <result property="playerName" column="player_name"/>
+        <result property="showImg"    column="show_img"    />
     </resultMap>
 
     <sql id="selectJwEightVo">
@@ -50,7 +51,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectJwEightListWithSport" parameterType="JwEight" resultMap="JwEightSportResult">
-        select je.* , cc.id as sub_id, jsr.back_number, cc.player_name from jw_eight je
+        select je.* , cc.id as sub_id, jsr.back_number, jsr.show_img, cc.player_name from jw_eight je
         left join jw_sign_record jsr on jsr.id = je.player_id
         left join jw_sign_record_sport b on b.sign_record_id = je.player_id
         left join jw_sport cc on cc.id = b.sport_id

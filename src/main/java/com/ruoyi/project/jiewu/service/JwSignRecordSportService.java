@@ -11,7 +11,6 @@ import com.ruoyi.project.jiewu.mapper.JwSignRecordSportMapper;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSport;
 import org.springframework.transaction.annotation.Transactional;
 
-
 @Service
 public class JwSignRecordSportService {
 
@@ -29,6 +28,10 @@ public class JwSignRecordSportService {
         return jwSignRecordSportMapper.selectJwSignRecordSportList(jwSignRecordSport);
     }
 
+    public List<JwSignRecordSport> selectJwSignRecordSportListByGameItemName(JwSignRecordSport jwSignRecordSport) {
+        return jwSignRecordSportMapper.selectJwSignRecordSportListByGameItemName(jwSignRecordSport);
+    }
+
     // 获取报名记录的人员名单
     public List<JwSignRecordSport> selectJwSignRecordSportListById(Long signRecordId) {
         return jwSignRecordSportMapper.selectJwSignRecordSportListById(signRecordId);
@@ -38,7 +41,6 @@ public class JwSignRecordSportService {
     public List<JwSignRecordSport> selectJwSignRecordSportBySportId(Long sportId) {
         return jwSignRecordSportMapper.selectJwSignRecordSportBySportId(sportId);
     }
-
 
     @Transactional
     public int insertJwSignRecordSport(JwSignRecordSport jwSignRecordSport) {

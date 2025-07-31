@@ -323,7 +323,10 @@
               scheduleItemList = scheduleItemList.sort((a, b) => a.area > b.area ? 1 : -1);
               console.log(scheduleItemList)
               schedulePlaceList.push({placeOrder: place["placeOrder"], scheduleItemList: scheduleItemList});
-            })
+            });
+            if(schedulePlaceList){
+              schedulePlaceList.sort((a, b) => a.placeOrder - b.placeOrder)
+            }
             this.gameItemList = schedulePlaceList;
           }
           this.currentSelectGameItem = this.currentGameItem || {};

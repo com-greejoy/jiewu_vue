@@ -6,9 +6,9 @@
     </video>
     <el-image class="img" :src="match.mainImg" fit="fill" v-if="match.mainImg"></el-image>
 
-    <Battle v-if="showBattle" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></Battle>
+    <Battle v-if="showBattle"  :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></Battle>
 
-    <HaiXuanGrade v-if="showHaiXuanGrade" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></HaiXuanGrade>
+    <HaiXuanGrade v-if="showHaiXuanGrade" :minOrder.sync="battle.minOrder" :maxOrder.sync="battle.maxOrder" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></HaiXuanGrade>
     <JinJiSport v-if="showjinJiSport" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></JinJiSport>
 
   </div>
@@ -26,6 +26,8 @@
     components: {Battle, HaiXuanGrade, JinJiSport},
     data() {
       return {
+
+
         battle: {},
         showBattle: false,
         showHaiXuanGrade: false,
@@ -141,7 +143,7 @@
               // 投屏海选成绩
               setTimeout(() => {
                 getJwGameItem(data.gameItemId).then(res => {
-                  that.battle = {gameItemId: data.gameItemId, currentGameItem: res.data || data};
+                  that.battle = {minOrder: data.minOrder * 1, maxOrder: data.maxOrder * 1, gameItemId: data.gameItemId, currentGameItem: res.data || data};
                   that.showHaiXuanGrade = true;
                 })
               }, 100)

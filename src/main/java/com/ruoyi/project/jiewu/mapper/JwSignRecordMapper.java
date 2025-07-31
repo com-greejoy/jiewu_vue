@@ -69,6 +69,9 @@ public interface JwSignRecordMapper {
     // 修改排名
     public int saveCustomOrder(@Param("id") Long id, @Param("rankOrder") Long rankOrder);
 
+    // 修改选手队伍
+    public int changeTeam(@Param("ids") Long[] ids, @Param("teamId") Long teamId);
+
     // 获取海选晋级选手
     public List<JwSignRecord> selectHaiXuanJinJiSportList(@Param("gameItemId") Long gameItemId);
 

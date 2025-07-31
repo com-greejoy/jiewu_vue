@@ -13,10 +13,9 @@ public interface JwSportMapper {
 
     public List<JwSport> selectTodayBirthSport(String today);
 
-    public JwSport selectJwSportByIdCard(String idCard, Long id);
+    public JwSport selectJwSportByIdCard(String idCard, Long id, Long createUserId);
 
     public JwSport selectJwSportByName(String playerName, String idCard, Long createUserId);
-
 
     public List<JwSport> getSportListWithsignRecord(Long signRecordId);
 
@@ -31,6 +30,8 @@ public interface JwSportMapper {
     public int insertJwSport(JwSport jwSport);
 
     public int updateJwSport(JwSport jwSport);
+
+    public int updateJwSportByName(JwSport jwSport);
 
     public int deleteJwSportById(Long id);
 

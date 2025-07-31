@@ -56,9 +56,19 @@ export function updateJwMatchTeam(data) {
 }
 
 // 删除比赛参赛的队伍
-export function delJwMatchTeam(teamId) {
+export function delJwMatchTeam(data) {
   return request({
-    url: '/jiewu/JwMatchTeam/' + teamId,
-    method: 'delete'
+    url: '/jiewu/JwMatchTeam/removeTeam',
+    method: 'post',
+    params: data
+  })
+}
+
+// 删除比赛参赛的队伍
+export function reOrderMatchTeam(data) {
+  return request({
+    url: '/jiewu/JwMatchTeam/reOrderMatchTeam',
+    method: 'post',
+    params: data
   })
 }

@@ -60,12 +60,12 @@
         currentJudge: {},
         matchJudgeList: [],
         showScore: false,
-        matchId:  14,
+        matchId:  17,
       }
     },
     created() {
       this.matchId = this.$route.query.matchId;
-      this.matchId = 14;
+      this.matchId = 17;
       if (!this.matchId) {
         this.showMatchSelect = true;
       } else {
@@ -161,6 +161,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      z-index: 1002;
 
       .judge-con {
         width: 200px;

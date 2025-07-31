@@ -45,10 +45,12 @@ public class JwScreenController extends BaseController {
     // 投屏海选成绩
     @PostMapping("/sendHaiXuanGrade")
     @ResponseBody
-    public AjaxResult sendHaiXuanGrade(Long gameItemId, Long matchId) {
+    public AjaxResult sendHaiXuanGrade(Long gameItemId, Long matchId, Long minOrder, Long maxOrder) {
         JSONObject msg = new JSONObject();
         msg.put("type", "sendHaiXuanGrade");
         msg.put("gameItemId", gameItemId);
+        msg.put("minOrder", minOrder);
+        msg.put("maxOrder", maxOrder);
         WebsocketServe.sendUserTypeMessage("playMusicEr-" + matchId, msg.toJSONString());
         return AjaxResult.success(1);
     }

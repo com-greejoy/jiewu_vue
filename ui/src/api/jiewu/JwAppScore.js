@@ -27,6 +27,16 @@ export function xianshidafen(data) {
   })
 }
 
+export function xianshi3dafen(data) {
+  return request({
+    url: '/app/score/api/xianshi3dafen',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
+
 
 export function  getScheduleItems(data) {
   return request({

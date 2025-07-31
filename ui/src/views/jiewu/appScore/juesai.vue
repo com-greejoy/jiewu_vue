@@ -3,12 +3,13 @@
     <div class="select-chang">
       <el-radio size="mini" v-model="currentArea" label="A" border>A场地</el-radio>
       <el-radio size="mini" v-model="currentArea" label="B" border>B场地</el-radio>
+      <el-radio size="mini" v-model="currentArea" label="C" border>C场地</el-radio>
+      <el-radio size="mini" v-model="currentArea" label="D" border>D场地</el-radio>
 
       <el-radio size="mini" @change="lunChange" v-model="lun" label="1" border>第一轮</el-radio>
       <el-radio size="mini" @change="lunChange" v-model="lun" label="2" v-if="currentPk == '1.1' || currentPk == '3.0'" border>第二轮</el-radio>
       <el-radio size="mini" @change="lunChange" v-model="lun" label="3" v-if="currentPk == '1.1' || currentPk == '3.0'" border>第三轮</el-radio>
     </div>
-    <!--{{aaa}}-->
     <div class="sport-con">
       <div class="sport-left">
         <div class="sport-info">
@@ -89,6 +90,30 @@
     <div class="btn-con">
       <div class="save-btn" @click="saveScore">提交打分</div>
     </div>
+
+    <transition name="el-zoom-in-bottom">
+      <div class="show-queren" v-show="showSave" @click.stop="showSave = false">
+        <div class="judge-con" @click.stop="aaa">
+          <div class="judge-title">确认获胜者</div>
+          <div class="judge-item">
+            <div v-if="((p1.score || 0) * 1) > ((p2.score || 0) * 1)" class="sport-info-win blue">
+              <div class="sport-name">{{p1.playerName}}</div>
+              <div class="sport-back">{{p1.backNumber}}</div>
+              <div class="sport-score"><span>得分:</span>{{p1.score || '-'}}</div>
+            </div>
+            <div v-if="((p1.score || 0) * 1) < ((p2.score || 0) * 1)" class="sport-info-win red">
+              <div class="sport-name">{{p2.playerName}}</div>
+              <div class="sport-back">{{p2.backNumber}}</div>
+              <div class="sport-score"><span>得分:</span>{{p2.score || '-'}}</div>
+            </div>
+          </div>
+          <div class="judge-btn">
+            <el-link :underline="false" type="danger" @click="showSave = false">取 消</el-link>
+            <el-link :underline="false" type="warning" @click="saveEightScorehandel">提 交</el-link>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -111,7 +136,7 @@
     },
     data() {
       return {
-        aaa: '',
+
         p1: {},
         p2: {},
         currentPk: "",
@@ -131,11 +156,12 @@
         timeout: 2000,
         interval: 10000,
         reconnect: true,
-        area: ["A", "B"],
+        area: ["A", "B", "C", "D"],
         currentArea: "A",
         eightList: [],
         inte: null,
-        jwEightScoreList: []
+        jwEightScoreList: [],
+        showSave: false,
       }
     },
     destroyed() {
@@ -150,7 +176,10 @@
       this.inte = setInterval(this.getCurrentPkHandel, 1000)
     },
     methods: {
-      lunChange(){
+      aaa() {
+
+      },
+      lunChange() {
         let jwEightScore = (this.jwEightScoreList || []).filter(item => item.lun == this.lun)[0] || "";
         if (jwEightScore && jwEightScore.subScore) {
           let jss = jwEightScore.subScore.split(",");
@@ -187,7 +216,10 @@
 
         this.eightList = data.list || [];
         // if ((this.lun != currentPkGroup.lun || this.currentPk != currentPkGroup.currentPk) && (currentPkGroup.area == "全" || currentPkGroup.area == this.currentArea)) {
-        //   this.lun = currentPkGroup.lun;
+        if (currentPkGroup.lun == 3 && this.lun != 3) {
+          this.lun = currentPkGroup.lun;
+          this.lunChange()
+        }
 
         if ((this.currentPk != currentPkGroup.currentPk) && (currentPkGroup.area == "全" || currentPkGroup.area == this.currentArea)) {
 
@@ -214,7 +246,52 @@
           this.onmessage(currentPkGroup, data)
         })
       },
+      saveEightScorehandel() {
+        let that = this;
+        that.loadingSave = true;
+        saveEightScore({
+          judgeId: that.currentJudge.id,
+          currentPkGroup: that.currentPk,
+          jinJiId: ((that.p1.score || 0) * 1) > ((that.p2.score || 0) * 1) ? that.p1.playerId : that.p2.playerId,
+          lun: that.lun,
+          subScore: [that.score1l, that.score2l, that.score3l, that.score4l, that.score5l].join(",")
+        }).then(() => {
+          that.showSave = false;
+          that.loadingSave = false;
+          that.$notify({
+            title: '成功',
+            message: '提交成功',
+            type: 'success',
+            offset: 300
+          });
+          if ((that.currentPk == '1.1' || that.currentPk == '3.0') && that.lun == "1") {
+            that.lun = "2";
+          }
+
+          that.currentPk = "";
+
+          that.p1 = {};
+          that.p2 = {};
+
+          that.score1l = 100;
+          that.score1r = 0;
+          that.score2l = 100;
+          that.score2r = 0;
+          that.score3l = 100;
+          that.score3r = 0;
+          that.score4l = 100;
+          that.score4r = 0;
+          that.score5l = 100;
+          that.score5r = 0;
+
+
+          that.getCurrentPkHandel()
+        }).catch(() => {
+          that.loadingSave = false;
+        });
+      },
       saveScore() {
+        let that = this;
         if (this.p1.score || this.p2.score) {
           if (this.p1.score == this.p2.score) {
             this.$notify.error({
@@ -225,41 +302,8 @@
             return;
           }
           if (this.p1.id && this.p2.id) {
-            this.loadingSave = true;
-            saveEightScore({
-              judgeId: this.currentJudge.id,
-              currentPkGroup: this.currentPk,
-              jinJiId: ((this.p1.score || 0) * 1) > ((this.p2.score || 0) * 1) ? this.p1.playerId : this.p2.playerId,
-              lun: this.lun,
-              subScore: [this.score1l, this.score2l, this.score3l, this.score4l, this.score5l].join(",")
-            }).then(res => {
-              this.loadingSave = false;
-              this.$notify({
-                title: '成功',
-                message: '提交成功',
-                type: 'success',
-                offset: 300
-              });
-              this.currentPk = "";
+            this.showSave = true;
 
-              this.p1 = {};
-              this.p2 = {};
-
-              this.score1l = 100
-              this.score1r = 0
-              this.score2l = 100
-              this.score2r = 0
-              this.score3l = 100
-              this.score3r = 0
-              this.score4l = 100
-              this.score4r = 0
-              this.score5l = 100
-              this.score5r = 0
-
-              this.getCurrentPkHandel()
-            }, () => {
-              this.loadingSave = false;
-            })
           }
         } else {
           this.$notify.error({
@@ -353,6 +397,96 @@
 </script>
 
 <style scoped lang="scss">
+  .show-queren {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1002;
+
+    .judge-con {
+      width: 260px;
+      border-radius: 12px;
+      box-shadow: 0px 6px 16px 2px rgba(0, 0, 0, 0.5);
+      padding: 24px;
+      background: #fff;
+    }
+
+    .judge-title {
+      text-align: center;
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: 1pt;
+    }
+
+    .judge-item {
+      margin-right: 0;
+      margin-top: 16pt;
+
+      .sport-info-win {
+        color: #fff;
+        padding: 12pt 0;
+
+        .sport-score {
+
+          font-weight: 600;
+          white-space: nowrap;
+          font-size: 22px;
+          margin-top: 8pt;
+          border-radius: 12px;
+
+
+          span {
+            font-size: 13px;
+          }
+        }
+
+        .sport-name {
+          margin-bottom: 8pt;
+          font-size: 18pt;
+        }
+
+        .sport-back {
+          font-weight: 600;
+          font-size: 20pt;
+        }
+
+        &.blue {
+          text-align: center;
+          background: #409EFF;
+          border-radius: 16px;
+        }
+
+        &.red {
+          flex: 1;
+          text-align: center;
+          background: #F56C6C;
+          border-radius: 16px;
+        }
+      }
+    }
+
+    .judge-btn {
+      text-align: center;
+
+      .el-link {
+        margin-right: 56pt;
+        margin-top: 28pt;
+        margin-bottom: 8pt;
+        font-size: 20px;
+        font-weight: 600;
+
+        &:nth-child(2) {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+
   .is-bordered {
     margin-right: 0 !important;
   }

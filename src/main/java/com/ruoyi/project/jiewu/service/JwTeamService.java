@@ -76,7 +76,9 @@ public class JwTeamService {
                         }
 
                         jwTeam1.setBackNums(jwSignRecords.stream()
-                                .map(JwSignRecord::getBackNumber) // 获取每个Person的backNum
+                                .map(jwSignRecord -> {
+                                    return StringUtils.isNotEmpty(jwSignRecord.getBackNumber()) ? jwSignRecord.getBackNumber() : "";
+                                }) // 获取每个Person的backNum
                                 .distinct()              // 去重
                                 .sorted()                // 排序
                                 .map(String::valueOf)    // 转换为String类型
@@ -112,7 +114,7 @@ public class JwTeamService {
 //                    }
 //                }
 //            }
-        } else if ("3".equals(jwGameItem.getSportLimit())) {
+        } else if ("3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit())) {
             // 多人
             if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
                 int sportCount = jwSignRecord.getJwSignRecordSportList().size();
@@ -139,45 +141,20 @@ public class JwTeamService {
         return jwTeamMapper.selectJwTeamByUserId(createUserId);
     }
 
-
-    /**
-     * 新增代表队
-     *
-     * @param jwTeam 代表队
-     * @return 结果
-     */
     public int insertJwTeam(JwTeam jwTeam) {
         jwTeam.setCreateTime(DateUtils.getNowDate());
         return jwTeamMapper.insertJwTeam(jwTeam);
     }
 
-    /**
-     * 修改代表队
-     *
-     * @param jwTeam 代表队
-     * @return 结果
-     */
     public int updateJwTeam(JwTeam jwTeam) {
         jwTeam.setUpdateTime(DateUtils.getNowDate());
         return jwTeamMapper.updateJwTeam(jwTeam);
     }
 
-    /**
-     * 批量删除代表队
-     *
-     * @param ids 需要删除的代表队主键
-     * @return 结果
-     */
     public int deleteJwTeamByIds(Long[] ids) {
         return jwTeamMapper.deleteJwTeamByIds(ids);
     }
 
-    /**
-     * 删除代表队信息
-     *
-     * @param id 代表队主键
-     * @return 结果
-     */
     public int deleteJwTeamById(Long id) {
         return jwTeamMapper.deleteJwTeamById(id);
     }

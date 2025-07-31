@@ -21,11 +21,14 @@
         <result property="mainImg" column="main_img"/>
         <result property="battleImg" column="battle_img"/>
         <result property="startBackNum"    column="start_back_num"    />
+        <result property="invitationCode"    column="Invitation_code"    />
+        <result property="invitationList"    column="Invitation_list"    />
+        <result property="isShowGrade"    column="is_show_grade"    />
     </resultMap>
 
     <sql id="selectJwMatchVo">
         select id, match_name, begin_time, end_time, start_back_num, is_show, main_img, battle_img, seal_unit,
-        sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations from jw_match
+        sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations, Invitation_code, Invitation_list from jw_match
     </sql>
 
     <!--获取没开始的比赛和正在报名的比赛-->
@@ -53,6 +56,9 @@
             <if test="posterImg != null  and posterImg != ''">and poster_img = #{posterImg}</if>
             <if test="state != null  and state != ''">and state = #{state}</if>
             <if test="isShow != null  and isShow != ''">and is_show = #{isShow}</if>
+            <if test="isShowGrade != null  and isShowGrade != ''"> and is_show_grade = #{isShowGrade}</if>
+            <if test="invitationCode != null  and invitationCode != ''"> and Invitation_code = #{invitationCode}</if>
+            <if test="invitationList != null  and invitationList != ''"> and Invitation_list = #{invitationList}</if>
         </where>
     </select>
 
@@ -79,6 +85,9 @@
             <if test="mainImg != null">main_img,</if>
             <if test="battleImg != null">battle_img,</if>
             <if test="startBackNum != null">start_back_num,</if>
+            <if test="invitationCode != null">Invitation_code,</if>
+            <if test="invitationList != null">Invitation_list,</if>
+            <if test="isShowGrade != null">is_show_grade,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchName != null">#{matchName},</if>
@@ -96,6 +105,9 @@
             <if test="mainImg != null">#{mainImg},</if>
             <if test="battleImg != null">#{battleImg},</if>
             <if test="startBackNum != null">#{startBackNum},</if>
+            <if test="invitationCode != null">#{invitationCode},</if>
+            <if test="invitationList != null">#{invitationList},</if>
+            <if test="isShowGrade != null">#{isShowGrade},</if>
         </trim>
     </insert>
 
@@ -117,8 +129,17 @@
             <if test="mainImg != null and mainImg != ''">main_img = #{mainImg},</if>
             <if test="battleImg != null and battleImg != ''">battle_img = #{battleImg},</if>
             <if test="startBackNum != null">start_back_num = #{startBackNum},</if>
+            <if test="invitationCode != null">Invitation_code = #{invitationCode},</if>
+            <if test="invitationList != null">Invitation_list = #{invitationList},</if>
+            <if test="isShowGrade != null">is_show_grade = #{isShowGrade},</if>
         </trim>
         where id = #{id}
+    </update>
+
+    <update id="updateJwMatchInvitationList">
+        update jw_match
+        set Invitation_list = #{invitationList}
+        where id = #{matchId}
     </update>
 
     <delete id="deleteJwMatchById" parameterType="Long">

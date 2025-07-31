@@ -11,11 +11,11 @@ public class JwSportImport   {
     @Excel(name = "姓名")
     private String playerName;
 
-    @Excel(name = "背号")
-    private String backNum;
-
     @Excel(name = "单位")
     private String playerTeam;
+
+    @Excel(name = "背号")
+    private String backNum;
 
     public String getPlayerGroup() {
         return playerGroup;

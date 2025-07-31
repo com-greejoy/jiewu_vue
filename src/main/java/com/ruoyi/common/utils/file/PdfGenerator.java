@@ -1,18 +1,18 @@
 package com.ruoyi.common.utils.file;
 
+import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSport;
 
+import com.ruoyi.project.jiewu.domain.JwTeam;
 import org.apache.poi.xwpf.usermodel.*;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTPageMar;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTSectPr;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTblWidth;
-import org.openxmlformats.schemas.wordprocessingml.x2006.main.STTblWidth;
+import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -43,6 +43,16 @@ public class PdfGenerator {
     }
 
 
+    private static String getSessionNumberTop(String name) {
+        // 提取"第几场"数字部分
+        Pattern pattern = Pattern.compile("第(\\d+)阶段");
+        Matcher matcher = pattern.matcher(name);
+        if (matcher.find()) {
+            return String.valueOf(matcher.group(1));
+        }
+        return ""; // 默认值，如果未找到匹配项
+    }
+
 //    private static int getSessionNumber(String name) {
 //        // 提取"第几场"数字部分
 //        Pattern pattern = Pattern.compile("第(\\d+)场");
@@ -63,7 +73,7 @@ public class PdfGenerator {
         return ' ';
     }
 
-    public static byte[] generateWord(List<JwSignRecord> records, String matchName) throws IOException {
+    public static byte[] generateWord(List<JwSignRecord> records, String matchName, JwTeam jwTeam) throws IOException {
         XWPFDocument document = new XWPFDocument();
 
         // 创建标题
@@ -81,11 +91,15 @@ public class PdfGenerator {
         titleRun.setFontSize(16);
         titleRun.setBold(true);
 
-        XWPFRun aaa = titleParagraph.createRun();
-        aaa.setText("");
-        aaa.setFontSize(16);
-        aaa.setBold(true);
-        aaa.addBreak();
+
+        if(jwTeam != null){
+            XWPFRun aaa = titleParagraph.createRun();
+            aaa.setText(jwTeam.getTeamName());
+            aaa.setFontSize(16);
+            aaa.setBold(true);
+            aaa.addBreak();
+        }
+
         XWPFRun aaa22 = titleParagraph.createRun();
         aaa22.setText("");
         aaa22.setFontSize(16);
@@ -93,7 +107,7 @@ public class PdfGenerator {
         aaa22.addBreak();
 
 
-        Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(Collectors.groupingBy(jws -> "【第" + jws.getPlaceOrder() + "场 "
+        Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(Collectors.groupingBy(jws -> jws.getScheduleName() + "【第" + jws.getPlaceOrder() + "场 "
                 + DateUtils.parseDateToStr("HH:mm", jws.getPlaceTime())
                 + "】    " + jws.getItemName()
                 + "【" + DictUtils.getDictLabel("jw_area", jws.getJwScheduleItem().getArea()) + "】"
@@ -110,13 +124,46 @@ public class PdfGenerator {
 
         String[] keyS = groupedRecords.keySet().toArray(new String[0]);
 
+        // 正则表达式：精确提取“阶段汉字”和“场次数字”
+        Pattern pattern = Pattern.compile("第(.+?)阶段.*?第(\\d+)场");
+
         Arrays.sort(keyS, (s1, s2) -> {
-            int sessionComparison = Integer.compare(getSessionNumber(s1), getSessionNumber(s2));
-            if (sessionComparison != 0) {
-                return sessionComparison;
+            Matcher m1 = pattern.matcher(s1);
+            Matcher m2 = pattern.matcher(s2);
+
+            int stage1 = 0, stage2 = 0, round1 = 0, round2 = 0;
+
+            if (m1.find() && m2.find()) {
+                String stageStr1 = m1.group(1);
+                String stageStr2 = m2.group(1);
+                stage1 = ChineseNumUtil.chineseToArabic(stageStr1);
+                stage2 = ChineseNumUtil.chineseToArabic(stageStr2);
+                round1 = Integer.parseInt(m1.group(2));
+                round2 = Integer.parseInt(m2.group(2));
             }
+
+            // 先按阶段排序
+            int stageCompare = Integer.compare(stage1, stage2);
+            if (stageCompare != 0) {
+                return stageCompare;
+            }
+
+            // 阶段相同，再按场次排序
+            stageCompare = Integer.compare(round1, round2);
+            if (stageCompare != 0) {
+                return stageCompare;
+            }
+
             return Character.compare(getVenue(s1), getVenue(s2));
         });
+
+//        Arrays.sort(keyS, (s1, s2) -> {
+//            int sessionComparison = Integer.compare(getSessionNumber(s1), getSessionNumber(s2));
+//            if (sessionComparison != 0) {
+//                return sessionComparison;
+//            }
+//            return Character.compare(getVenue(s1), getVenue(s2));
+//        });
 
 
         // 添加每个分组的数据为表格
@@ -203,7 +250,7 @@ public class PdfGenerator {
                     String h = StringUtils.isNotEmpty(record.getWorksName()) ? record.getWorksName() + "\\n" : "";
                     String[] rowContents = {
                             String.valueOf(record.getIndexOrder()),
-                            String.valueOf(record.getBackNumber()),
+                            String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
                             record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
                             record.getTeamName()
                     };
@@ -262,6 +309,161 @@ public class PdfGenerator {
         return byteArrayOutputStream.toByteArray();
     }
 
+    public static byte[] generateFeeWord(List<JwSignRecord> jwSignRecordList, String matchName, JwTeam jwTeam) throws IOException {
+        XWPFDocument document = new XWPFDocument();
+
+        // 创建标题
+        XWPFParagraph titleParagraph = document.createParagraph();
+        titleParagraph.setAlignment(ParagraphAlignment.CENTER);
+
+        XWPFRun titleRun1 = titleParagraph.createRun();
+        titleRun1.setText(matchName);
+        titleRun1.setFontSize(18);
+        titleRun1.setBold(true);
+        titleRun1.addBreak();
+
+        XWPFRun titleRun = titleParagraph.createRun();
+        titleRun.setText("收费通知单");
+        titleRun.setFontSize(16);
+        titleRun.setBold(true);
+        titleRun.addBreak();
+
+        if(jwTeam != null){
+            XWPFRun aaa22 = titleParagraph.createRun();
+            aaa22.setText(jwTeam.getTeamName());
+            aaa22.setFontSize(16);
+            aaa22.setBold(true);
+            aaa22.addBreak();
+        }
+
+        if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
+
+            // 按照上场序号排序
+            List<JwSignRecord> sortedList = jwSignRecordList.stream().sorted(Comparator.comparing(JwSignRecord::getSportLimit)).collect(Collectors.toList());
+
+            // 设置页面宽度（假设为100%）
+            CTTblWidth tableWidth = CTTblWidth.Factory.newInstance();
+            tableWidth.setType(STTblWidth.PCT);
+            tableWidth.setW(BigInteger.valueOf(5000));
+
+            // 创建表格
+            XWPFTable table = document.createTable(sortedList.size() + 1, 5); // 表头+数据行数
+            table.getCTTbl().addNewTblPr().setTblW(tableWidth);
+
+            int columnCount = 5;
+            for (int col = 0; col < columnCount; col++) {
+                CTTblWidth cellWidth = CTTblWidth.Factory.newInstance();
+                cellWidth.setType(STTblWidth.DXA);
+                int w = 2000;
+                switch (col) {
+                    case 0:
+                        w = 750;
+                        break;
+                    case 1:
+                        w = 750;
+                        break;
+                    case 2:
+                        w = 2000;
+                        break;
+                    case 3:
+                        w = 4000;
+                        break;
+                    case 4:
+                        w = 1000;
+                        break;
+                }
+                cellWidth.setW(BigInteger.valueOf(w)); // 2000 对应于大约2%
+
+                for (XWPFTableRow row : table.getRows()) {
+                    XWPFTableCell cell = row.getCell(col);
+                    if (cell.getCTTc().getTcPr() == null) {
+                        cell.getCTTc().addNewTcPr();
+                    }
+                    cell.getCTTc().getTcPr().setTcW(cellWidth);
+                }
+            }
+
+            // 设置表头
+            XWPFTableRow headerRow = table.getRow(0);
+            String[] headers = {"序号", "背号", "选手", "组别", "报名费"};
+            for (int i = 0; i < headers.length; i++) {
+
+                if (headerRow.getCell(i) == null) {
+                    headerRow.createCell();
+                }
+
+                XWPFTableCell cell = headerRow.getCell(i);
+                XWPFParagraph p = cell.getParagraphs().get(0);
+                if (p == null) {
+                    p = cell.addParagraph();
+                }
+                p.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun run = p.createRun();
+                run.setText(headers[i]);
+                run.setBold(true);
+                cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+            }
+
+            // 添加记录到表格中，并设置单元格内容居中
+            int rowIndex = 1;
+            BigDecimal allFee = new BigDecimal("0");
+            for (JwSignRecord record : sortedList) {
+                XWPFTableRow dataRow = table.getRow(rowIndex++);
+                String[] rowContents = {
+                        String.valueOf(rowIndex - 1),
+                        (StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
+                        record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
+                        record.getJwGameItem().getCode() + ":" + record.getJwGameItem().getName(),
+                        record.getFee().toPlainString() + (record.getSportLimit().equals("1") ? "" : "(" + record.getAvgFee().toPlainString() + "/人)")
+                };
+                for (int i = 0; i < rowContents.length; i++) {
+                    XWPFTableCell cell = dataRow.getCell(i);
+                    XWPFParagraph p = cell.getParagraphs().get(0);
+                    if (p == null) {
+                        p = cell.addParagraph();
+                    }
+                    p.setAlignment(ParagraphAlignment.CENTER);
+                    XWPFRun run = p.createRun();
+                    run.setText(rowContents[i]);
+                    cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                }
+                if(BigDecimalUtil.isNotNull(record.getFee())){
+                    allFee = allFee.add(record.getFee());
+                }
+            }
+
+            // 添加最后一行，并合并第一到第三列
+            XWPFTableRow newRow = table.createRow();
+            // 填充第一格内容
+            XWPFTableCell cell = newRow.getCell(0);
+            cell.getParagraphs().get(0).setAlignment(ParagraphAlignment.CENTER);
+
+            // 创建 Run 并设置样式
+            XWPFRun run = cell.getParagraphs().get(0).createRun();
+            run.setBold(true);
+            run.setFontSize(13);
+            run.setText("总计：" + allFee.toPlainString());
+//            run.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+
+            // 合并第1行的第1到第3个单元格（从索引0开始）
+            mergeCellsHorizontal(newRow, 0, 4); // 合并从第0个单元格到第2个
+            newRow.removeCell(1);
+            newRow.removeCell(1);
+            newRow.removeCell(1);
+            newRow.removeCell(1);
+        }
+
+        // 调用方法来设置整个文档的页边距
+        setPageMargins(document, 720, 720, 720, 720);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        document.write(byteArrayOutputStream);
+        document.close();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
     public static void setPageMargins(XWPFDocument document, int top, int bottom, int left, int right) {
 
         // 获取文档主体中的默认节属性
@@ -275,5 +477,24 @@ public class PdfGenerator {
         pageMar.setBottom(bottom);
         pageMar.setLeft(left);
         pageMar.setRight(right);
+    }
+
+    public static void mergeCellsHorizontal(XWPFTableRow row, int fromCell, int toCell) {
+        for (int cellIndex = fromCell; cellIndex <= toCell; cellIndex++) {
+            if (cellIndex == fromCell) {
+                // 设置第一个单元格为合并起点
+                CTTc ctTc = row.getCell(cellIndex).getCTTc();
+                CTTcPr ctTcPr = ctTc.isSetTcPr() ? ctTc.getTcPr() : ctTc.addNewTcPr();
+                CTDecimalNumber gridSpan = ctTcPr.isSetGridSpan() ? ctTcPr.getGridSpan() : ctTcPr.addNewGridSpan();
+                gridSpan.setVal(BigInteger.valueOf(toCell - fromCell + 1));
+            } else {
+                // 其他单元格设置为空，并隐藏边框
+//                row.removeCell(cellIndex);
+//                row.getCell(cellIndex).setText("");
+//                CTTc ctTc = row.getCell(cellIndex).getCTTc();
+//                CTTcPr ctTcPr = ctTc.isSetTcPr() ? ctTc.getTcPr() : ctTc.addNewTcPr();
+//                ctTcPr.addNewHMerge().setVal(STMerge.CONTINUE);
+            }
+        }
     }
 }

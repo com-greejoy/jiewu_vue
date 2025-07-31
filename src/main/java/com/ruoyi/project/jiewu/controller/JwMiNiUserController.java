@@ -89,7 +89,7 @@ public class JwMiNiUserController extends BaseController {
             return AjaxResult.error("授权错误");
         }
 
-//        openId = "op3oK7SCph0vYzUnxgpNmPDxK0rA";
+//        openId = "op3oK7doMbiZPD2QyiXwyWtPDTLg";
 
         JwWxUser jwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (jwWxUser == null) {
@@ -211,7 +211,7 @@ public class JwMiNiUserController extends BaseController {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
 
-            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), jwSport.getId());
+            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), jwSport.getId(), zwWxUser.getId());
             if(jwSport1 != null){
                 return AjaxResult.error("身份证已经存在");
             }
@@ -464,7 +464,7 @@ public class JwMiNiUserController extends BaseController {
                                 jwSportList.add(jwSport);
                             }
 
-                        }else if("3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())){
+                        }else if("3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())){
 
                             // 多人
                             if(jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0){
@@ -564,15 +564,28 @@ public class JwMiNiUserController extends BaseController {
     public AjaxResult listMatchQiWuSignRecord(@RequestHeader("Authorization") String openId, Long matchId, Long teamId){
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
-
             List<JwSignRecord> jwSignRecords = jwSignRecordService.listMatchQiWuSignRecord(teamId, matchId);
-
             return AjaxResult.success(jwSignRecords);
         }else{
             return AjaxResult.error("错误");
         }
     }
 
+    // 获取所有的齐舞的报名记录
+    @PostMapping("/listMatchQiWuSignRecordAll")
+    @ResponseBody
+    public AjaxResult listMatchQiWuSignRecordAll(@RequestHeader("Authorization") String openId, Long matchId){
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            List<JwSignRecord> jwSignRecords = jwSignRecordService.listMatchQiWuSignRecord(null, matchId);
+            if(jwSignRecords != null && jwSignRecords.size() > 0){
+                jwSignRecords.sort(Comparator.comparing(JwSignRecord::getTeamName));
+            }
+            return AjaxResult.success(jwSignRecords);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
     // 获取代表队赛程
     @PostMapping("/getTeamSchedule")
     @ResponseBody

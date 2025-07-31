@@ -1,19 +1,31 @@
 package com.ruoyi.project.jiewu.service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.ruoyi.common.utils.IDCardUtils;
-import com.ruoyi.project.jiewu.domain.JwWxUser;
+import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.project.jiewu.mapper.JwSportMapper;
-import com.ruoyi.project.jiewu.domain.JwSport;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class JwSportService {
 
     @Autowired
     private JwSportMapper jwSportMapper;
+
+    @Autowired
+    private JwTeamService jwTeamService;
+
+    @Autowired
+    private JwSignRecordSportService jwSignRecordSportService;
+
+    @Autowired
+    private JwSignRecordService jwSignRecordService;
 
     public JwSport selectJwSportById(Long id) {
         return jwSportMapper.selectJwSportById(id);
@@ -31,8 +43,8 @@ public class JwSportService {
         return jwSportMapper.selectTodayBirthSport(today);
     }
 
-    public JwSport selectJwSportByIdCard(String idCard, Long id) {
-        return jwSportMapper.selectJwSportByIdCard(idCard, id);
+    public JwSport selectJwSportByIdCard(String idCard, Long id, Long createUserId) {
+        return jwSportMapper.selectJwSportByIdCard(idCard, id, createUserId);
     }
 
     public JwSport selectJwSportByName(String playerName, String idCard, Long createUserId) {
@@ -72,9 +84,58 @@ public class JwSportService {
     }
 
     public int updateJwSport(JwSport jwSport) {
-        jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
-        jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
+        if(StringUtils.isNotEmpty(jwSport.getIdCard())){
+            jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
+            jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
+        }
         return jwSportMapper.updateJwSport(jwSport);
+    }
+
+    // 修改选手的队伍
+    @Transactional
+    public int changeTeam(Long[] sportIds, Long newTeamId){
+        if(sportIds != null && sportIds.length > 0 && newTeamId != null && newTeamId != 0l){
+
+            JwTeam jwTeam = jwTeamService.selectJwTeamById(newTeamId);
+            if(jwTeam != null){
+                Arrays.stream(sportIds).forEach(sportId->{
+                    JwSport jwSport = selectJwSportById(sportId);
+                    if(jwSport != null){
+                        // 更新选手表的 createUserId
+                        JwSport updateSport = new JwSport();
+                        updateSport.setId(jwSport.getId());
+                        updateSport.setCreateUserId(jwTeam.getCreateUserId());
+                        updateJwSport(updateSport);
+
+                        // 更新报名记录选手表的 teamId
+                        List<JwSignRecordSport> jwSignRecordSportList = jwSignRecordSportService.selectJwSignRecordSportBySportId(sportId);
+
+                        if(jwSignRecordSportList != null && jwSignRecordSportList.size() > 0){
+                            jwSignRecordSportList.forEach(jwSignRecordSport -> {
+                                JwSignRecordSport updateSignSport = new JwSignRecordSport();
+                                updateSignSport.setId(jwSignRecordSport.getId());
+                                updateSignSport.setTeamId(newTeamId);
+                                jwSignRecordSportService.updateJwSignRecordSport(updateSignSport);
+                            });
+
+                            Long[] signRecordIds = jwSignRecordSportList.stream()
+                                    .map(JwSignRecordSport::getSignRecordId)
+                                    .filter(Objects::nonNull)
+                                    .distinct()
+                                    .toArray(Long[]::new);
+
+                            // 更新报名记录的 teamId
+                            jwSignRecordService.changeTeam(signRecordIds, newTeamId);
+                        }
+                    }
+                });
+            }
+        }
+        return 1;
+    }
+
+    public int updateJwSportByName(JwSport jwSport) {
+        return jwSportMapper.updateJwSportByName(jwSport);
     }
 
     public int deleteJwSportByIds(Long[] ids) {

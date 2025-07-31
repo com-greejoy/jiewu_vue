@@ -7,6 +7,8 @@ import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ServletUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.framework.aspectj.lang.annotation.Log;
+import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.framework.redis.RedisCache;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
@@ -17,6 +19,7 @@ import org.checkerframework.checker.units.qual.A;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -50,6 +53,8 @@ public class JwMiNiMatchController extends BaseController {
     @Autowired
     private JwTeamService jwTeamService;
 
+    @Autowired
+    private JwHaiScoreService jwHaiScoreService;
 
     @PostMapping("/listMatchGameItem")
     @ResponseBody
@@ -89,6 +94,20 @@ public class JwMiNiMatchController extends BaseController {
         }
         return AjaxResult.success(jwMatchList);
     }
+
+    @PostMapping("/listAllMatchItem")
+    @ResponseBody
+    public AjaxResult listAllMatchItem() {
+        JwMatch jwMatch = new JwMatch();
+        jwMatch.setIsShowGrade("Y");
+        List<JwMatch> jwMatchList = jwMatchService.selectJwMatchList(jwMatch);
+        if(jwMatchList != null && jwMatchList.size() > 0){
+            jwMatchList.forEach(jwMatch1 -> jwMatch1.setMatchName(jwMatch1.getMatchName().replaceAll("<br/>", " ")));
+            jwMatchList.sort(Comparator.comparing(JwMatch::getBeginTime).reversed());
+        }
+        return AjaxResult.success(jwMatchList);
+    }
+
 
     @PostMapping("/getMatchItem")
     @ResponseBody
@@ -158,5 +177,57 @@ public class JwMiNiMatchController extends BaseController {
         }
         return AjaxResult.success("拜拜");
     }
+
+    // 获取比赛一个组别的成绩
+    @PostMapping("/listGameItemGradeDes")
+    @ResponseBody
+    public AjaxResult listGameItemGradeDes(@RequestHeader("Authorization") String openId, JwSignRecord jwSignRecord) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            return AjaxResult.success(jwHaiScoreService.listGameItemGradeDes(jwSignRecord));
+        }
+        return AjaxResult.success("拜拜");
+
+    }
+
+    @PostMapping("/checkMatchInvitationCode")
+    @ResponseBody
+    public AjaxResult checkMatchInvitationCode(@RequestHeader("Authorization") String openId, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
+            if(StringUtils.isNotEmpty(jwMatch.getInvitationList()) && jwMatch.getInvitationList().contains(openId)){
+                return  AjaxResult.success(1);
+            }else{
+                return AjaxResult.success(0);
+            }
+        }
+        return AjaxResult.success("拜拜");
+    }
+
+    @PostMapping("/verifyMatchInvitationCode")
+    @ResponseBody
+    public AjaxResult verifyMatchInvitationCode(@RequestHeader("Authorization") String openId, String invitationCode, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(StringUtils.isEmpty(invitationCode)){
+            return AjaxResult.error("请输入邀请码");
+        }
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
+            if(jwMatch.getInvitationCode().equals(invitationCode)){
+                String invitationList = jwMatch.getInvitationList();
+                if(StringUtils.isEmpty(invitationList)){
+                    invitationList = "";
+                }
+                invitationList +=  openId + ",";
+
+                return AjaxResult.success(jwMatchService.updateJwMatchInvitationList(matchId, invitationList));
+            }else{
+                return AjaxResult.success(0);
+            }
+        }
+        return AjaxResult.success("拜拜");
+    }
+
 
 }

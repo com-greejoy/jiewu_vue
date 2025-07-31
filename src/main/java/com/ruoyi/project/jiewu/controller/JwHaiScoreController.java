@@ -1,11 +1,13 @@
 package com.ruoyi.project.jiewu.controller;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
+import com.ruoyi.project.jiewu.domain.JwSignRecordSportExport;
 import com.ruoyi.project.jiewu.service.JwSignRecordService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +34,10 @@ public class JwHaiScoreController extends BaseController {
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
     @GetMapping("/list")
     public AjaxResult list(JwSignRecord jwSignRecord) {
-        if(StringUtils.isLongNotNull(jwSignRecord.getGameItemId())){
+        if (StringUtils.isLongNotNull(jwSignRecord.getGameItemId())) {
             List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord);
             return AjaxResult.success(list);
-        }else{
+        } else {
             return AjaxResult.success(new ArrayList<>());
         }
     }
@@ -48,6 +50,32 @@ public class JwHaiScoreController extends BaseController {
         ExcelUtil<JwHaiScore> util = new ExcelUtil<JwHaiScore>(JwHaiScore.class);
         util.exportExcel(response, list, "海选打分数据");
     }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
+    @Log(title = "全部成绩表", businessType = BusinessType.EXPORT)
+    @PostMapping("/exportAllGrade")
+    public void exportAllGrade(HttpServletResponse response, Long matchId) {
+        List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId);
+        List<JwSignRecordSportExport> jwSignRecordSportExportList = new ArrayList<>();
+
+        jwSignRecordList.forEach(jwSignRecord -> {
+            jwSignRecord.getJwSignRecordSportList().forEach(jwSignRecordSport -> {
+                jwSignRecordSportExportList.add(new JwSignRecordSportExport(
+                        jwSignRecord.getTeamName(),
+                        jwSignRecordSport.getPlayerName(),
+                        jwSignRecordSport.getIdCard(),
+                        jwSignRecordSport.getPlayerPhone(),
+                        jwSignRecord.getAvgScore(),
+                        jwSignRecord.getRankOrder(),
+                        jwSignRecord.getJwGameItem().getName()));
+            });
+        });
+        jwSignRecordSportExportList.sort(Comparator.comparing(JwSignRecordSportExport::getPlayerName));
+
+        ExcelUtil<JwSignRecordSportExport> util = new ExcelUtil<JwSignRecordSportExport>(JwSignRecordSportExport.class);
+        util.exportExcel(response, jwSignRecordSportExportList, "全部成绩表");
+    }
+
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:query')")
     @GetMapping(value = "/{id}")
@@ -121,7 +149,7 @@ public class JwHaiScoreController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:remove')")
     @Log(title = "海选打分", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(jwHaiScoreService.deleteJwHaiScoreByIds(ids));
     }

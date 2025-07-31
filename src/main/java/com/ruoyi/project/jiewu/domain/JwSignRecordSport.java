@@ -27,6 +27,7 @@ public class JwSignRecordSport extends BaseEntity {
     private String playerName;
     private String idCard;
     private String sex;
+    private String playerPhone;
 
     private JwSport jwSport;
 
@@ -35,6 +36,24 @@ public class JwSignRecordSport extends BaseEntity {
     private Long[] sportIds;
 
     private String showImg;
+
+    private String gameNameVar;
+
+    public String getGameNameVar() {
+        return gameNameVar;
+    }
+
+    public void setGameNameVar(String gameNameVar) {
+        this.gameNameVar = gameNameVar;
+    }
+
+    public String getPlayerPhone() {
+        return playerPhone;
+    }
+
+    public void setPlayerPhone(String playerPhone) {
+        this.playerPhone = playerPhone;
+    }
 
     public String getShowImg() {
         return showImg;

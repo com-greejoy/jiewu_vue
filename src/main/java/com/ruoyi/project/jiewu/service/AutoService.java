@@ -28,10 +28,14 @@ public class AutoService {
     @Autowired
     private JwMatchService jwMatchService;
 
-    @Scheduled(cron = "0 0 1 * * ?")
+//   @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(cron = "0 0 2 * * ?")
     public void autoSportAge() {
         // 每天凌晨计算选手的年龄
         List<JwSport> jwSportList = jwSportService.selectTodayBirthSport(DateUtils.getDateBirthStr());
+        JwSport q = new JwSport();
+        q.setAge(0l);
+        jwSportList = jwSportService.selectJwSportList(q);
         jwSportList.forEach(jwSport -> {
             JwSport jwSport1 = new JwSport();
             jwSport1.setId(jwSport.getId());

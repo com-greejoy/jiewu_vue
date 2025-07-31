@@ -34,10 +34,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="signCount"    column="signCount"    />
         <result property="groupMode"    column="group_mode"    />
         <result property="judgeId"    column="judge_id"    />
+        <result property="judgeIdB"    column="judge_id_b"    />
+        <result property="judgeIdC"    column="judge_id_c"    />
+        <result property="judgeIdD"    column="judge_id_d"    />
+        <result property="judgeIdAll"    column="judge_id_all"    />
     </resultMap>
 
     <sql id="selectJwGameItemVo">
-        select id, match_id, code, show_min_year, judge_id, show_max_year, name, max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
+        select id, match_id, code, show_min_year, judge_id, judge_id_b, judge_id_c, judge_id_d, judge_id_all, show_max_year, name,
+        max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
         single_duration, match_type, promotion_num, min_year, max_year,
         fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
         screen_img, remark from jw_game_item
@@ -107,6 +112,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         limit 1
     </select>
 
+    <select id="selectJwGameItemByCode" resultMap="JwGameItemResult">
+        select gi.* from jw_game_item gi
+        <where>
+            <if test="matchId != null "> and gi.match_id = #{matchId}</if>
+            <if test="code != null and code != ''"> and gi.code = #{code}</if>
+        </where>
+        limit 1
+    </select>
+
+
     <select id="selectJwGameItemById" parameterType="Long" resultMap="JwGameItemResult">
         <include refid="selectJwGameItemVo"/>
         where id = #{id}
@@ -141,6 +156,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="showMinYear != null">show_min_year,</if>
             <if test="showMaxYear != null">show_max_year,</if>
             <if test="judgeId != null">judge_id,</if>
+            <if test="judgeIdB != null">judge_id_b,</if>
+            <if test="judgeIdC != null">judge_id_c,</if>
+            <if test="judgeIdD != null">judge_id_d,</if>
+            <if test="judgeIdAll != null">judge_id_all,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -169,6 +188,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="showMinYear != null">#{showMinYear},</if>
             <if test="showMaxYear != null">#{showMaxYear},</if>
             <if test="judgeId != null">#{judgeId},</if>
+            <if test="judgeIdB != null">#{judgeIdB},</if>
+            <if test="judgeIdC != null">#{judgeIdC},</if>
+            <if test="judgeIdD != null">#{judgeIdD},</if>
+            <if test="judgeIdAll != null">#{judgeIdAll},</if>
          </trim>
     </insert>
 
@@ -201,6 +224,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="showMinYear != null">show_min_year = #{showMinYear},</if>
             <if test="showMaxYear != null">show_max_year = #{showMaxYear},</if>
             <if test="judgeId != null">judge_id = #{judgeId},</if>
+            <if test="judgeIdB != null">judge_id_b = #{judgeIdB},</if>
+            <if test="judgeIdC != null">judge_id_c = #{judgeIdC},</if>
+            <if test="judgeIdD != null">judge_id_d = #{judgeIdD},</if>
+            <if test="judgeIdAll != null">judge_id_all = #{judgeIdAll},</if>
         </trim>
         where id = #{id}
     </update>

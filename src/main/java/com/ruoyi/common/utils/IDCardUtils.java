@@ -1,5 +1,7 @@
 package com.ruoyi.common.utils;
 
+import com.ruoyi.framework.web.domain.server.Sys;
+
 import java.util.Calendar;
 import java.util.Random;
 
@@ -29,6 +31,11 @@ public class IDCardUtils {
         return matches;
     }
 
+//    public static void main(String[] args){
+//        System.out.println(isIdCard("500231201809040012"));
+//
+//    }
+
     private static int getIdCardCheckIndex(StringBuilder idCardBuilder){
         // 判断传入的是17位还是18位身份证号
         int length = idCardBuilder.length() == SECOND_ID_CARD_LENGTH ? idCardBuilder.length()-1 : idCardBuilder.length();
@@ -47,27 +54,42 @@ public class IDCardUtils {
 
 
     public static Long getAge(String idCard) {
-        String birth = idCard.substring(6, 14);
-        int year = Integer.parseInt(birth.substring(0, 4));
-        int month = Integer.parseInt(birth.substring(4, 6));
-        int day = Integer.parseInt(birth.substring(6, 8));
+        try {
+            if(StringUtils.isNotEmpty(idCard))idCard = idCard.replaceAll(" ", "");
+            String birth = idCard.substring(6, 14);
+            int year = Integer.parseInt(birth.substring(0, 4));
+            int month = Integer.parseInt(birth.substring(4, 6));
+            int day = Integer.parseInt(birth.substring(6, 8));
 
-        Calendar cal = Calendar.getInstance();
-        int curYear = cal.get(Calendar.YEAR);
-        int curMonth = cal.get(Calendar.MONTH) + 1;
-        int curDay = cal.get(Calendar.DAY_OF_MONTH);
+            Calendar cal = Calendar.getInstance();
+            int curYear = cal.get(Calendar.YEAR);
+            int curMonth = cal.get(Calendar.MONTH) + 1;
+            int curDay = cal.get(Calendar.DAY_OF_MONTH);
 
-        int age = curYear - year;
-        if (curMonth < month || (curMonth == month && curDay < day)) {
-            age--;
+            // 暂时改成一月一号
+            curYear = 2025;
+
+            int age = curYear - year;
+            // 暂时改成一月一号
+//            if (curMonth < month || (curMonth == month && curDay < day)) {
+//                age--;
+//            }
+            return Long.valueOf(age);
+        }catch (Exception e){
+            return 0l;
         }
 
-        return Long.valueOf(age);
+
     }
 
     public static String getGender(String idCard) {
+        try{
+        if(StringUtils.isNotEmpty(idCard))idCard = idCard.replaceAll(" ", "");
         int genderNum = Integer.parseInt(idCard.substring(idCard.length() - 2, idCard.length() - 1));
         return genderNum % 2 == 0 ? "f" : "m";
+        }catch (Exception e){
+            return "m";
+        }
     }
 
 

@@ -7,7 +7,7 @@
       <el-form-item label="组别" prop="gameItemId">
         <el-select style="width: 360px" filterable v-model="queryParams.gameItemId" placeholder="组别" clearable @change="gameItemChange">
           <el-option
-            v-for="gameItem in JwGameItemList"
+            v-for="gameItem in JwGameItemList.filter(it=>it.signCount > 0)"
             :key="gameItem.id"
             :label="gameItem.code + ' : ' + gameItem.name + (gameItem.matchType == '2' ?  ' (晋级' + (gameItem.promotionNum || '') + ')' : '')"
             :value="gameItem.id"
@@ -19,7 +19,7 @@
       </el-form-item>
     </el-form>
 
-    <el-row class="mb8">
+    <el-row class="mb8" style="display: flex;flex-direction: row;flex-wrap: wrap;align-items: center;">
       <el-button type="warning" plain size="mini" @click="handleLockScore">锁定打分</el-button>
       <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem('zhijiepingjun')">直接平均分</el-button>
       <el-button type="primary" plain size="mini" @click="handleJiSuanGameItem('zuigaozuidi')">去最高最低</el-button>
@@ -31,7 +31,13 @@
       <el-button type="success" plain size="mini" v-if="currentGameItem.matchType == 2" @click="printJinJiSport">晋级名单</el-button>
       <el-button type="success" plain size="mini" v-if="currentGameItem.matchType == 2" @click="printJinJiSportGrade">晋级成绩</el-button>
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
-      <el-button type="primary" plain size="mini" @click="handleSendHaiXuanGrade">投屏成绩</el-button>
+      <div class="order-row">
+        <el-input size="mini" v-model="minOrder"></el-input>
+        -
+        <el-input size="mini" v-model="maxOrder"></el-input>
+      </div>
+      <el-button type="primary" plain size="mini" @click="handleSendHaiXuanGrade(true)">指定名次</el-button>
+      <el-button type="primary" plain size="mini" @click="handleSendHaiXuanGrade(false)">投屏成绩</el-button>
       <el-button type="success" plain size="mini" v-if="currentGameItem.matchType == 2" @click="handleSendJinJiSport">投屏晋级名单</el-button>
       <el-button type="warning" plain size="mini" v-if="currentGameItem.matchType == 2" @click="handleSendBattle">投屏对阵</el-button>
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
@@ -40,6 +46,7 @@
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
       <el-button type="primary" plain size="mini" @click="handlePrintAllZhengshu">全部证书</el-button>
       <el-button type="primary" plain size="mini" @click="handlePrintAllGrage">全部成绩</el-button>
+      <el-button type="primary" plain size="mini" @click="handleDownloadAllGrage">导出成绩</el-button>
       <el-divider direction="vertical" style="margin: 0 32px"></el-divider>
       <el-button type="danger" plain size="mini" @click="handleClearScreen">清屏</el-button>
 
@@ -104,7 +111,7 @@
       </div>
       <div class="print-sport-items" id="printJinJiSport" v-if="showJinJiSport">
         <div class="match-name" v-html="currentGameItem.matchName"></div>
-        <div class="game-item-name">{{currentGameItem.code}}:{{currentGameItem.name}} 晋级名单</div>
+        <div class="game-item-name">{{currentGameItem.code}} {{currentGameItem.name}} 晋级名单</div>
         <div class="sport-item">
           <div class="index-v h order">名次</div>
           <div class="index-v h grade">成绩</div>
@@ -128,7 +135,7 @@
       </div>
       <div class="print-sport-items" id="jinJiSportGrade" v-if="signRecordJinJiGradeList">
         <div class="match-name" v-html="currentGameItem.matchName"></div>
-        <div class="game-item-name">{{currentGameItem.code}}:{{currentGameItem.name}} 晋级成绩</div>
+        <div class="game-item-name">{{currentGameItem.code}} {{currentGameItem.name}} 晋级成绩</div>
         <div class="sport-item">
           <div class="index-v h order">海选名次</div>
           <div class="index-v h grade">海选成绩</div>
@@ -171,10 +178,11 @@
           <div class="sport-item" v-for="item in itemmm.grades">
             <div class="index-v order">{{item.rankOrder}}</div>
             <div class="index-v order-des">
-              <span v-if="item.rankOrder == 1">[冠军]</span>
-              <span v-if="item.rankOrder == 2">[亚军]</span>
-              <span v-if="item.rankOrder == 3">[季军]</span>
-              {{item.rankOrderDes}} </div>
+              <!--<span v-if="item.rankOrder == 1">[冠军]</span>-->
+              <!--<span v-if="item.rankOrder == 2">[亚军]</span>-->
+              <!--<span v-if="item.rankOrder == 3">[季军]</span>-->
+              {{item.rankOrderDes}}
+            </div>
             <!--<div class="index-v h grade" v-if="itemmm.gameItem.matchType == 2">{{item.description}}</div>-->
             <!--<div class="index-v grade">{{item.avgScore}}</div>-->
             <div class="index-v back-num">{{item.backNumber}}</div>
@@ -191,10 +199,10 @@
       </div>
       <div class="print-sport-items" id="haiScore" v-if="showHaiGrade">
         <div class="match-name" v-html="currentGameItem.matchName"></div>
-        <div class="game-item-name">{{currentGameItem.code}}:{{currentGameItem.name}} 成绩</div>
+        <div class="game-item-name">{{currentGameItem.code}} {{currentGameItem.name}} 成绩</div>
         <div class="sport-item">
           <div class="index-v h order">名次</div>
-          <div class="index-v h order-des">奖项</div>
+<!--          <div class="index-v h order-des">奖项</div>-->
           <div class="index-v h grade" v-if="currentGameItem.matchType == 1">成绩</div>
           <div class="index-v h grade" v-if="currentGameItem.matchType == 2">决赛成绩</div>
           <div class="index-v h grade" v-if="currentGameItem.matchType == 2">海选成绩</div>
@@ -204,8 +212,8 @@
         </div>
         <div class="sport-item" v-for="item in signRecordJinJiGradeList">
           <div class="index-v order">{{item.rankOrder}}</div>
-          <!--<div class="index-v order-des">{{item.rankOrderDes}}</div>-->
-          <div class="index-v order-des"></div>
+<!--          <div class="index-v order-des">{{item.rankOrderDes}}</div>-->
+          <!--<div class="index-v order-des"></div>-->
           <div class="index-v h grade" v-if="currentGameItem.matchType == 2">{{item.description}}</div>
           <div class="index-v grade">{{item.avgScore}}</div>
           <div class="index-v back-num">{{item.backNumber}}</div>
@@ -220,7 +228,7 @@
         <el-button type="warning" size="mini" @click="handlePrint('zhengshu')">打印</el-button>
       </div>
       <div class="print-con-zhengshu" id="zhengshu" v-if="showZhengShu">
-        <div class="page-con-box" :style="{height: item.jwSignRecordSportList.length * 1000 + 'px'} " v-for="item in signRecordJinJiGradeList">
+        <div class="page-con-box" :style="{height: item.jwSignRecordSportList.length * 1005 + 'px'} " v-for="item in signRecordJinJiGradeList">
           <div class="page-con" v-for="itemm in item.jwSignRecordSportList">
             <div class="row-item name">
               <div class="item-label">姓名</div>
@@ -228,9 +236,11 @@
               <div class="item-value">{{itemm.playerName}}</div>
             </div>
             <div class="row-item gameItemName">
-              <div class="item-label">参赛项目</div>
+              <div class="item-label">组别</div>
               <div class="colon">:</div>
-              <div class="item-value">{{item.itemName}}</div>
+
+              <div class="item-value" :class="{smalll: item.itemName.indexOf('waacking') > -1 }">{{item.itemName}}</div>
+<!--              <div class="item-value" :class="{smalll: item.itemName.length > 170 }">{{item.itemName}}</div>-->
             </div>
             <div class="row-item order">
               <div class="item-label">名次</div>
@@ -238,9 +248,15 @@
               <div class="item-value">{{item.rankOrderDes}}</div>
             </div>
             <div class="row-item team">
-              <div class="item-label">参赛单位</div>
+              <div class="item-label">单位</div>
               <div class="colon">:</div>
-              <div class="item-value">{{item.jwTeam.teamName}}</div>
+              <div class="item-value" :class="{small: item.jwTeam.teamName.length > 101, smalll: item.jwTeam.teamName.length >= 105 } ">{{item.jwTeam.teamName}}</div>
+
+            </div>
+            <div class="row-item team">
+              <div class="item-label">地点</div>
+              <div class="colon">:</div>
+              <div class="item-value">中国 · 成都</div>
             </div>
           </div>
         </div>
@@ -259,11 +275,15 @@
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {sendBattle, sendHaiXuanGrade, sendJinJiSport} from "@/api/jiewu/ScreenSend";
   import {sendMusic} from "@/api/jiewu/ScreenSend";
+  import {listJwSchedulePlaceWithScheduleItem} from "@/api/jiewu/JwSchedulePlace";
+  import {listJwScheduleInfo} from "@/api/jiewu/JwScheduleInfo";
 
   export default {
     name: "JwHaiScore",
     data() {
       return {
+        minOrder: 1,
+        maxOrder: 999,
         allGrade: [],
         showAllGrade: false,
         showZhengShu: false,
@@ -343,16 +363,13 @@
         })
       },
       // 打印全部成绩
-      handlePrintAllGrage(){
+      handlePrintAllGrage() {
         let allGrade = [];
-        this.JwGameItemList.forEach(item=>{
+        this.JwGameItemList.forEach(item => {
           listGameItemGradeDes({
-
             matchId: (this.Cookies.get("matchId") * 1) || null,
             gameItemId: item.id,
-
           },).then(res => {
-
             allGrade.push({gameItem: item, grades: ([].concat(res.data || []).filter(item => item.rankOrder).sort((a, b) => a.rankOrder - b.rankOrder))})
           })
         })
@@ -363,9 +380,16 @@
       // 打印全部证书
       handlePrintAllZhengshu() {
         listAllGameItemGradeDes({matchId: this.queryParams.matchId}).then(res => {
-          this.signRecordJinJiGradeList = [].concat(res.data || []).filter(item => item.rankOrder);
+          this.signRecordJinJiGradeList = [].concat(res.data || []).filter(item => (item.rankOrder && item.rankOrderDes));
           this.showZhengShu = true;
         })
+      },
+
+      // 导出全部成绩
+      handleDownloadAllGrage() {
+        this.download('jiewu/JwHaiScore/exportAllGrade', {
+          ...this.queryParams
+        }, `全部成绩表.xlsx`)
       },
 
       // 打印证书
@@ -382,8 +406,13 @@
         })
       },
       // 投屏成绩
-      handleSendHaiXuanGrade() {
-        sendHaiXuanGrade({gameItemId: this.queryParams.gameItemId, matchId: this.queryParams.matchId}).then(res => {
+      handleSendHaiXuanGrade(zhiDing) {
+        let minOrder=1, maxOrder=999;
+        if(zhiDing){
+          minOrder = this.minOrder;
+          maxOrder = this.maxOrder;
+        }
+        sendHaiXuanGrade({minOrder: minOrder, maxOrder: maxOrder, gameItemId: this.queryParams.gameItemId, matchId: this.queryParams.matchId}).then(res => {
           this.$modal.msgSuccess("发送成功");
         })
       },
@@ -477,6 +506,21 @@
         return item ? item.code + ":" + item.name : "";
       },
       getGameItemList() {
+        // let that = this;
+        // listJwScheduleInfo(this.queryParams).then(response => {
+        //
+        //   (response.rows || []).forEach(item => {
+        //
+        //     listJwSchedulePlaceWithScheduleItem({matchId: this.queryParams.matchId, scheduleInfoId: item.id}).then(res => {
+        //
+        //       console.log(res)
+        //
+        //       that.$forceUpdate()
+        //     })
+        //   })
+        // });
+
+
         listJwGameItem({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000}).then(response => {
           this.JwGameItemList = response.rows;
         });
@@ -648,9 +692,24 @@
   };
 </script>
 <style lang="scss" scoped>
+  .order-row {
+    /*width: 120px;*/
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    .el-input {
+      width: 24pt;
+      ::v-deep .el-input__inner{
+        padding: 0 4px;
+      }
+    }
+  }
 
   .print-con-zhengshu .item-label, .colon {
     /*visibility: hidden;*/
+    font-weight: 900;
+    line-height: 90px;
   }
 
   .item-value {
@@ -658,7 +717,7 @@
   }
 
   .print-con-zhengshu {
-    font-size: 24px;
+    font-size: 26px;
     padding-left: 80px;
     padding-right: 80px;
     color: #000;
@@ -675,7 +734,7 @@
       page-break-before: always;
       /*page-break-after:always;*/
       .row-item {
-        height: 88px;
+        height: 70px;
         line-height: 120px;
         display: flex;
         flex-direction: row;
@@ -697,22 +756,30 @@
         float: left;
         text-align: justify;
         text-align-last: justify;
-        width: 120px;
+        width: 80px;
         margin-right: 6px;
         white-space: nowrap;
+        font-weight: 900;
+        line-height: 90px;
+        /*visibility: hidden;*/
       }
 
       .item-value {
         flex: 1;
         text-align: center;
         margin-left: 24px;
-        border-bottom: 1px solid #000;
-        /*padding-bottom: 6px;*/
+        border-bottom: 2px solid #000;
+        padding-bottom: 6px;
         white-space: nowrap;
         color: #000;
-        /*font-weight: 600;*/
+        font-weight: 900;
+        line-height: 90px;
         &.small {
-          /*font-size: 20px;*/
+          font-size: 20px;
+        }
+
+        &.smalll{
+          font-size: 22px;
         }
       }
     }
@@ -807,7 +874,7 @@
   }
 
   .el-divider {
-    margin: 0 32px;
+    margin: 0 16px;
   }
 
   .box-card {

@@ -84,6 +84,8 @@
           <el-link :underline="false" type="primary" style="font-weight: 600" @click="setManager(scope.row)">设置</el-link>
         </template>
       </el-table-column>
+      <el-table-column label="邀请码" align="center" prop="invitationCode" />
+      <el-table-column label="邀请码列表" show-overflow-tooltip align="center" prop="invitationList" />
       <el-table-column label="开始时间" align="center" prop="beginTime" width="100">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.beginTime, '{y}-{m}-{d}') }}</span>
@@ -130,6 +132,11 @@
       <el-table-column label="是否显示" align="center" prop="isShow">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isShow"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="显示成绩" align="center" prop="isShowGrade">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isShowGrade"/>
         </template>
       </el-table-column>
       <el-table-column label="操作" width="240" align="center" class-name="small-padding fixed-width" fixed="right">
@@ -246,8 +253,6 @@
             </el-form-item>
           </el-col>
         </el-row>
-
-
         <el-row>
           <el-col :span="8">
             <el-form-item label="是否显示" prop="isShow">
@@ -266,11 +271,11 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-
+            <el-form-item label="邀请码" prop="invitationCode">
+              <el-input v-model="form.invitationCode" placeholder="请输入邀请码" />
+            </el-form-item>
           </el-col>
         </el-row>
-
-
         <el-row>
           <el-col :span="8">
             <el-form-item label="海报" prop="posterImg">
@@ -300,7 +305,15 @@
             </el-form-item>
           </el-col>
           <el-col :span="8">
-
+            <el-form-item label="显示成绩" prop="isShowGrade">
+              <el-radio-group v-model="form.isShowGrade">
+                <el-radio
+                  v-for="dict in dict.type.sys_yes_no"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
           </el-col>
         </el-row>
 
@@ -386,7 +399,8 @@
           signEndTime: null,
           addr: null,
           posterImg: null,
-          state: null
+          state: null,
+          orderByColumn: "id", isAsc: "descending"
         },
         // 表单参数
         form: {},
@@ -463,7 +477,10 @@
           posterImg: null,
           state: null,
           matchDetails: null,
-          matchRegulations: null
+          matchRegulations: null,
+          invitationCode: null,
+          invitationList: null,
+          isShowGrade: null,
         };
         this.resetForm("form");
       },

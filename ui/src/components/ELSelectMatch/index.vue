@@ -33,7 +33,11 @@
       }
     },
     created() {
-      listJwMatch().then(res => {
+      listJwMatch(   {
+        pageNum: 1,
+          pageSize: 100,
+          orderByColumn: "id", isAsc: "descending"
+      },).then(res => {
         this.jwMatchList = res.rows;
         this.currentMatchId = (Cookies.get("matchId")  * 1) || null;
       })

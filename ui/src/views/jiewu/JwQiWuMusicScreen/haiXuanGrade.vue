@@ -1,8 +1,10 @@
 <template>
   <div class="hai-con" :style="{ backgroundImage: 'url(' + background + ')' }">
     <!--<div class="match-name" v-html="match.matchName"></div>-->
-    <div class="game-item-name">{{currentGameItem.name}}</div>
-    <div class="title-desc">成绩公告</div>
+    <div class="game-item-name">
+      <div>{{currentGameItem.name}}</div>
+    </div>
+    <div class="title-desc"><div>成绩公告</div></div>
     <div class="rank-con">
       <div class="rank-item">
         <div class="si rank">排名</div>
@@ -24,7 +26,7 @@
 </template>
 
 <script>
-  import {listJwHaiScore} from "@/api/jiewu/JwHaiScore";
+  import {listJwHaiScore, listGameItemGradeDes} from "@/api/jiewu/JwHaiScore";
   import {getJwMatch} from "@/api/jiewu/jwMatch";
 
   export default {
@@ -42,7 +44,15 @@
       currentGameItem: {
         type: Object,
         default: {}
-      }
+      },
+      minOrder: {
+        type: Number,
+        default: 1
+      },
+      maxOrder: {
+        type: Number,
+        default: 9999
+      },
     },
     watch: {
       "matchId": function (val) {
@@ -76,10 +86,6 @@
       console.log("created");
       let that = this;
       that.getList();
-      this.inter = setInterval(() => {
-        that.getshowSportRankList()
-      }, 8000);
-
       that.getMatchInfo()
     },
     methods: {
@@ -87,8 +93,10 @@
         let that = this;
         that.showSportRankList = that.sportRankList.slice((that.page - 1) * that.pageSize, that.page * that.pageSize);
         if (that.page * that.pageSize > that.sportRankList.length) {
-          this.page = 1;
-          that.getList();
+          setTimeout(()=>{
+            that.page = 1;
+            that.getList();
+          }, 6000)
         } else {
           this.page++;
         }
@@ -105,7 +113,7 @@
       },
       getList() {
         let that = this;
-        listJwHaiScore({gameItemId: this.gameItemId, matchId: this.matchId}).then(res => {
+        listGameItemGradeDes({gameItemId: this.gameItemId, matchId: this.matchId}).then(res => {
           let lockk = "Y";
           (res.data || []).forEach(item => {
             item.sortOr = item.rankOrder || 999;
@@ -114,10 +122,14 @@
             }
           });
 
-          this.lockk = lockk;
-          this.sportRankList = (res.data || []).sort((a, b) => a.sortOr - b.sortOr);
+          that.lockk = lockk;
+          that.sportRankList = (res.data || []).filter(item=>item.sortOr >= that.minOrder && item.sortOr <= that.maxOrder).sort((a, b) => a.sortOr - b.sortOr);
 
-          that.getshowSportRankList()
+          that.getshowSportRankList();
+          clearInterval(that.inter);
+          that.inter = setInterval(() => {
+            that.getshowSportRankList()
+          }, 8000);
         })
       },
       getMatchInfo() {
@@ -150,15 +162,33 @@
     .game-item-name {
       font-size: 64px;
       text-align: center;
-      margin-top: 466px;
+      margin-top: 316px;
       letter-spacing: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      div{
+        background: #1ab394;
+        padding: 8px 64px;
+        transform: skew(-30deg);
+        background: linear-gradient(to right, #d5282a, #444446);
+      }
     }
 
     .title-desc {
       font-size: 48px;
       text-align: center;
-      margin-top: -12px;
+      /*margin-top: -12px;*/
       letter-spacing: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      div{
+        background: #1ab394;
+        padding: 8px 64px;
+        transform: skew(-30deg);
+        background: linear-gradient(to right, #d5282a, #444446);
+      }
     }
 
     .rank-con {

@@ -41,14 +41,15 @@ public class JwGameItem extends BaseEntity {
     private String groupMode;
 
 
-//    @Excel(name = "最小年龄")
+    @Excel(name = "最小年龄")
     private Long minYear;
 
-//    @Excel(name = "最大年龄")
+    @Excel(name = "最大年龄")
     private Long maxYear;
-    @Excel(name = "显示最小年龄")
+
+//    @Excel(name = "显示最小年龄")
     private Long showMinYear;
-    @Excel(name = "显示最大年龄")
+//    @Excel(name = "显示最大年龄")
     private Long showMaxYear;
 
     @Excel(name = "备注")
@@ -62,6 +63,8 @@ public class JwGameItem extends BaseEntity {
     private Integer minSport;
 //    @Excel(name = "选手时长(秒)")
     private Long singleDuration;
+
+//    @Excel(name = "B场地裁判")
 
 
 
@@ -82,6 +85,42 @@ public class JwGameItem extends BaseEntity {
     private Long signCount;
 
     private String judgeId;
+    private String judgeIdB;
+    private String judgeIdC;
+    private String judgeIdD;
+    private String judgeIdAll;
+
+    public String getJudgeIdC() {
+        return judgeIdC;
+    }
+
+    public void setJudgeIdC(String judgeIdC) {
+        this.judgeIdC = judgeIdC;
+    }
+
+    public String getJudgeIdD() {
+        return judgeIdD;
+    }
+
+    public void setJudgeIdD(String judgeIdD) {
+        this.judgeIdD = judgeIdD;
+    }
+
+    public String getJudgeIdAll() {
+        return judgeIdAll;
+    }
+
+    public void setJudgeIdAll(String judgeIdAll) {
+        this.judgeIdAll = judgeIdAll;
+    }
+
+    public String getJudgeIdB() {
+        return judgeIdB;
+    }
+
+    public void setJudgeIdB(String judgeIdB) {
+        this.judgeIdB = judgeIdB;
+    }
 
     public String getJudgeId() {
         return judgeId;

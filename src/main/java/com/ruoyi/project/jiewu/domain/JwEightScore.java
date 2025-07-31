@@ -29,6 +29,16 @@ public class JwEightScore extends BaseEntity{
 
     private String subScore;
 
+    private String changDi;
+
+    public String getChangDi() {
+        return changDi;
+    }
+
+    public void setChangDi(String changDi) {
+        this.changDi = changDi;
+    }
+
     public String getSubScore() {
         return subScore;
     }

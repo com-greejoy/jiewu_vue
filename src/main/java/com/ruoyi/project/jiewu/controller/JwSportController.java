@@ -5,22 +5,20 @@ import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.exception.GlobalException;
 import com.ruoyi.common.utils.IDCardUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.framework.web.domain.server.Sys;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSport;
 import com.ruoyi.project.jiewu.domain.JwSportExport;
+import com.ruoyi.project.jiewu.domain.JwTeam;
+import com.ruoyi.project.jiewu.service.JwTeamService;
 import com.ruoyi.project.system.domain.SysUser;
+import me.chanjar.weixin.common.annotation.Required;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
 import com.ruoyi.project.jiewu.domain.JwSport;
@@ -38,14 +36,17 @@ public class JwSportController extends BaseController {
     @Autowired
     private JwSportService jwSportService;
 
+    @Autowired
+    private JwTeamService jwTeamService;
+
     @PreAuthorize("@ss.hasPermi('jiewu:JwSport:list')")
     @GetMapping("/list")
     public TableDataInfo list(JwSport jwSport, Long gameItemId) {
 
-        if(StringUtils.isLongNotNull(gameItemId)){
+        if (StringUtils.isLongNotNull(gameItemId)) {
             List<JwSport> jwSportList = jwSportService.getWxSportListWithGameItem(jwSport.getCreateUserId(), gameItemId, -999999l, 999999l, null);
             return getDataTable(jwSportList);
-        }else{
+        } else {
             startPage();
             List<JwSport> list = jwSportService.selectJwSportList(jwSport);
             return getDataTable(list);
@@ -59,21 +60,51 @@ public class JwSportController extends BaseController {
         return getDataTable(jwSportService.getWxSportListByMatchTeam(jwSport));
     }
 
+    @PreAuthorize("@ss.hasPermi('jiewu:JwSport:add')")
+    @Log(title = "修改选手队伍", businessType = BusinessType.UPDATE)
+    @PostMapping("/changeTeam")
+    @ResponseBody
+    public AjaxResult changeTeam(Long[] sportIds, Long newTeamId) {
+        if(sportIds != null && sportIds.length > 0 && newTeamId != null && newTeamId != 0l){
+            return AjaxResult.success(jwSportService.changeTeam(sportIds, newTeamId));
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
 
     @PostMapping("/importData")
-    public AjaxResult importData(MultipartFile file, Long createUserId) throws Exception
-    {
+    public AjaxResult importData(MultipartFile file, Long createUserId) throws Exception {
         ExcelUtil<JwSport> util = new ExcelUtil<>(JwSport.class);
         List<JwSport> userList = util.importExcel(file.getInputStream());
+        for (JwSport jwSport : userList) {
+            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), null, null);
+            if (jwSport1 == null) {
+                if(StringUtils.isNotEmpty(jwSport.getIdCard()) && jwSport.getIdCard().length() > 15){
+                    try{
+                        jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
+                        jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
+                    }catch (Exception e){
+                        System.out.println(jwSport.getIdCard());
+                        throw new GlobalException(jwSport.getIdCard());
+                    }
+                }else{
+                    jwSport.setSex("m");
+                    jwSport.setAge(5l);
+                }
 
-        for(JwSport jwSport: userList){
-            jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
-            jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
-            if(jwSport.getAge() <= 0 || jwSport.getAge() >= 99){
-                jwSport.setAge(10l);
+                if (jwSport.getAge() <= 0 || jwSport.getAge() >= 99) {
+                    jwSport.setAge(10l);
+                }
+               JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
+                if(jwTeam == null){
+                    throw new GlobalException(jwSport.getTeamName());
+                }
+                jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
+
+                jwSportService.insertJwSport(jwSport);
+            }else{
+                System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
             }
-            jwSport.setCreateUserId(createUserId);
-            jwSportService.insertJwSport(jwSport);
         }
         return success();
     }
@@ -82,9 +113,9 @@ public class JwSportController extends BaseController {
     @Log(title = "选手", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, JwSport jwSport) {
-        List<JwSport> jwSportList =jwSportService.getWxSportListByMatchTeam(jwSport);
+        List<JwSport> jwSportList = jwSportService.getWxSportListByMatchTeam(jwSport);
         List<JwSportExport> jwSportExportList = new ArrayList<>();
-        if(jwSportList != null && jwSportList.size() > 0){
+        if (jwSportList != null && jwSportList.size() > 0) {
             jwSportList.forEach(jwSport1 -> {
                 jwSportExportList.add(new JwSportExport(jwSport1.getTeamName(), jwSport1.getPlayerName(), jwSport1.getIdCard()));
             });
@@ -130,7 +161,7 @@ public class JwSportController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('jiewu:JwSport:remove')")
     @Log(title = "选手", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(jwSportService.deleteJwSportByIds(ids));
     }

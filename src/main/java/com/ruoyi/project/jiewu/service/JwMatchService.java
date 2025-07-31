@@ -75,7 +75,7 @@ public class JwMatchService {
 //                            allFee = allFee.add(jwGameItem.getFee());
 //                        }
 
-                    } else if ("3".equals(jwGameItem.getSportLimit())) {
+                    } else if ("2".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit())) {
                         // 多人
                         if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
                             int sportCount = jwSignRecord.getJwSignRecordSportList().size();
@@ -111,6 +111,10 @@ public class JwMatchService {
 
     public int updateJwMatch(JwMatch jwMatch) {
         return jwMatchMapper.updateJwMatch(jwMatch);
+    }
+
+    public int updateJwMatchInvitationList(Long matchId, String invitationList){
+        return jwMatchMapper.updateJwMatchInvitationList(matchId, invitationList);
     }
 
     public int deleteJwMatchByIds(Long[] ids) {

@@ -45,6 +45,16 @@ export function updateJwSport(data) {
   })
 }
 
+// 修改选手队伍
+export function changeTeam(data) {
+  return request({
+    url: '/jiewu/JwSport/changeTeam',
+    method: 'post',
+    params: data
+  })
+}
+
+
 // 删除选手
 export function delJwSport(id) {
   return request({

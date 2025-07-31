@@ -20,10 +20,18 @@
         <div class="fen">
           <el-switch
             v-model="isfen"
-            active-text="分场地"
+            active-text="2个场地"
             inactive-text="不分场地">
           </el-switch>
+          <div style="width: 40px"></div>
+          <el-switch
+            v-model="isfenF"
+            active-text="4个场地"
+            inactive-text="不分场地">
+          </el-switch>
+
           <div class="qing" @click.stop="xianshidafen">显示打分</div>
+          <div class="qing" @click.stop="xianshi3dafen">显示3打分</div>
           <div class="qing" @click.stop="qingPing">清屏</div>
         </div>
         <el-radio-group v-model="showNum">
@@ -38,7 +46,7 @@
       <div class="battle-sports">
 
         <div class="battle-left battle-c" data-area="A" v-if="showNum == 32">
-          <div class="battle-item" data-pk1="32.1" data-pk2="32.32" data-pk="16.1" :class="{select: currentPk == '16.1'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="32.1" data-pk2="32.32" data-pk="16.1" :class="{select: currentPk == '16.1'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 1)}}</div>
               <div class="battle-sport">{{getSportName(32, 32)}}</div>
@@ -55,109 +63,109 @@
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.16" data-pk2="32.20" data-pk="16.16" :class="{select: currentPk == '16.16'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="32.16" data-pk2="32.17" data-pk="16.16" :class="{select: currentPk == '16.16'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 16)}}</div>
-              <div class="battle-sport">{{getSportName(32, 20)}}</div>
+              <div class="battle-sport">{{getSportName(32, 17)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
                 <div class="score-o" v-for="item in getSportScore(32, 16, '16.16')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 20, '16.16')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 17, '16.16')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.12" data-pk2="32.24" data-pk="16.12" :class="{select: currentPk == '16.12'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="32.8" data-pk2="32.25" data-pk="16.8" :class="{select: currentPk == '16.8'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 12)}}</div>
-              <div class="battle-sport">{{getSportName(32, 24)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 12, '16.12')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 24, '16.12')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="32.28" data-pk2="32.8" data-pk="16.8" :class="{select: currentPk == '16.8'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 28)}}</div>
               <div class="battle-sport">{{getSportName(32, 8)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 28, '16.8')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 8, '16.8')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="32.5" data-pk2="32.25" data-pk="16.5" :class="{select: currentPk == '16.5'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 5)}}</div>
               <div class="battle-sport">{{getSportName(32, 25)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 5, '16.5')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 8, '16.8')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 25, '16.5')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 25, '16.8')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.21" data-pk2="32.9" data-pk="16.9" :class="{select: currentPk == '16.9'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="32.9" data-pk2="32.24" data-pk="16.9" :class="{select: currentPk == '16.9'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 21)}}</div>
               <div class="battle-sport">{{getSportName(32, 9)}}</div>
+              <div class="battle-sport">{{getSportName(32, 24)}}</div>
             </div>
             <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 21, '16.9')"></div>
-              </div>
               <div class="battle-score">
                 <div class="score-o" v-for="item in getSportScore(32, 9, '16.9')"></div>
               </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 24, '16.9')"></div>
+              </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.13" data-pk2="32.17" data-pk="16.13" :class="{select: currentPk == '16.13'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="C" data-pk1="32.21" data-pk2="32.12" data-pk="16.12" :class="{select: currentPk == '16.12'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 13)}}</div>
-              <div class="battle-sport">{{getSportName(32, 17)}}</div>
+              <div class="battle-sport">{{getSportName(32, 21)}}</div>
+              <div class="battle-sport">{{getSportName(32, 12)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 13, '16.13')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 21, '16.12')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 17, '16.13')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 12, '16.12')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.29" data-pk2="32.4" data-pk="16.4" :class="{select: currentPk == '16.4'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="C" data-pk1="32.28" data-pk2="32.5" data-pk="16.5" :class="{select: currentPk == '16.5'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(32, 28)}}</div>
+              <div class="battle-sport">{{getSportName(32, 5)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 28, '16.5')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 5, '16.5')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="C" data-pk1="32.20" data-pk2="32.13" data-pk="16.13" :class="{select: currentPk == '16.13'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(32, 20)}}</div>
+              <div class="battle-sport">{{getSportName(32, 13)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 20, '16.13')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 13, '16.13')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="C" data-pk1="32.29" data-pk2="32.4" data-pk="16.4" :class="{select: currentPk == '16.4'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 29)}}</div>
               <div class="battle-sport">{{getSportName(32, 4)}}</div>
@@ -176,7 +184,7 @@
           </div>
         </div>
         <div class="battle-right battle-c" data-area="B" v-if="showNum == 32">
-          <div class="battle-item" data-pk1="32.3" data-pk2="32.30" data-pk="16.3" :class="{select: currentPk == '16.3'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="32.3" data-pk2="32.30" data-pk="16.3" :class="{select: currentPk == '16.3'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 3)}}</div>
               <div class="battle-sport">{{getSportName(32, 30)}}</div>
@@ -193,109 +201,109 @@
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.22" data-pk2="32.10" data-pk="16.14" :class="{select: currentPk == '16.14'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 22)}}</div>
-              <div class="battle-sport">{{getSportName(32, 10)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 22, '16.14')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 10, '16.14')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="32.14" data-pk2="32.18" data-pk="16.10" :class="{select: currentPk == '16.10'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="32.14" data-pk2="32.19" data-pk="16.14" :class="{select: currentPk == '16.14'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 14)}}</div>
-              <div class="battle-sport">{{getSportName(32, 18)}}</div>
+              <div class="battle-sport">{{getSportName(32, 19)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 14, '16.10')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 14, '16.14')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 18, '16.10')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 19, '16.14')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.26" data-pk2="32.6" data-pk="16.6" :class="{select: currentPk == '16.6'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="32.6" data-pk2="32.27" data-pk="16.6" :class="{select: currentPk == '16.6'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 26)}}</div>
               <div class="battle-sport">{{getSportName(32, 6)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 26, '16.6')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 6, '16.6')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="32.7" data-pk2="32.27" data-pk="16.7" :class="{select: currentPk == '16.7'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 7)}}</div>
               <div class="battle-sport">{{getSportName(32, 27)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 7, '16.7')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 6, '16.6')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 27, '16.7')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 27, '16.6')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.11" data-pk2="32.23" data-pk="16.11" :class="{select: currentPk == '16.11'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="32.11" data-pk2="32.22" data-pk="16.11" :class="{select: currentPk == '16.11'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 11)}}</div>
-              <div class="battle-sport">{{getSportName(32, 23)}}</div>
+              <div class="battle-sport">{{getSportName(32, 22)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
                 <div class="score-o" v-for="item in getSportScore(32, 11, '16.11')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 23, '16.11')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 22, '16.11')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.15" data-pk2="32.19" data-pk="16.15" :class="{select: currentPk == '16.15'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="D" data-pk1="32.23" data-pk2="32.10" data-pk="16.10" :class="{select: currentPk == '16.10'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(32, 15)}}</div>
-              <div class="battle-sport">{{getSportName(32, 19)}}</div>
+              <div class="battle-sport">{{getSportName(32, 23)}}</div>
+              <div class="battle-sport">{{getSportName(32, 10)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 15, '16.15')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 23, '16.10')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(32, 19, '16.15')"></div>
+                <div class="score-o" v-for="item in getSportScore(32, 10, '16.10')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="32.31" data-pk2="32.2" data-pk="16.2" :class="{select: currentPk == '16.2'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="D" data-pk1="32.26" data-pk2="32.7" data-pk="16.7" :class="{select: currentPk == '16.7'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(32, 26)}}</div>
+              <div class="battle-sport">{{getSportName(32, 7)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 26, '16.7')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 7, '16.7')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="D" data-pk1="32.18" data-pk2="32.15" data-pk="16.15" :class="{select: currentPk == '16.15'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(32, 18)}}</div>
+              <div class="battle-sport">{{getSportName(32, 15)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 18, '16.15')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(32, 15, '16.15')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="D" data-pk1="32.31" data-pk2="32.2" data-pk="16.2" :class="{select: currentPk == '16.2'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(32, 31)}}</div>
               <div class="battle-sport">{{getSportName(32, 2)}}</div>
@@ -316,7 +324,7 @@
 
 
         <div class="battle-left battle-c" data-area="A" v-if="showNum == 16">
-          <div class="battle-item" data-pk1="16.1" data-pk2="16.16" data-pk="8.1" :class="{select: currentPk == '8.1'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="16.1" data-pk2="16.16" data-pk="8.1" :class="{select: currentPk == '8.1'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(16, 1)}}</div>
               <div class="battle-sport">{{getSportName(16, 16)}}</div>
@@ -333,41 +341,41 @@
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="16.12" data-pk2="16.8" data-pk="8.8" :class="{select: currentPk == '8.8'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="16.8" data-pk2="16.9" data-pk="8.8" :class="{select: currentPk == '8.8'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(16, 12)}}</div>
               <div class="battle-sport">{{getSportName(16, 8)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 12, '8.8')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 8, '8.8')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="16.5" data-pk2="16.9" data-pk="8.5" :class="{select: currentPk == '8.5'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(16, 5)}}</div>
               <div class="battle-sport">{{getSportName(16, 9)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 5, '8.5')"></div>
+                <div class="score-o" v-for="item in getSportScore(16, 8, '8.8')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 9, '8.5')"></div>
+                <div class="score-o" v-for="item in getSportScore(16, 9, '8.8')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="16.13" data-pk2="16.4" data-pk="8.4" :class="{select: currentPk == '8.4'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="C" data-pk1="16.12" data-pk2="16.5" data-pk="8.5" :class="{select: currentPk == '8.5'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(16, 12)}}</div>
+              <div class="battle-sport">{{getSportName(16, 5)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(16, 12, '8.5')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(16, 5, '8.5')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="C" data-pk1="16.13" data-pk2="16.4" data-pk="8.4" :class="{select: currentPk == '8.4'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(16, 13)}}</div>
               <div class="battle-sport">{{getSportName(16, 4)}}</div>
@@ -387,7 +395,7 @@
         </div>
         <div class="battle-right battle-c" data-area="B" v-if="showNum == 16">
 
-          <div class="battle-item" data-pk1="16.3" data-pk2="16.14" data-pk="8.3" :class="{select: currentPk == '8.3'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="16.3" data-pk2="16.14" data-pk="8.3" :class="{select: currentPk == '8.3'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(16, 3)}}</div>
               <div class="battle-sport">{{getSportName(16, 14)}}</div>
@@ -404,41 +412,41 @@
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="16.10" data-pk2="16.6" data-pk="8.6" :class="{select: currentPk == '8.6'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="16.6" data-pk2="16.11" data-pk="8.6" :class="{select: currentPk == '8.6'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(16, 10)}}</div>
               <div class="battle-sport">{{getSportName(16, 6)}}</div>
-            </div>
-            <div class="item-score">
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 10, '8.6')"></div>
-              </div>
-              <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 6, '8.6')"></div>
-              </div>
-            </div>
-            <div class="item-btn">
-              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
-            </div>
-          </div>
-          <div class="battle-item" data-pk1="16.7" data-pk2="16.11" data-pk="8.7" :class="{select: currentPk == '8.7'}" @click.stop="battleItemSelect">
-            <div class="item-sport">
-              <div class="battle-sport">{{getSportName(16, 7)}}</div>
               <div class="battle-sport">{{getSportName(16, 11)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 7, '8.7')"></div>
+                <div class="score-o" v-for="item in getSportScore(16, 6, '8.6')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(16, 11, '8.7')"></div>
+                <div class="score-o" v-for="item in getSportScore(16, 11, '8.6')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="16.15" data-pk2="16.2" data-pk="8.2" :class="{select: currentPk == '8.2'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="D" data-pk1="16.10" data-pk2="16.7" data-pk="8.7" :class="{select: currentPk == '8.7'}" @click.stop="battleItemSelect">
+            <div class="item-sport">
+              <div class="battle-sport">{{getSportName(16, 10)}}</div>
+              <div class="battle-sport">{{getSportName(16, 7)}}</div>
+            </div>
+            <div class="item-score">
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(16, 10, '8.7')"></div>
+              </div>
+              <div class="battle-score">
+                <div class="score-o" v-for="item in getSportScore(16, 7, '8.7')"></div>
+              </div>
+            </div>
+            <div class="item-btn">
+              <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
+            </div>
+          </div>
+          <div class="battle-item" data-area-f="D" data-pk1="16.15" data-pk2="16.2" data-pk="8.2" :class="{select: currentPk == '8.2'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(16, 15)}}</div>
               <div class="battle-sport">{{getSportName(16, 2)}}</div>
@@ -458,7 +466,7 @@
         </div>
 
         <div class="battle-left battle-c" data-area="A" v-if="showNum == 8">
-          <div class="battle-item" data-pk1="8.1" data-pk2="8.8" data-pk="4.1" :class="{select: currentPk == '4.1'}" @click="battleItemSelect">
+          <div class="battle-item" data-area-f="A" data-pk1="8.1" data-pk2="8.8" data-pk="4.1" :class="{select: currentPk == '4.1'}" @click="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(8, 1)}}</div>
               <div class="battle-sport">{{getSportName(8, 8)}}</div>
@@ -475,7 +483,7 @@
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="8.5" data-pk2="8.4" data-pk="4.4" :class="{select: currentPk == '4.4'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="C" data-pk1="8.5" data-pk2="8.4" data-pk="4.4" :class="{select: currentPk == '4.4'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(8, 5)}}</div>
               <div class="battle-sport">{{getSportName(8, 4)}}</div>
@@ -494,34 +502,34 @@
           </div>
         </div>
         <div class="battle-right battle-c" data-area="B" v-if="showNum == 8">
-          <div class="battle-item" data-pk1="8.3" data-pk2="8.6" data-pk="4.2" :class="{select: currentPk == '4.2'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="B" data-pk1="8.3" data-pk2="8.6" data-pk="4.3" :class="{select: currentPk == '4.3'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(8, 3)}}</div>
               <div class="battle-sport">{{getSportName(8, 6)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(8, 3, '4.2')"></div>
+                <div class="score-o" v-for="item in getSportScore(8, 3, '4.3')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(8, 6, '4.2')"></div>
+                <div class="score-o" v-for="item in getSportScore(8, 6, '4.3')"></div>
               </div>
             </div>
             <div class="item-btn">
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
-          <div class="battle-item" data-pk1="8.7" data-pk2="8.2" data-pk="4.3" :class="{select: currentPk == '4.3'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-area-f="D" data-pk1="8.7" data-pk2="8.2" data-pk="4.2" :class="{select: currentPk == '4.2'}" @click.stop="battleItemSelect">
             <div class="item-sport">
               <div class="battle-sport">{{getSportName(8, 7)}}</div>
               <div class="battle-sport">{{getSportName(8, 2)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(8, 7, '4.3')"></div>
+                <div class="score-o" v-for="item in getSportScore(8, 7, '4.2')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(8, 2, '4.3')"></div>
+                <div class="score-o" v-for="item in getSportScore(8, 2, '4.2')"></div>
               </div>
             </div>
             <div class="item-btn">
@@ -550,17 +558,17 @@
           </div>
         </div>
         <div class="battle-right battle-c" data-area="B" v-if="showNum == 4">
-          <div class="battle-item" data-pk1="4.2" data-pk2="4.3" data-pk="2.2" :class="{select: currentPk == '2.2'}" @click.stop="battleItemSelect">
+          <div class="battle-item" data-pk1="4.3" data-pk2="4.2" data-pk="2.2" :class="{select: currentPk == '2.2'}" @click.stop="battleItemSelect">
             <div class="item-sport">
-              <div class="battle-sport">{{getSportName(4, 2)}}</div>
               <div class="battle-sport">{{getSportName(4, 3)}}</div>
+              <div class="battle-sport">{{getSportName(4, 2)}}</div>
             </div>
             <div class="item-score">
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(4, 2, '2.2')"></div>
+                <div class="score-o" v-for="item in getSportScore(4, 3, '2.2')"></div>
               </div>
               <div class="battle-score">
-                <div class="score-o" v-for="item in getSportScore(4, 3, '2.2')"></div>
+                <div class="score-o" v-for="item in getSportScore(4, 2, '2.2')"></div>
               </div>
             </div>
             <div class="item-btn">
@@ -611,7 +619,7 @@
               </div>
             </div>
             <div class="item-btn">
-              <div class="save-btn q" @click.stop="cancelScoreHandel">清除分数</div>
+              <!--<div class="save-btn q" @click.stop="cancelScoreHandel">清除分数</div>-->
               <div class="save-btn" @click.stop="saveScoreHandel">确认分数</div>
             </div>
           </div>
@@ -675,7 +683,7 @@
   import {listJwEight, saveEightPro, clearEightPro} from "@/api/jiewu/jwEight";
   import {getJwMatch} from "@/api/jiewu/jwMatch";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
-  import {startPk, getPkScores, xianshidafen} from "@/api/jiewu/JwAppScore";
+  import {startPk, getPkScores, xianshidafen, xianshi3dafen} from "@/api/jiewu/JwAppScore";
 
   export default {
     name: 'battlePhoneNew321',
@@ -692,6 +700,7 @@
       return {
         lun: 1,
         isfen: false,
+        isfenF: false,
         currentPk: "",
         showNum: "32",
         matchId: null,
@@ -798,6 +807,11 @@
       battleItemSelect(e) {
         let area = e.target.closest(".battle-c").getAttribute("data-area");
         if (!this.isfen) area = '全';
+
+        if(this.isfenF){
+          // 分四个场地
+          area = e.target.closest(".battle-item").getAttribute("data-area-f");
+        }
         let pk = e.target.closest(".battle-item").getAttribute("data-pk");
         this.currentPk = pk;
         let p1 = e.target.closest(".battle-item").getAttribute("data-pk1");
@@ -834,6 +848,11 @@
 
         })
       },
+      xianshi3dafen() {
+        xianshi3dafen({}).then(res => {
+
+        })
+      },
       getPkScores() {
         // if (this.currentPk) {
         getPkScores({gameItemId: this.gameItemId, currentPkGroup: ""}).then(res => {
@@ -861,7 +880,6 @@
         if (this.gameItemId) {
           listJwEight({gameItemId: this.gameItemId}).then(response => {
             this.jwEightList = response.rows;
-
             this.getPkScores()
           });
         } else {
@@ -870,6 +888,7 @@
         }
       },
       getSportName(positoin, index) {
+        // return index;
         // index = this.sportConfig[positoin + "." + index];
         let sport = this.jwEightList.find(item => item.playerPosition == positoin && item.playerIndex == index);
 
@@ -1016,6 +1035,9 @@
             border-radius: 4px;
             height: 24px;
             line-height: 24px;
+
+            white-space: nowrap;
+            overflow: hidden;
 
             &:last-child {
               margin-top: 4px;

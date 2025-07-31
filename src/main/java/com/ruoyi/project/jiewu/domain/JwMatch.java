@@ -51,13 +51,45 @@ public class JwMatch extends BaseEntity {
     @Excel(name = "盖章单位")
     private String sealUnit;
 
+    @Excel(name = "邀请码")
+    private String invitationCode;
+
+    @Excel(name = "邀请码列表")
+    private String invitationList;
+
     private String isShow;
+
+    private String isShowGrade;
 
     private String mainImg;
 
     private String battleImg;
 
     private Long startBackNum;
+
+    public String getIsShowGrade() {
+        return isShowGrade;
+    }
+
+    public void setIsShowGrade(String isShowGrade) {
+        this.isShowGrade = isShowGrade;
+    }
+
+    public String getInvitationCode() {
+        return invitationCode;
+    }
+
+    public void setInvitationCode(String invitationCode) {
+        this.invitationCode = invitationCode;
+    }
+
+    public String getInvitationList() {
+        return invitationList;
+    }
+
+    public void setInvitationList(String invitationList) {
+        this.invitationList = invitationList;
+    }
 
     public Long getStartBackNum() {
         return startBackNum;

@@ -32,11 +32,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </select>
 
-
-
-
-
-
     <select id="selectJwJudgeById" parameterType="Long" resultMap="JwJudgeResult">
         <include refid="selectJwJudgeVo"/>
         where id = #{id}

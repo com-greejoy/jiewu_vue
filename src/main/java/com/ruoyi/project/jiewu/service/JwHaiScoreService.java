@@ -138,7 +138,7 @@ public class JwHaiScoreService {
 
                 jwScoreListPlayer.sort((u1, u2) -> new BigDecimal(u2.getScore()).compareTo(new BigDecimal(u1.getScore())));
 
-                for ( JwHaiScore jwScore : jwScoreListPlayer) {
+                for (JwHaiScore jwScore : jwScoreListPlayer) {
                     if (StringUtils.isNotEmpty(jwScore.getScore()) && new BigDecimal(jwScore.getScore()).compareTo(new BigDecimal("0")) > 0) {
                         playerScoreAll = playerScoreAll.add(new BigDecimal(jwScore.getScore()));
                         playerCount++;
@@ -440,19 +440,23 @@ public class JwHaiScoreService {
                 list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
             }
 
-            List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+
             if (list != null && list.size() != 0) {
                 list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                 list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
                 int allSize = list.size();
                 list.forEach(jwSignRecord1 -> {
-                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
-                    jwSignRecord1.setItemName(jwGameItem.getName());
-                    if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                    if (StringUtils.isNotEmpty(jwGameItem.getResultDesId())) {
+                        List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+                        JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+                        jwSignRecord1.setItemName(jwGameItem.getName());
+                        if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                    }
                 });
+
             }
         }
-
+//        list = list.stream().filter(jwSignRecord1 -> jwSignRecord1.getJwTeam().getTeamName().contains("充轻舞飞扬艺术")).collect(Collectors.toList());
         return list;
     }
 
@@ -490,17 +494,22 @@ public class JwHaiScoreService {
                             jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                             jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
                         }
-                        List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+
+
                         if (jwSignRecordList != null && jwSignRecordList.size() != 0) {
                             jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                             jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
                             int allSize = jwSignRecordList.size();
-                            jwSignRecordList.forEach(jwSignRecord1 -> {
-                                JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
-                                jwSignRecord1.setJwGameItem(jwGameItem);
-                                jwSignRecord1.setItemName(jwGameItem.getName());
-                                if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
-                            });
+                            if (StringUtils.isNotEmpty(jwGameItem.getResultDesId())) {
+                                List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+                                jwSignRecordList.forEach(jwSignRecord1 -> {
+                                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+                                    jwSignRecord1.setJwGameItem(jwGameItem);
+                                    jwSignRecord1.setItemName(jwGameItem.getName());
+                                    if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                                });
+                            }
+
                         }
                         list.addAll(jwSignRecordList);
                     }

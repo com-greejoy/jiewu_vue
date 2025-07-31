@@ -1,5 +1,6 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,8 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.ruoyi.common.exception.GlobalException;
 import com.ruoyi.common.utils.IDCardUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.file.FileUploadUtils;
+import com.ruoyi.common.utils.file.MimeTypeUtils;
+import com.ruoyi.framework.config.RuoYiConfig;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.service.*;
+import org.apache.commons.io.FilenameUtils;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,9 +64,10 @@ public class JwSignRecordController extends BaseController {
         if (!StringUtils.isLongNotNull(jwSignRecord.getMatchId())) {
             return getDataTable(new ArrayList<>());
         }
+        startOrderBy();
         // 以组别的形式显示
         List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordList(jwSignRecord);
-        if(list != null && list.size() > 0){
+        if (list != null && list.size() > 0) {
             list.forEach(jwSignRecord1 -> jwSignRecord1.setJwSignRecordSportList(jwSignRecordSportService.selectJwSignRecordSportListById(jwSignRecord1.getId())));
         }
         return getDataTable(list);
@@ -77,7 +83,7 @@ public class JwSignRecordController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:export')")
-    @Log(title = "报名记录" , businessType = BusinessType.EXPORT)
+    @Log(title = "报名记录", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, JwSignRecord jwSignRecord) {
         List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordList(jwSignRecord);
@@ -88,12 +94,23 @@ public class JwSignRecordController extends BaseController {
             for (JwSignRecord jwSignRecord1 : list) {
                 JwSignRecordExport jwSignRecordExport = new JwSignRecordExport();
                 jwSignRecordExport.setGameItemName(jwGameItemService.selectJwGameItemById(jwSignRecord1.getGameItemId()).getName());
-                jwSignRecordExport.setTeamName(jwTeamService.selectJwTeamById(jwSignRecord1.getTeamId()).getTeamName());
+                JwTeam jwTeam = jwTeamService.selectJwTeamById(jwSignRecord1.getTeamId());
+                jwSignRecordExport.setTeamName(jwTeam.getTeamName());
                 jwSignRecordExport.setBackNumber(jwSignRecord1.getBackNumber());
-
+                jwSignRecordExport.setUserName(jwTeam.getUserName());
+                jwSignRecordExport.setUserPhone(jwTeam.getUserPhone());
                 List<JwSignRecordSport> jwSignRecordSportList = jwSignRecordSportService.selectJwSignRecordSportListById(jwSignRecord1.getId());
-                if (jwSignRecordSportList != null && jwSignRecordSportList.size() > 0) {
-                    jwSignRecordExport.setPlayerName(jwSignRecordSportList.stream().map(jwSignRecordSport -> jwSignRecordSport.getPlayerName() + ":" + jwSignRecordSport.getIdCard()).collect(Collectors.joining(";")));
+
+                if (jwSignRecord1.getSportLimit().equals("1")) {
+                    jwSignRecordExport.setPlayerNameS(jwSignRecordSportList.get(0).getPlayerName());
+                    jwSignRecordExport.setPlayerIdCard(jwSignRecordSportList.get(0).getIdCard());
+                    jwSignRecordExport.setPlayerPhone(jwSignRecordSportList.get(0).getPlayerPhone());
+                } else {
+                    if (jwSignRecordSportList != null && jwSignRecordSportList.size() > 0) {
+//                        jwSignRecordExport.setPlayerName(jwSignRecordSportList.stream().map(jwSignRecordSport -> jwSignRecordSport.getPlayerName() + ",身份证," + jwSignRecordSport.getIdCard()).collect(Collectors.joining(";")));
+                        jwSignRecordExport.setPlayerName(jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(";")));
+
+                    }
                 }
                 res.add(jwSignRecordExport);
             }
@@ -108,7 +125,7 @@ public class JwSignRecordController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:add')")
-    @Log(title = "报名记录" , businessType = BusinessType.INSERT)
+    @Log(title = "报名记录", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody JwSignRecord jwSignRecord) {
         JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
@@ -116,7 +133,7 @@ public class JwSignRecordController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:add')")
-    @Log(title = "改组" , businessType = BusinessType.INSERT)
+    @Log(title = "改组", businessType = BusinessType.INSERT)
     @PostMapping("/changeGameItem")
     @ResponseBody
     public AjaxResult changeGameItem(Long id, Long changeGameItemId) {
@@ -125,7 +142,7 @@ public class JwSignRecordController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:add')")
-    @Log(title = "改小项" , businessType = BusinessType.UPDATE)
+    @Log(title = "改小项", businessType = BusinessType.UPDATE)
     @PostMapping("/changeJwScheduleItem")
     @ResponseBody
     public AjaxResult changeJwScheduleItem(Long id, Long changeScheduleItemId) {
@@ -134,14 +151,14 @@ public class JwSignRecordController extends BaseController {
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:edit')")
-    @Log(title = "报名记录" , businessType = BusinessType.UPDATE)
+    @Log(title = "报名记录", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody JwSignRecord jwSignRecord) {
         return toAjax(jwSignRecordService.updateJwSignRecord(jwSignRecord));
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:remove')")
-    @Log(title = "报名记录" , businessType = BusinessType.DELETE)
+    @Log(title = "报名记录", businessType = BusinessType.DELETE)
     @DeleteMapping("/{id}")
     public AjaxResult remove(@PathVariable Long id) {
         return toAjax(jwSignRecordService.deleteJwSignRecordById(id));
@@ -157,12 +174,13 @@ public class JwSignRecordController extends BaseController {
 
             for (JwSportImport jwSportImport : userList) {
 
-                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemByName(jwSportImport.getPlayerGroup(), matchId);
+                jwSportImport.setPlayerGroup(new DecimalFormat("000").format(Long.valueOf(jwSportImport.getPlayerGroup())));
+                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemByCode(jwSportImport.getPlayerGroup(), matchId);
                 JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSportImport.getPlayerTeam());
                 List<Long> sportIds = new ArrayList<>();
-                String[] playerNames = jwSportImport.getPlayerName().replaceAll(" " , "").split("&");
+                String[] playerNames = jwSportImport.getPlayerName().replaceAll(" ", "").split("&");
                 for (String playerName : playerNames) {
-                    System.out.println(playerName +"----"+jwSportImport.getPlayerTeam());
+                    System.out.println(playerName + "----" + jwSportImport.getPlayerTeam());
                     JwSport jwSport = jwSportService.selectJwSportByName(playerName, null, jwTeam.getCreateUserId());
                     if (jwSport != null && StringUtils.isNotEmpty(jwSport.getPlayerName())) {
                         sportIds.add(jwSport.getId());
@@ -175,7 +193,7 @@ public class JwSignRecordController extends BaseController {
                         sportIds.add(jwSport.getId());
                     }
                 }
-                if(jwGameItem == null){
+                if (jwGameItem == null) {
                     throw new GlobalException(jwSportImport.getPlayerGroup());
 
                 }
@@ -183,5 +201,23 @@ public class JwSignRecordController extends BaseController {
             }
         }
         return success();
+    }
+
+    @PostMapping("/upLoadMusic")
+    public AjaxResult upLoadMusic(MultipartFile file, Long jwSignRecordId) {
+        String avatar = "";
+        try {
+            avatar = FileUploadUtils.uploadMatch(RuoYiConfig.getMatchPath() + jwSignRecordService.selectJwSignRecordById(jwSignRecordId).getMatchId(), file, MimeTypeUtils.MEDIA_EXTENSION);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("错误");
+        }
+        JwSignRecord jwSignRecord = new JwSignRecord();
+        jwSignRecord.setId(jwSignRecordId);
+        jwSignRecord.setWorksMusic(avatar);
+//        jwSignRecord.setWorksName(FilenameUtils.getBaseName(file.getOriginalFilename()));
+        jwSignRecord.setWorksMusicName(FilenameUtils.getBaseName(file.getOriginalFilename()) + "." + FilenameUtils.getExtension(file.getOriginalFilename()));
+        jwSignRecordService.updateJwSignRecord(jwSignRecord);
+        return AjaxResult.success(avatar);
     }
 }

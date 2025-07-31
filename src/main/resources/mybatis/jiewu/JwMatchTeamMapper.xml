@@ -60,10 +60,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <update id="updateJwMatchTeam" parameterType="JwMatchTeam">
         update jw_match_team
         <trim prefix="SET" suffixOverrides=",">
-            <if test="matchId != null">match_id = #{matchId},</if>
             <if test="indexOrder != null">index_order = #{indexOrder},</if>
         </trim>
-        where team_id = #{teamId}
+        where team_id = #{teamId} and match_id = #{matchId}
     </update>
 
     <delete id="deleteJwMatchTeamByTeamId" parameterType="Long">
@@ -76,4 +75,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{teamId}
         </foreach>
     </delete>
+
+    <delete id="deleteJwMatchTeamByTeamMatch" parameterType="Long">
+        delete from jw_match_team where index_order = #{indexOrder} and match_id = #{matchId}
+    </delete>
+
 </mapper>

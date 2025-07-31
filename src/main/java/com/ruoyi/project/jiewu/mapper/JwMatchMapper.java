@@ -19,6 +19,8 @@ public interface JwMatchMapper {
 
     public int updateJwMatch(JwMatch jwMatch);
 
+    public int updateJwMatchInvitationList(@Param("matchId") Long matchId, @Param("invitationList") String invitationList);
+
     public int deleteJwMatchById(Long id);
 
     public int deleteJwMatchByIds(Long[] ids);

@@ -115,7 +115,7 @@ public class JwAppScoreController extends BaseController {
     public AjaxResult getSports(Long judgeId, Long matchId, Long scheduleItemId) {
 
         JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(scheduleItemId);
-        if("2".equals(jwScheduleItem.getItemProcess())){
+        if ("2".equals(jwScheduleItem.getItemProcess())) {
             // 决赛对阵  获取全部对阵选手，拿到前端去处理
             JwEight query = new JwEight();
             query.setGameItemId(jwScheduleItem.getGameItemId());
@@ -125,7 +125,7 @@ public class JwAppScoreController extends BaseController {
             result.put("list", list);
             return AjaxResult.success(result);
 
-        }else{
+        } else {
             List<JwSignRecord> signRecordList = jwSignRecordService.selectJwSignRecordListWithJudgeScore(judgeId, scheduleItemId);
             return AjaxResult.success(signRecordList);
         }
@@ -149,7 +149,7 @@ public class JwAppScoreController extends BaseController {
         msg.put("currentPkGroup", currentPkGroup);
         msg.put("currentPosition", currentPosition);
 
-        String area  = JSONObject.parse(currentPkGroup).getString("area");
+        String area = JSONObject.parse(currentPkGroup).getString("area");
         JwEight query = new JwEight();
         query.setGameItemId(gameItemId);
         query.setPlayerPosition(currentPosition);
@@ -157,14 +157,16 @@ public class JwAppScoreController extends BaseController {
         List<JwEight> list = jwEightService.selectJwEightListWithSport(query);
         msg.put("list", list);
 
-        if(StringUtils.isEmpty(area)){
+        if (StringUtils.isEmpty(area)) {
             redisCache.setCacheObject("currentPk:A", null);
             redisCache.setCacheObject("currentPk:B", null);
-        }else{
-            if("全".equals(area)){
+            redisCache.setCacheObject("currentPk:C", null);
+            redisCache.setCacheObject("currentPk:D", null);
+        } else {
+            if ("全".equals(area)) {
                 redisCache.setCacheObject("currentPk:A", msg);
                 redisCache.setCacheObject("currentPk:B", msg);
-            }else{
+            } else {
                 redisCache.setCacheObject("currentPk:" + area, msg);
             }
         }
@@ -184,30 +186,42 @@ public class JwAppScoreController extends BaseController {
         return AjaxResult.success(1);
     }
 
+    // 显示对阵的裁判打分 第三轮的
+    @PostMapping("/xianshi3dafen")
+    @ResponseBody
+    public AjaxResult xianshi3dafen() {
+        JSONObject msg = new JSONObject();
+        msg.put("type", "show3Score");
+        WebsocketServe.sendUserListTypeMessage("juesai-", msg.toJSONString());
+        return AjaxResult.success(1);
+    }
 
     @PostMapping("/getCurrentPk")
     @ResponseBody
     public AjaxResult getCurrentPk(String area, Long judgeId) {
         JSONObject msg = redisCache.getCacheObject("currentPk:" + area);
-        JSONObject currentPkGroup = msg.getJSONObject("currentPkGroup");
-        if(currentPkGroup != null){
-            String currentPk = currentPkGroup.getString("currentPk");
-            if(StringUtils.isNotEmpty(currentPk)){
-                JwEightScore query = new JwEightScore();
-                query.setJudgeId(judgeId);
-                query.setPlayerPkGroup(currentPk);
-                query.setPlayerGroup(msg.getLong("gameItemId"));
-                List<JwEightScore> jwEightScoreList = jwEightScoreService.selectJwEightScoreList(query);
-                msg.put("jwEightScoreList", jwEightScoreList);
+        if(msg != null){
+            JSONObject currentPkGroup = msg.getJSONObject("currentPkGroup");
+            if (currentPkGroup != null) {
+                String currentPk = currentPkGroup.getString("currentPk");
+                if (StringUtils.isNotEmpty(currentPk)) {
+                    JwEightScore query = new JwEightScore();
+                    query.setJudgeId(judgeId);
+                    query.setPlayerPkGroup(currentPk);
+                    query.setPlayerGroup(msg.getLong("gameItemId"));
+                    List<JwEightScore> jwEightScoreList = jwEightScoreService.selectJwEightScoreList(query);
+                    msg.put("jwEightScoreList", jwEightScoreList);
+                }
             }
         }
+
         return AjaxResult.success(msg);
     }
 
     // 保存对阵打分
     @PostMapping("/saveEightScore")
     @ResponseBody
-    public AjaxResult saveEightScore(String judgeId, String currentPkGroup, Long jinJiId , Long lun, String subScore) {
+    public AjaxResult saveEightScore(String judgeId, String currentPkGroup, Long jinJiId, Long lun, String subScore) {
         return AjaxResult.success(jwEightScoreService.saveEightScore(judgeId, currentPkGroup, jinJiId, lun, subScore));
     }
 
@@ -215,31 +229,103 @@ public class JwAppScoreController extends BaseController {
     @PostMapping("/getPkScores")
     @ResponseBody
     public AjaxResult getPkScores(String currentPkGroup, Long gameItemId) {
-//        List<JwJudge> judgeList = new ArrayList<>();
 
-//        JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(gameItemId);
 
-//        if(StringUtils.isNotEmpty(jwGameItem.getJudgeId())){
-////             judgeList = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeId().split(","));
-//        }
+        JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(gameItemId);
+
+        List<JwJudge> judgeListAll = new ArrayList<>();
+        if (StringUtils.isNotEmpty(jwGameItem.getJudgeIdAll())) {
+            judgeListAll = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeIdAll().split(","));
+        }
+
+        List<JwJudge> judgeListA = new ArrayList<>();
+        if (StringUtils.isNotEmpty(jwGameItem.getJudgeId())) {
+            judgeListA = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeId().split(","));
+        }
+
+        List<JwJudge> judgeListB = new ArrayList<>();
+        if (StringUtils.isNotEmpty(jwGameItem.getJudgeIdB())) {
+            judgeListB = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeIdB().split(","));
+        }
+
+        List<JwJudge> judgeListC = new ArrayList<>();
+        if (StringUtils.isNotEmpty(jwGameItem.getJudgeIdC())) {
+            judgeListC = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeIdC().split(","));
+        }
+
+        List<JwJudge> judgeListD = new ArrayList<>();
+        if (StringUtils.isNotEmpty(jwGameItem.getJudgeIdD())) {
+            judgeListD = jwJudgeService.selectJwJudgeByIds(jwGameItem.getJudgeIdD().split(","));
+        }
 
         List<JwEightScore> jwEightScoreList = jwEightScoreMapper.selectJwEightScoreListByPkGroup(currentPkGroup, gameItemId);
-//        if(jwEightScoreList != null && jwEightScoreList.size() > 0){
-//            for(JwEightScore  jwEightScore : jwEightScoreList){
-//                judgeList.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
-//            }
-//
-//            if(judgeList.size() > 0){
-//                judgeList.forEach(jwJudge -> {
-//                    JwEightScore jwEightScore = new JwEightScore();
-//                    jwEightScore.setJudgeId(jwJudge.getId());
-//                    jwEightScore.setJudgeName(jwJudge.getJudgeName());
-//                    jwEightScore.setLun(1l);
-//                    jwEightScoreList.add(jwEightScore);
-//                });
-//            }
+
+        if (jwEightScoreList == null) {
+            jwEightScoreList = new ArrayList<>();
+        }
+
+//        for (JwEightScore jwEightScore : jwEightScoreList) {
+//            judgeListA.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
+//            judgeListB.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
+//            judgeListC.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
+//            judgeListD.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
+//            judgeListAll.removeIf(jwJudge -> jwJudge.getId().equals(jwEightScore.getJudgeId()));
 //        }
 
+        if (judgeListA.size() > 0) {
+            for(JwJudge jwJudge : judgeListA){
+                JwEightScore jwEightScore = new JwEightScore();
+                jwEightScore.setJudgeId(jwJudge.getId());
+                jwEightScore.setJudgeName(jwJudge.getJudgeName());
+                jwEightScore.setLun(1l);
+                jwEightScore.setChangDi("A");
+                jwEightScoreList.add(jwEightScore);
+            }
+        }
+
+        if (judgeListB.size() > 0) {
+            for(JwJudge jwJudge : judgeListB){
+                JwEightScore jwEightScore = new JwEightScore();
+                jwEightScore.setJudgeId(jwJudge.getId());
+                jwEightScore.setJudgeName(jwJudge.getJudgeName());
+                jwEightScore.setLun(1l);
+                jwEightScore.setChangDi("B");
+                jwEightScoreList.add(jwEightScore);
+            }
+        }
+
+
+        if (judgeListC.size() > 0) {
+            for(JwJudge jwJudge : judgeListC){
+                JwEightScore jwEightScore = new JwEightScore();
+                jwEightScore.setJudgeId(jwJudge.getId());
+                jwEightScore.setJudgeName(jwJudge.getJudgeName());
+                jwEightScore.setLun(1l);
+                jwEightScore.setChangDi("C");
+                jwEightScoreList.add(jwEightScore);
+            }
+        }
+
+        if (judgeListD.size() > 0) {
+            for(JwJudge jwJudge : judgeListD){
+                JwEightScore jwEightScore = new JwEightScore();
+                jwEightScore.setJudgeId(jwJudge.getId());
+                jwEightScore.setJudgeName(jwJudge.getJudgeName());
+                jwEightScore.setLun(1l);
+                jwEightScore.setChangDi("D");
+                jwEightScoreList.add(jwEightScore);
+            }
+        }
+        if (judgeListAll.size() > 0) {
+            for(JwJudge jwJudge : judgeListAll){
+                JwEightScore jwEightScore = new JwEightScore();
+                jwEightScore.setJudgeId(jwJudge.getId());
+                jwEightScore.setJudgeName(jwJudge.getJudgeName());
+                jwEightScore.setLun(1l);
+                jwEightScore.setChangDi("ALL");
+                jwEightScoreList.add(jwEightScore);
+            }
+        }
         return AjaxResult.success(jwEightScoreList);
     }
 }

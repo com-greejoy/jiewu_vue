@@ -99,6 +99,7 @@
         </template>
       </el-table-column>
       <el-table-column label="年龄" align="center" prop="age" />
+      <el-table-column label="电话" align="center" prop="playerPhone" />
       <el-table-column label="创建者" align="center" prop="createUserId" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -119,7 +120,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -129,7 +130,7 @@
     />
 
     <!-- 添加或修改选手对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="姓名" prop="playerName">
           <el-input v-model="form.playerName" placeholder="请输入姓名" />
@@ -137,9 +138,9 @@
         <el-form-item label="身份证" prop="idCard">
           <el-input v-model="form.idCard" placeholder="请输入身份证" />
         </el-form-item>
-
-
-
+        <el-form-item label="电话" prop="playerPhone">
+          <el-input v-model="form.playerPhone" placeholder="请输入电话" />
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
@@ -222,7 +223,8 @@ export default {
         idCard: null,
         sex: null,
         age: null,
-        createUserId: null
+        createUserId: null,
+        playerPhone: null
       },
       // 表单参数
       form: {},
@@ -266,7 +268,8 @@ export default {
         idCard: null,
         sex: null,
         age: null,
-        createUserId: null
+        createUserId: null,
+        playerPhone: null
       };
       this.resetForm("form");
     },
@@ -300,7 +303,7 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || this.ids
+      const id = row.id || this.ids;
       getJwSport(id).then(response => {
         this.form = response.data;
         this.open = true;

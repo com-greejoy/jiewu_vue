@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectJwEightList" parameterType="JwEight" resultMap="JwEightResult">
         <include refid="selectJwEightVo"/>
-        <where>  
+        <where>
             <if test="playerId != null  and playerId != ''"> and player_id = #{playerId}</if>
             <if test="playerIndex != null "> and player_index = #{playerIndex}</if>
             <if test="playerPosition != null  and playerPosition != ''"> and player_position = #{playerPosition}</if>

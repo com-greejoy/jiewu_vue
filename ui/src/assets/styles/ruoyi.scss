@@ -293,3 +293,7 @@
 .el-select-dropdown__wrap {
   max-height: 65vh !important;
 }
+
+.is-multiple  .el-select-dropdown__wrap {
+  max-height: 55vh !important;
+}

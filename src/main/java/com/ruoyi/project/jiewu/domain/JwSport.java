@@ -28,23 +28,34 @@ public class JwSport extends BaseEntity {
     @Excel(name = "身份证")
     private String idCard;
 
+    @Excel(name = "电话")
+    private String playerPhone;
+
 //    @Excel(name = "性别")
     private String sex;
 
 //    @Excel(name = "年龄")
     private Long age;
 
-//    @Excel(name = "创建者")
     private Long createUserId;
 
     private Boolean select;
     private Long matchId;
     private Long teamId;
     private String backNumber;
+
+    @Excel(name = "创建者")
     private String teamName;
 
     private List<JwGameItem> jwGameItemList;
 
+    public String getPlayerPhone() {
+        return playerPhone;
+    }
+
+    public void setPlayerPhone(String playerPhone) {
+        this.playerPhone = playerPhone;
+    }
 
     public String getTeamName() {
         return teamName;

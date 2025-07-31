@@ -14,6 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="playerName"    column="player_name"    />
         <result property="idCard"    column="id_card"    />
         <result property="sex"    column="sex"    />
+        <result property="playerPhone"    column="player_phone"    />
     </resultMap>
 
     <sql id="selectJwSignRecordSportVo">
@@ -31,8 +32,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
+    <select id="selectJwSignRecordSportListByGameItemName" parameterType="JwSignRecordSport" resultMap="JwSignRecordSportResult">
+        select jsr.* from jw_sign_record_sport jsr
+        left join jw_game_item jgi on jgi.id = jsr.game_item_id
+        <where>
+            <if test="teamId != null "> and jsr.team_id = #{teamId}</if>
+            <if test="matchId != null "> and jsr.match_id = #{matchId}</if>
+            <if test="gameItemId != null "> and jsr.game_item_id = #{gameItemId}</if>
+            <if test="sportId != null "> and jsr.sport_id = #{sportId}</if>
+            <if test="signRecordId != null "> and jsr.sign_record_id = #{signRecordId}</if>
+            <if test="gameNameVar != null  and gameNameVar != ''"> and jgi.name like concat('%', #{gameNameVar}, '%')</if>
+            and jgi.sport_limit = '1'
+        </where>
+    </select>
+
     <select id="selectJwSignRecordSportListById" parameterType="Long" resultMap="JwSignRecordSportResult">
-        select b.*,  cc.player_name, cc.id_card, cc.sex from jw_sign_record_sport b
+        select b.*,  cc.player_name, cc.id_card, cc.sex,cc.player_phone from jw_sign_record_sport b
         left join jw_sport cc on cc.id = b.sport_id
         where sign_record_id = #{signRecordId}
     </select>

@@ -1,0 +1,1 @@
+update jw_sign_record set all_score = null, avg_score = null, rank_order = null;

@@ -40,7 +40,6 @@
       <el-col :span="1.5">
         <el-button
           type="primary"
-          plain
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
@@ -51,7 +50,6 @@
       <el-col :span="1.5">
         <el-button
           type="success"
-          plain
           icon="el-icon-edit"
           size="mini"
           :disabled="single"
@@ -63,7 +61,6 @@
       <el-col :span="1.5">
         <el-button
           type="danger"
-          plain
           icon="el-icon-delete"
           size="mini"
           :disabled="multiple"
@@ -75,12 +72,20 @@
       <el-col :span="1.5">
         <el-button
           type="warning"
-          plain
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
           v-hasPermi="['jiewu:JwGameItem:export']"
         >导出
+        </el-button>
+
+        <el-button
+          type="primary"
+          icon="el-icon-download"
+          size="mini"
+          @click="handleExportGameItemCount"
+          v-hasPermi="['jiewu:JwGameItem:export']"
+        >导出每项报名数量
         </el-button>
 
         <el-button type="success" icon="el-icon-upload2" size="mini" @click="handleImport">导入数据</el-button>
@@ -97,11 +102,19 @@
         <el-button
           style="padding: 6px;"
           size="mini"
-          type="primary"
+          type="warning"
           @click="handleSetJudge()"
           v-hasPermi="['jiewu:JwGameItem:remove']"
         >设置决赛裁判
         </el-button>
+        <!--<el-button-->
+        <!--style="padding: 6px;"-->
+        <!--size="mini"-->
+        <!--type="primary"-->
+        <!--@click="handleSetJudge('B')"-->
+        <!--v-hasPermi="['jiewu:JwGameItem:remove']"-->
+        <!--&gt;设置决赛裁判B-->
+        <!--</el-button>-->
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -427,10 +440,43 @@
           <el-input v-model="judgeForm.name" placeholder="请输入项目名"/>
         </el-form-item>
 
-        <el-form-item label="裁判" prop="judgeIds">
-          <el-checkbox-group v-model="judgeForm.judgeIds" style="height: 50vh;overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+
+        <el-form-item label="决赛裁判" prop="judgeIdAlls">
+          <el-checkbox-group v-model="judgeForm.judgeIdAlls" style="overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
             <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
-              <div class="item-name">{{item.judgeName}}  </div>
+              <div class="item-name">{{item.judgeName}}</div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item label="A场裁判" prop="judgeIds">
+          <el-checkbox-group v-model="judgeForm.judgeIds" style="overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+            <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
+              <div class="item-name">{{item.judgeName}}</div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item label="B场裁判" prop="judgeIdBs">
+          <el-checkbox-group v-model="judgeForm.judgeIdBs" style="overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+            <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
+              <div class="item-name">{{item.judgeName}}</div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item label="C场裁判" prop="judgeIdCs">
+          <el-checkbox-group v-model="judgeForm.judgeIdCs" style="overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+            <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
+              <div class="item-name">{{item.judgeName}}</div>
+            </el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+
+        <el-form-item label="D场裁判" prop="judgeIdDs">
+          <el-checkbox-group v-model="judgeForm.judgeIdDs" style="overflow: auto;display: flex;flex-direction: row;flex-wrap: wrap;">
+            <el-checkbox v-for="item in matchJudgeList" :label="item.id" class="checkbox-game-item" :key="item.judgeName">
+              <div class="item-name">{{item.judgeName}}</div>
             </el-checkbox>
           </el-checkbox-group>
         </el-form-item>
@@ -440,8 +486,6 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
-
-
 
     <el-dialog title="导入报名" :visible.sync="upload.open" width="400px" append-to-body>
 
@@ -551,38 +595,58 @@
         // 表单参数
         form: {},
         // 表单校验
-        rules: {}
+        rules: {},
+        changDi: ""
       };
     },
     created() {
       this.getList();
     },
     methods: {
-      submitJudgeForm(){
+      submitJudgeForm() {
         (this.ids || []).forEach(id => {
-          updateJwGameItem({id: id, judgeId: this.judgeForm.judgeIds.join(",")}).then(res => {
+
+          let data = {
+            id: id,
+            judgeId: this.judgeForm.judgeIds.join(","),
+            judgeIdB: this.judgeForm.judgeIdBs.join(","),
+            judgeIdC: this.judgeForm.judgeIdCs.join(","),
+            judgeIdD: this.judgeForm.judgeIdDs.join(","),
+            judgeIdAll: this.judgeForm.judgeIdAlls.join(",")};
+          updateJwGameItem(data).then(res => {
             this.showSetJudge = false;
             this.getList();
           });
         });
       },
       handleSetJudge() {
+
         if (this.queryParams.matchId && this.ids && this.ids.length > 0) {
-          this.judgeForm = {judgeIds: []};
+          this.judgeForm = {judgeIds: [], judgeIdBs: []};
           listJwJudgeMatch({
             matchId: this.queryParams.matchId, pageNum: 1,
             pageSize: 1000,
           }).then(response => {
-
             let names = [];
+            let judgeId = [], judgeIdB = [], judgeIdC = [],judgeIdD = [],judgeIdAll = [];
+
+
             (this.ids || []).forEach(id => {
               let item = this.JwGameItemList.find((item) => item.id == id);
-              names.push(item.name)
+              names.push(item.name);
+              judgeId = (item.judgeId || "").split(",").map(Number);
+              judgeIdB = (item.judgeIdB || "").split(",").map(Number);
+              judgeIdC = (item.judgeIdC || "").split(",").map(Number);
+              judgeIdD = (item.judgeIdD || "").split(",").map(Number);
+              judgeIdAll = (item.judgeIdAll || "").split(",").map(Number);
             });
 
-
-            this.judgeForm = {ids: this.ids, name: names.join(", "), judgeIds: []};
-
+            this.judgeForm = {ids: this.ids, name: names.join(", "),
+              judgeIds: judgeId || [],
+              judgeIdBs: judgeIdB || [],
+              judgeIdCs: judgeIdC || [],
+              judgeIdDs: judgeIdD || [],
+              judgeIdAlls: judgeIdAll || []};
 
             this.matchJudgeList = response.rows || [];
             this.matchJudgeList.sort((a, b) => a.judgeId - b.judgeId);
@@ -728,7 +792,7 @@
         this.form.id = null;
         this.form.code = row.code * 1 + 1;
         this.form.name = null;
-        this.form.remark = "[等级赛]";
+        this.form.remark = null;
         this.form.minYear = null;
         this.form.maxYear = null;
         this.form.showMinYear = null;
@@ -803,6 +867,13 @@
           ...this.queryParams
         }, `JwGameItem_${new Date().getTime()}.xlsx`)
       },
+      /** 导出按钮操作 */
+      handleExportGameItemCount() {
+        this.download('jiewu/JwGameItem/handleExportGameItemCount', {
+          ...this.queryParams
+        }, `组别报名数量.xlsx`)
+      },
+
       handleImport() {
         this.upload.title = "导入";
         this.upload.open = true;

@@ -72,6 +72,9 @@ public class JwGameItemService {
         return jwGameItemMapper.selectJwGameItemByName(name, matchId);
     }
 
+    public JwGameItem selectJwGameItemByCode(String code, Long matchId) {
+        return jwGameItemMapper.selectJwGameItemByCode(code, matchId);
+    }
 
     public int deleteJwGameItemByIds(Long[] ids) {
         return jwGameItemMapper.deleteJwGameItemByIds(ids);

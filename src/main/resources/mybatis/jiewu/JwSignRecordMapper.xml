@@ -56,6 +56,7 @@
         <result property="playerName" column="player_name"/>
         <result property="idCard" column="id_card"/>
         <result property="sex" column="sex"/>
+        <result property="playerPhone"    column="player_phone"    />
     </resultMap>
 
     <sql id="selectJwSignRecordVo">
@@ -227,7 +228,7 @@
 
     <!--获取齐舞的报名记录-->
     <select id="listMatchQiWuSignRecord" resultMap="JwSignRecordWithMusicResult">
-        select a.id, a.team_id, a.schedule_item_id, a.show_img, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
+        select a.id, a.team_id, jt.team_name, a.schedule_item_id, a.show_img, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
         a.create_time, a.update_time,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex,
@@ -236,7 +237,11 @@
         left join jw_sign_record_sport b on b.sign_record_id = a.id
         left join jw_sport cc on cc.id = b.sport_id
         left join jw_game_item jgi on jgi.id = a.game_item_id
-        where a.team_id = #{teamId} and a.match_id = #{matchId} and (a.sport_limit = 3 or a.match_id = 12 or a.match_id = 13)
+        left join jw_team jt on jt.id = a.team_id
+        where
+        a.match_id = #{matchId}
+        <if test="teamId != null ">and a.team_id = #{teamId}</if>
+        and (a.sport_limit = 3 or a.match_id = 12 or a.match_id = 13)
     </select>
 
     <!--获取代表队比赛报名人数-->
@@ -341,6 +346,14 @@
         update jw_sign_record set rank_order = #{rankOrder} where id = #{id}
     </update>
 
+    <!--修改队伍-->
+    <update id="changeTeam">
+        update jw_sign_record set team_id = #{teamId} where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
     <!-- 获取海选晋级选手 -->
     <select id="selectHaiXuanJinJiSportList" resultMap="JwSignRecordResult">
         select jsr.* from jw_sign_record jsr
@@ -381,7 +394,7 @@
     <select id="selectJwSignRecordHaiScore" parameterType="JwSignRecord" resultMap="JwSignRecordJwHaiScoreResult">
         select a.*, jj.judge_name, jsi.item_name, jsi.lock_score,  jt.team_name,
         srs.id as sub_id, srs.match_id as sub_match_id, srs.sport_id as sub_sport_id, srs.sign_record_id as sub_sign_record_id,
-        cc.player_name, cc.id_card, cc.sex,
+        cc.player_name, cc.id_card, cc.sex, cc.player_phone,
         b.id as sub_hai_id,  b.sport_id as sub_hai_sport_id, b.judge_id as sub_judge_id, b.score as sub_score, b.score_type as sub_score_type, b.create_time as sub_create_time
         from jw_sign_record a
         left join jw_schedule_item jsi on jsi.id = a.schedule_item_id

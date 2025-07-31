@@ -411,7 +411,9 @@
           itemName: null,
           shceduleTime: null,
           area: null,
-          lockScore: null
+          lockScore: null,
+          // orderByColumn: "jsi.placeOrder",
+          // isAsc: "ascending"
         },
         // 表单参数
         form: {},
@@ -685,7 +687,7 @@
 
   .sport-name {
     cursor: pointer;
-    word-break: keep-all;
+    /*word-break: keep-all;*/
   }
   .btn-row {
     display: flex;

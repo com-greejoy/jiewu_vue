@@ -213,28 +213,74 @@
       <div class="fee-items schedule"  id="printSchedule" v-if="downLoadSchedule" v-loading="scheduleLoading">
         <div class="match-name" v-html="JwScheduleInfoList[0].matchName"></div>
         <div class="title-name" >竞赛日程表</div>
+
+        <div class="fee-item">
+          <div class="index-v h game-item s">7月26日赛程</div>
+        </div>
         <div class="fee-item">
           <div class="index-v h time">比赛时间</div>
           <div class="index-v h game-item s">比赛组别</div>
           <div class="index-v h area">场地</div>
         </div>
-        <div v-for="schedulePlace in JwScheduleInfoList">
+        <div v-for="schedulePlace in JwScheduleInfoList.filter(ss=>ss.scheduleName == '第一阶段')">
           <div class="fee-item" v-for="item in schedulePlace.schedulePlaceList">
             <div class="index-v time">
-              {{parseTime(item.placeTime, '{h}:{i}')}} 第{{item.placeOrder}}场
+              {{schedulePlace.scheduleName}}：第{{item.placeOrder}}场：
+              {{parseTime(item.placeTime, '{h}:{i}')}}
             </div>
             <div class="index-v game-item sd">
               <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList.sort((a, b)=> a.area - b.area)">
-                <div class="index-v name">{{itemm.itemName}} ({{itemm.sportCount}} 人)</div>
+                <div class="index-v name">
+                  <span v-if="itemm.itemProcess == '1'">
+                    {{itemm.itemName}}
+                  ({{itemm.sportCount}} {{(itemm.itemName.includes('齐舞') || itemm.itemName.includes('团队')) ? '队' : '人'}})
+                  </span>
+                  <span v-else>
+                    {{itemm.itemName.replaceAll("决赛", "-晋级赛-半决赛-季军赛-决赛")}}
+                  </span>
+                  </div>
                 <div class="index-v area">{{getAreaLabel(itemm)}}</div>
               </div>
             </div>
           </div>
         </div>
+
+
+        <div class="fee-item" style="margin-top: 260px;">
+          <div class="index-v h game-item s">7月27日赛程</div>
+        </div>
+        <div class="fee-item">
+          <div class="index-v h time">比赛时间</div>
+          <div class="index-v h game-item s">比赛组别</div>
+          <div class="index-v h area">场地</div>
+        </div>
+        <div  v-for="schedulePlace in JwScheduleInfoList.filter(ss=>ss.scheduleName == '第二阶段')">
+          <div class="fee-item" v-for="item in schedulePlace.schedulePlaceList">
+            <div class="index-v time">
+              {{schedulePlace.scheduleName}}：第{{item.placeOrder}}场：
+              {{parseTime(item.placeTime, '{h}:{i}')}}
+            </div>
+            <div class="index-v game-item sd">
+              <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList.sort((a, b)=> a.area - b.area)">
+                <div class="index-v name">
+                  <span v-if="itemm.itemProcess == '1'">
+                    {{itemm.itemName}}
+                  ({{itemm.sportCount}} {{(itemm.itemName.includes('齐舞') || itemm.itemName.includes('团队')) ? '队' : '人'}})
+                  </span>
+                  <span v-else>
+                    {{itemm.itemName.replaceAll("决赛", "-晋级赛-半决赛-季军赛-决赛")}}
+                  </span>
+                </div>
+                <div class="index-v area">{{getAreaLabel(itemm)}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </el-dialog>
 
-    <el-dialog title="检录举牌" :visible.sync="showJuPai" width="950px" center :append-to-body="false">
+    <el-dialog title="检录举牌" :visible.sync="showJuPai" width="1280px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="primary" plain size="mini" @click="handlePrintC('printJuPai')">打印</el-button>
       </div>
@@ -518,8 +564,13 @@
         listJwSchedulePlaceWithScheduleItem({matchId: matchId, scheduleInfoId: scheduleInfoId}).then(res => {
           let index = that.JwScheduleInfoList.findIndex(item => item.id === scheduleInfoId);
           that.JwScheduleInfoList[index].schedulePlaceList = res.data || [];
-          console.log( that.JwScheduleInfoList[index].schedulePlaceList)
-          // that.JwScheduleInfoList[index].schedulePlaceList.jwScheduleItemList.sort((a, b) => a.area - b.area)
+
+          that.JwScheduleInfoList[index].schedulePlaceList.forEach(sortItem=>{
+            if(sortItem.jwScheduleItemList){
+              sortItem.jwScheduleItemList.sort((a, b) => a.area * 1 - b.area * 1);
+            }
+          })
+
           // that.componentKey = new Date()
           that.$forceUpdate()
         })
@@ -698,7 +749,7 @@
           padding: 8px 8px;
           border: 1px solid #000000;
           border-radius: 4px;
-          width: 104px;
+          width: 126px;
           .sport-index{
             text-align: center;
             border-bottom: 3px solid #888;
@@ -706,6 +757,8 @@
             min-width: 56px;
             height: 56px;
             white-space: nowrap;
+            font-size: 36px;
+            line-height: 56px;
           }
         }
       }
@@ -739,7 +792,7 @@
         .index-v{
           padding: 6px 0;
           &.time {
-            width: 120px;
+            width: 228px;
 
             padding-left: 8px;
           }
@@ -909,10 +962,10 @@
 
   .info-items {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     overflow: auto;
     padding-bottom: 16px;
-    max-height: calc(100vh - 200px);
+    /*max-height: calc(100vh - 200px);*/
 
     &::-webkit-scrollbar {
       height: 18px;

@@ -28,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
 @RestController
 @RequestMapping("/jiewu/JwMatchTeam")
 public class JwMatchTeamController extends BaseController {
@@ -75,7 +76,7 @@ public class JwMatchTeamController extends BaseController {
     public void exportTeamBackNum(HttpServletResponse response, JwTeam jwTeam) {
         List<JwTeam> list = jwTeamService.selectJwTeamList(jwTeam);
 
-        if(list != null && list.size() > 0){
+        if (list != null && list.size() > 0) {
             list.forEach(jwTeam1 -> {
 
             });
@@ -83,7 +84,6 @@ public class JwMatchTeamController extends BaseController {
         ExcelUtil<JwTeam> util = new ExcelUtil<JwTeam>(JwTeam.class);
         util.exportExcel(response, list, "比赛参赛的队伍数据");
     }
-
 
 
     // 获取总费用
@@ -98,6 +98,16 @@ public class JwMatchTeamController extends BaseController {
         List<JwSport> jwSportList = new ArrayList<>();
 
         // 全部报名记录
+        List<JwSignRecord> jwSignRecords = genJwSignRecords(teamId, matchId, jwSportList);
+
+        Map<String, Object> result = new HashMap();
+        result.put("jwGameItemList", jwGameItemList);
+        result.put("jwSignRecordList", jwSignRecords);
+        result.put("jwSportList", jwSportList);
+        return AjaxResult.success(result);
+    }
+
+    private List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){
         List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
 
         if (jwSignRecords != null && jwSignRecords.size() > 0) {
@@ -106,7 +116,7 @@ public class JwMatchTeamController extends BaseController {
                 jwSignRecord.setJwGameItem(jwGameItem);
                 if ("1".equals(jwGameItem.getSportLimit())) {
                     //  单人
-                   if(BigDecimalUtil.isNotNull(jwGameItem.getFee())) jwSignRecord.setFee(jwGameItem.getFee());
+                    if (BigDecimalUtil.isNotNull(jwGameItem.getFee())) jwSignRecord.setFee(jwGameItem.getFee());
 
                     // 按选手查看
                     Long sportId = jwSignRecord.getJwSignRecordSportList().get(0).getSportId();
@@ -116,25 +126,25 @@ public class JwMatchTeamController extends BaseController {
                             .findFirst()
                             .orElse(-1);
                     JwSport jwSport = null;
-                    if(index >= 0){
+                    if (index >= 0) {
                         jwSport = jwSportList.get(index);
-                    }else{
+                    } else {
                         jwSport = jwSportService.selectJwSportById(sportId);
                     }
 
                     List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
-                    if(jwGameItems == null){
+                    if (jwGameItems == null) {
                         jwGameItems = new ArrayList<>();
                     }
                     jwGameItems.add(jwGameItem);
                     jwSport.setJwGameItemList(jwGameItems);
-                    if(index >= 0){
+                    if (index >= 0) {
                         jwSportList.set(index, jwSport);
-                    }else{
+                    } else {
                         jwSportList.add(jwSport);
                     }
 
-                } else if ("3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
+                } else if ("4".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
                     // 多人
                     if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
                         int sportCount = jwSignRecord.getJwSignRecordSportList().size();
@@ -151,7 +161,7 @@ public class JwMatchTeamController extends BaseController {
                         BigDecimal avgfee = jwSignRecord.getFee().divide(new BigDecimal(sportCount), 0, RoundingMode.DOWN);
                         jwSignRecord.setAvgFee(avgfee);
 
-                        for(JwSignRecordSport jwSignRecordSport : jwSignRecord.getJwSignRecordSportList()){
+                        for (JwSignRecordSport jwSignRecordSport : jwSignRecord.getJwSignRecordSportList()) {
 
                             Long sportId = jwSignRecordSport.getSportId();
 
@@ -161,23 +171,23 @@ public class JwMatchTeamController extends BaseController {
                                     .findFirst()
                                     .orElse(-1);
                             JwSport jwSport = null;
-                            if(index >= 0){
+                            if (index >= 0) {
                                 jwSport = jwSportList.get(index);
-                            }else{
+                            } else {
                                 jwSport = jwSportService.selectJwSportById(sportId);
                             }
 
                             List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
-                            if(jwGameItems == null){
+                            if (jwGameItems == null) {
                                 jwGameItems = new ArrayList<>();
                             }
                             jwGameItem.setFee(avgfee);
                             jwGameItems.add(jwGameItem);
 
                             jwSport.setJwGameItemList(jwGameItems);
-                            if(index >= 0){
+                            if (index >= 0) {
                                 jwSportList.set(index, jwSport);
-                            }else{
+                            } else {
                                 jwSportList.add(jwSport);
                             }
                         }
@@ -186,12 +196,7 @@ public class JwMatchTeamController extends BaseController {
             }
             jwSignRecords.sort(Comparator.comparing(s -> s.getJwGameItem().getCode()));
         }
-
-        Map<String, Object> result = new HashMap();
-        result.put("jwGameItemList", jwGameItemList);
-        result.put("jwSignRecordList", jwSignRecords);
-        result.put("jwSportList", jwSportList);
-        return AjaxResult.success(result);
+        return jwSignRecords;
     }
 
     // 获取代表队赛程
@@ -210,22 +215,42 @@ public class JwMatchTeamController extends BaseController {
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
         try {
             // 调用服务生成Word文档并返回字节数组
-            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList,  jwMatchService.selectJwMatchById(matchId).getMatchName());
-
+            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
             // 设置响应头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             headers.setContentDispositionFormData("attachment", "schedule.docx");
-
             // 返回带有字节数据和响应头的ResponseEntity
             return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
-
         } catch (IOException e) {
             // 处理异常情况
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
 
+    // 下载 代表队收费单
+    @PostMapping("/getTeamFeeDownload")
+    @ResponseBody
+    public ResponseEntity<byte[]> getTeamFeeDownload(Long matchId, Long teamId) {
+        //按选手查看
+        List<JwSport> jwSportList = new ArrayList<>();
+        // 全部报名记录
+        List<JwSignRecord> jwSignRecordList = genJwSignRecords(teamId, matchId, jwSportList);
+        try {
+            // 调用服务生成Word文档并返回字节数组
+            byte[] wordBytes = PdfGenerator.generateFeeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "fee.docx");
+            // 返回带有字节数据和响应头的ResponseEntity
+            return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            // 处理异常情况
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwMatchTeam:query')")
@@ -264,4 +289,21 @@ public class JwMatchTeamController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] teamIds) {
         return toAjax(jwMatchTeamService.deleteJwMatchTeamByTeamIds(teamIds));
     }
+
+    @PostMapping("/removeTeam")
+    @ResponseBody
+    public AjaxResult removeTeam(Long matchId, Long indexOrder) {
+
+        return AjaxResult.success(jwMatchTeamService.deleteJwMatchTeamByTeamMatch(indexOrder, matchId));
+    }
+
+    @PostMapping("/reOrderMatchTeam")
+    @ResponseBody
+    public AjaxResult reOrderMatchTeam(Long matchId) {
+        return AjaxResult.success(jwMatchTeamService.reOrderMatchTeam(matchId));
+    }
+
+
+
+
 }

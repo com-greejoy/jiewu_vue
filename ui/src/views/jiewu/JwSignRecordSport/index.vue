@@ -9,7 +9,7 @@
           <el-option
             v-for="team in JwTeamList"
             :key="team.id"
-            :label="team.indexOrder + ' : ' + team.teamName"
+            :label="team.indexOrder + ' : ' + team.teamName + ' - '+ team.userName+' - '+ team.createUserId"
             :value="team.id"
           />
         </el-select>
@@ -211,6 +211,8 @@
           <div class="team-name">{{key}}</div>
 
           <div class="la">{{getTeamUserName(key)}}</div>
+          <div class="la">{{getTeamUserNameT(key)}}</div>
+          <div class="la">{{getTeamUserNameTH(key)}}</div>
           <div class="la">运动员:</div>
           <div class="sport-rows">
             <div class="sport-row" v-for="itemm in item">
@@ -292,9 +294,43 @@
       this.getMatchInfo()
     },
     methods: {
+      getTeamUserNameTH(teamName) {
+        if (this.JwTeamList && this.JwTeamList.find((item) => item.teamName == teamName)) {
+          let team = this.JwTeamList.find((item) => item.teamName == teamName);
+          let res = "";
+          (team.jwTeamLeaderList || []).forEach(jtl => {
+            if (jtl.userType == "3") {
+              res += "管理： " + jtl.leaderName;
+            }
+          })
+          return res;
+        }
+      },
+      getTeamUserNameT(teamName) {
+        if (this.JwTeamList && this.JwTeamList.find((item) => item.teamName == teamName)) {
+          let team = this.JwTeamList.find((item) => item.teamName == teamName);
+          let res = "";
+          (team.jwTeamLeaderList || []).forEach(jtl => {
+            if (jtl.userType == "2") {
+              res = "教练： " + jtl.leaderName;
+            }
+          })
+          return res;
+        }
+      },
       getTeamUserName(teamName) {
         if (this.JwTeamList && this.JwTeamList.find((item) => item.teamName == teamName)) {
-          return "领队： " + this.JwTeamList.find((item) => item.teamName == teamName).userName;
+          let team = this.JwTeamList.find((item) => item.teamName == teamName);
+          let res = "";
+          if (team.userName) {
+            res = "领队： " + team.userName;
+          }
+          (team.jwTeamLeaderList || []).forEach(jtl => {
+            if (jtl.userType == "1") {
+              res = "领队： " + jtl.leaderName;
+            }
+          });
+          return res;
         }
       },
       getMatchInfo() {

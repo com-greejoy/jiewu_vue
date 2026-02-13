@@ -43,7 +43,7 @@ public class PdfUtils {
     @Autowired
     private JwGameItemService jwGameItemService;
 
-    private final String dirc = "E:\\jz\\项目\\jieWu\\2025\\2025-7-26 李金鑫街舞\\赛程";
+    private final String dirc = "E:\\jz\\项目\\jieWu\\2026\\2025-1-11 体育六艺\\赛程";
 
     private static String GAMENAME = "\n“全域天府 舞遍四川”体育舞蹈比赛暨\n四川省第三十一届体育舞蹈（国标舞）锦标赛";
 //	private static String tempFile = "E:/jz/项目/jieWu/2024街舞重庆/赛程/模板.pdf";
@@ -66,10 +66,10 @@ public class PdfUtils {
         fields.setFieldProperty("backNumber", "textfont", numFont, null);
 //		fields.setFieldProperty("backNumber", "textcolor", BaseColor.WHITE, null);
 //		fields.setFieldProperty("department", "textcolor", BaseColor.WHITE, null);
-        fields.setFieldProperty("department", "textsize", 40, null);
+//        fields.setFieldProperty("game1", "textfont", numFont, null);
 //		fields.setFieldProperty("name", "textcolor", BaseColor.WHITE, null);
 //		fields.setFieldProperty("game1", "textcolor", BaseColor.WHITE, null);
-        fields.setFieldProperty("game1", "setfflags", PdfFormField.FF_MULTILINE, null);
+//        fields.setFieldProperty("game1", "setfflags", PdfFormField.FF_MULTILINE, null);
         //往pdf模版里面设置值
 //		fields.setField("gameName", map.get("gameName"));
 //		fields.setField("background", "");//背景
@@ -139,7 +139,7 @@ public class PdfUtils {
                         map.put("name", userNameS);
                         map.put("game1", gameItemName);
                         map.put("indexOrder", String.valueOf(indexOrder));
-                        if (gameItemName.contains("齐舞") || gameItemName.contains("团队")) {
+                        if (gameItemName.contains("齐舞") || gameItemName.contains("混合小作品")) {
                             list.add(getStampedReader(map, dirc +  "/模板齐舞.pdf"));
                         } else {
                             list.add(getStampedReader(map, dirc +  "/模板单人.pdf"));
@@ -156,7 +156,7 @@ public class PdfUtils {
             for (int i = 1; i <= 10; i++) {
                 Map<String, String> map = new HashMap<String, String>();
                 map.put("gameName", GAMENAME);
-                map.put("backNumber", new DecimalFormat("000").format(lastBackNum + i));
+                map.put("backNumber", new DecimalFormat(getZeroString(lastBackNum)).format(lastBackNum + i));
                 map.put("department", "");
                 map.put("name", "");
                 map.put("game1", "");
@@ -166,6 +166,16 @@ public class PdfUtils {
             }
         }
         return list;
+    }
+
+    private  String getZeroString(Long number) {
+        number = Math.abs(number);
+        int length = String.valueOf(number).length();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append('0');
+        }
+        return sb.toString();
     }
 
     public void generatePdf(OutputStream out, Long matchId) throws Exception {

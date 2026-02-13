@@ -4,7 +4,7 @@
       <el-form-item style="margin-right: 88px" label="比赛" prop="matchId" v-if="!matchId">
         <ELSelectMatch :matchId.sync="matchId"/>
       </el-form-item>
-      <el-form-item label="组别" prop="gameItemId" style="margin-bottom: 0">
+      <el-form-item label="组别" prop="gameItemId" style="margin-bottom: 0;margin-right: 32px;">
         <el-select style="width: 360px" v-model="gameItemId" placeholder="组别" clearable @change="gameItemChange">
           <el-option
             v-for="gameItem in JwGameItemList"
@@ -14,6 +14,11 @@
           />
         </el-select>
       </el-form-item>
+
+      <el-button type="primary" plain size="mini" @click.stop="handleSendBattle()">投屏对阵</el-button>
+
+      <el-button type="primary" plain size="mini" @click.stop="handleClearScreen()">显示主屏</el-button>
+
     </el-form>
     <div class="battle-con">
       <div class="ballte-header">
@@ -29,7 +34,12 @@
             active-text="4个场地"
             inactive-text="不分场地">
           </el-switch>
-
+          <div style="width: 40px"></div>
+          <el-switch
+            v-model="isTwoLun"
+            active-text="打两轮"
+            inactive-text="打一轮">
+          </el-switch>
           <div class="qing" @click.stop="xianshidafen">显示打分</div>
           <div class="qing" @click.stop="xianshi3dafen">显示3打分</div>
           <div class="qing" @click.stop="qingPing">清屏</div>
@@ -684,6 +694,7 @@
   import {getJwMatch} from "@/api/jiewu/jwMatch";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {startPk, getPkScores, xianshidafen, xianshi3dafen} from "@/api/jiewu/JwAppScore";
+  import {sendBattle, sendMusic} from "@/api/jiewu/ScreenSend";
 
   export default {
     name: 'battlePhoneNew321',
@@ -701,6 +712,7 @@
         lun: 1,
         isfen: false,
         isfenF: false,
+        isTwoLun: false,
         currentPk: "",
         showNum: "32",
         matchId: null,
@@ -709,6 +721,7 @@
         JwGameItemList: [],
         jwEightList: [],
         pkScoreList: [],
+        inte: null,
         sportConfig: {
           "16.1": 1, "16.2": 9, "16.3": 5, "16.4": 13, "16.5": 3, "16.6": 11, "16.7": 7, "16.8": 15,
           "16.9": 2, "16.10": 10, "16.11": 6, "16.12": 14, "16.13": 4, "16.14": 12, "16.15": 8, "16.16": 16,
@@ -720,21 +733,35 @@
       };
     },
     computed: {},
+    destroyed() {
+      if (this.inte) {
+        clearInterval(this.inte);
+      }
+    },
     created() {
       this.getGameItemList();
       this.getList();
       this.getPkScores();
-      setInterval(this.getList, 2000)
+      this.inte = setInterval(this.getList, 2000)
     },
     methods: {
-      cancelScoreHandel(e){
+      handleClearScreen(){
+        sendMusic({worksMusic: "", matchId: this.matchId}).then(res => {
+          this.$modal.msgSuccess("发送成功");
+        })
+      },
+      handleSendBattle() {
+        sendBattle({gameItemId: this.gameItemId, matchId: this.matchId}).then(res => {
+          this.$modal.msgSuccess("发送成功");
+        })
+      },
+      cancelScoreHandel(e) {
         let that = this;
         e.stopPropagation();
         let pk = e.target.closest(".battle-item").getAttribute("data-pk");
-        clearEightPro({gameItemId: this.gameItemId, playerPosition: pk,}).then(res=>{
+        clearEightPro({gameItemId: this.gameItemId, playerPosition: pk,}).then(res => {
 
         })
-
       },
       saveScoreHandel(e) {
         let that = this;
@@ -755,7 +782,6 @@
         let p2Score = 0;
 
         for (let lun = 1; lun <= 3; lun++) {
-          console.log(this.pkScoreList, pk)
           if (((this.pkScoreList || []).filter(item => (item.lun == lun)).length) > 0) {
             let pk1ScoreList1 = (this.pkScoreList || []).filter(item => (item.lun == lun && item.playerPkGroup == pk && item.playerId == sport1.playerId));
             let pk1ScoreList2 = (this.pkScoreList || []).filter(item => (item.lun == lun && item.playerPkGroup == pk && item.playerId == sport2.playerId));
@@ -808,16 +834,19 @@
         let area = e.target.closest(".battle-c").getAttribute("data-area");
         if (!this.isfen) area = '全';
 
-        if(this.isfenF){
+        if (this.isfenF) {
           // 分四个场地
           area = e.target.closest(".battle-item").getAttribute("data-area-f");
         }
+
+        let isTwoLun = this.isTwoLun ? "2" : "1";
+
         let pk = e.target.closest(".battle-item").getAttribute("data-pk");
         this.currentPk = pk;
         let p1 = e.target.closest(".battle-item").getAttribute("data-pk1");
         let p2 = e.target.closest(".battle-item").getAttribute("data-pk2");
         this.lun = "1";
-        startPk({gameItemId: this.gameItemId, currentPosition: p1.split(".")[0], currentPkGroup: {lun: this.lun, itemName: this.currentGameItem.name, currentPk: this.currentPk, pk1: p1, pk2: p2, area: area}}).then(res => {
+        startPk({gameItemId: this.gameItemId, currentPosition: p1.split(".")[0], currentPkGroup: {lun: this.lun, isTwoLun: isTwoLun, itemName: this.currentGameItem.name, currentPk: this.currentPk, pk1: p1, pk2: p2, area: area}}).then(res => {
 
         })
       },
@@ -826,6 +855,8 @@
         let lun = e.target.closest(".lun-item").getAttribute("data-lun");
         this.lun = lun;
 
+        let isTwoLun = this.isTwoLun ? "2" : "1";
+
         let area = e.target.closest(".battle-c").getAttribute("data-area");
         if (!this.isfen) area = '全';
         let pk = e.target.closest(".battle-item").getAttribute("data-pk");
@@ -833,7 +864,7 @@
         let p1 = e.target.closest(".battle-item").getAttribute("data-pk1");
         let p2 = e.target.closest(".battle-item").getAttribute("data-pk2");
 
-        startPk({gameItemId: this.gameItemId, currentPosition: p1.split(".")[0], currentPkGroup: {lun: this.lun, itemName: this.currentGameItem.name, currentPk: this.currentPk, pk1: p1, pk2: p2, area: area}}).then(res => {
+        startPk({gameItemId: this.gameItemId, currentPosition: p1.split(".")[0], currentPkGroup: {lun: this.lun, isTwoLun: isTwoLun, itemName: this.currentGameItem.name, currentPk: this.currentPk, pk1: p1, pk2: p2, area: area}}).then(res => {
 
         })
 
@@ -904,7 +935,7 @@
         this.JwGameItemList = [];
         if (this.matchId) {
           listJwGameItem({matchId: this.matchId, pageNum: 1, pageSize: 5000, matchType: 2}).then(response => {
-            this.JwGameItemList = response.rows;
+            this.JwGameItemList = (response.rows || []).filter(ite=>ite.signCount > 0);
           });
         }
       },

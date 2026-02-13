@@ -1,25 +1,31 @@
 <template>
   <div class="hai-con" :style="{ backgroundImage: 'url(' + background + ')' }">
-    <!--<div class="match-name" v-html="match.matchName"></div>-->
-    <div class="game-item-name">
-      <div>{{currentGameItem.name}}</div>
+    <!--    <div class="match-name" v-html="match.matchName"></div>-->
+    <div class="game-item-name ">
+      <div class="background-linear-gradient">{{currentGameItem.name}}</div>
     </div>
-    <div class="title-desc"><div>成绩公告</div></div>
+    <div class="title-desc ">
+      <div class="background-linear-gradient">成绩公告</div>
+    </div>
     <div class="rank-con">
-      <div class="rank-item">
-        <div class="si rank">排名</div>
-        <div class="si back-num">背号</div>
-        <div class="si sport" :class="{longName: currentGameItem.sportLimit != 1}">选手</div>
-        <div class="si team-name">代表队</div>
-        <!--<div class="si avg-score">成绩</div>-->
+      <div class="rank-item ">
+        <div class="si rank" v-if="matchConfig.grade.rankOrder">排名</div>
+        <div class="si back-num" v-if="matchConfig.grade.backNum">背号</div>
+        <div class="si sport" v-if="matchConfig.grade.sport" :class="{longName: currentGameItem.sportLimit != 1}">选手</div>
+        <div class="si team-name" v-if="matchConfig.grade.worksName" style="padding-left: 32px;">作品名称</div>
+        <div class="si team-name" v-if="matchConfig.grade.teamName">代表队</div>
+        <div class="si avg-score" v-if="matchConfig.grade.avgScore || matchConfig.grade.allScore || matchConfig.grade.rankOrderDes">成绩</div>
       </div>
-      <div class="rank-item row-value" v-for="item in showSportRankList">
-        <div class="si rank">{{item.rankOrder}}</div>
-        <div class="si back-num">{{item.backNumber}}</div>
-        <div class="si sport" :class="{longName: currentGameItem.sportLimit != 1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
-        <div class="si team-name">{{item.jwTeam.teamName}}</div>
-        <!--<div class="si avg-score">{{item.avgScore || '-'}}</div>-->
-        <!--<div class="si avg-score">{{getdesc(item.rankOrder)}}</div>-->
+      <div class="rank-item row-value background-linear-gradient" v-for="item in showSportRankList">
+        <div class="si rank" v-if="matchConfig.grade.rankOrder">{{item.rankOrder}}</div>
+        <div class="si back-num" v-if="matchConfig.grade.backNum">{{item.backNumber}}</div>
+        <div class="si sport" v-if="matchConfig.grade.sport" :class="{longName: currentGameItem.sportLimit != 1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
+        <div class="si team-name" v-if="matchConfig.grade.worksName">{{item.worksName}}</div>
+        <div class="si team-name" v-if="matchConfig.grade.teamName">{{item.jwTeam.teamName}}</div>
+
+        <div class="si avg-score" v-if="matchConfig.grade.avgScore">{{item.avgScore || '-'}}</div>
+        <div class="si avg-score" v-if="matchConfig.grade.allScore">{{item.allScore || '-'}}</div>
+        <div class="si avg-score" v-if="matchConfig.grade.rankOrderDes">{{item.rankOrderDes || '-'}}</div>
       </div>
     </div>
   </div>
@@ -67,6 +73,7 @@
     data() {
       return {
         match: {},
+        matchConfig: {grade: {}},
         page: 1,
         pageSize: 10,
         background: "",
@@ -89,18 +96,7 @@
       that.getMatchInfo()
     },
     methods: {
-      getshowSportRankList(){
-        let that = this;
-        that.showSportRankList = that.sportRankList.slice((that.page - 1) * that.pageSize, that.page * that.pageSize);
-        if (that.page * that.pageSize > that.sportRankList.length) {
-          setTimeout(()=>{
-            that.page = 1;
-            that.getList();
-          }, 6000)
-        } else {
-          this.page++;
-        }
-      },
+
       getdesc(indexOrder) {
         indexOrder = indexOrder * 1;
         if (indexOrder >= 1 && indexOrder <= 5) {
@@ -123,7 +119,7 @@
           });
 
           that.lockk = lockk;
-          that.sportRankList = (res.data || []).filter(item=>item.sortOr >= that.minOrder && item.sortOr <= that.maxOrder).sort((a, b) => a.sortOr - b.sortOr);
+          that.sportRankList = (res.data || []).filter(item => item.sortOr >= that.minOrder && item.sortOr <= that.maxOrder).sort((a, b) => a.sortOr - b.sortOr);
 
           that.getshowSportRankList();
           clearInterval(that.inter);
@@ -132,9 +128,25 @@
           }, 8000);
         })
       },
+      getshowSportRankList() {
+        let that = this;
+        let showSportRankList = that.sportRankList.slice((that.page - 1) * that.pageSize, that.page * that.pageSize);
+        if (showSportRankList != null && showSportRankList.length > 0) {
+          that.showSportRankList = showSportRankList;
+        }
+        if (that.page * that.pageSize > that.sportRankList.length) {
+          setTimeout(() => {
+            that.page = 1;
+            that.getList();
+          }, 6000)
+        } else {
+          this.page++;
+        }
+      },
       getMatchInfo() {
         getJwMatch(this.matchId).then(response => {
           this.match = response.data || {};
+          this.matchConfig = JSON.parse(this.match.matchConfig || "{}");
           this.match.mainImg = process.env.VUE_APP_BASE_URL + this.match.mainImg;
           this.background = process.env.VUE_APP_BASE_URL + this.match.battleImg;
         });
@@ -162,16 +174,20 @@
     .game-item-name {
       font-size: 64px;
       text-align: center;
-      margin-top: 316px;
+      margin-top: 340px;
       letter-spacing: 4px;
       display: flex;
       align-items: center;
       justify-content: center;
-      div{
-        background: #1ab394;
+
+      div {
+        /*background: #1ab394;*/
         padding: 8px 64px;
         transform: skew(-30deg);
-        background: linear-gradient(to right, #d5282a, #444446);
+        /*background: linear-gradient(to right, #d5282a, #444446);*/
+        /*background: linear-gradient(90deg, #1b0945, #e22ee6);*/
+        /*background: linear-gradient(90deg, #673b6e, #ec3b79);*/
+
       }
     }
 
@@ -183,11 +199,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      div{
-        background: #1ab394;
+
+      div {
+        /*background: #1ab394;*/
         padding: 8px 64px;
         transform: skew(-30deg);
-        background: linear-gradient(to right, #d5282a, #444446);
+        /*background: linear-gradient(to right, #d5282a, #444446);*/
+        /*background: linear-gradient(90deg, #673b6e, #ec3b79);*/
       }
     }
 
@@ -199,8 +217,8 @@
       padding: 8px 16px;
       overflow: auto;
       align-items: center;
-      margin-top: 24px;
-
+      /*margin-top: -80px;*/
+      /*transform: scale(0.85);*/
 
       .rank-item {
         display: flex;
@@ -208,14 +226,15 @@
         align-items: center;
         font-size: 48px;
         transform: skew(-30deg);
-        margin-bottom: 26px;
-        padding: 8px 48px;
+        margin-bottom: 8px;
+        padding: 12px 48px;
 
         &.row-value {
           color: #fff;
-          background: linear-gradient(to right bottom, #f50d0d, #111d42);
-          background: linear-gradient(to right bottom, #f6c328, #f83b01);
-          background: linear-gradient(to right , #d5282a, #444446);
+          /*background: linear-gradient(to right bottom, #f50d0d, #111d42);*/
+          /*background: linear-gradient(to right bottom, #f6c328, #f83b01);*/
+          /*background: linear-gradient(to right, #d5282a, #444446);*/
+          /*background: linear-gradient(90deg, #673b6e, #ec3b79);*/
 
         }
 
@@ -230,8 +249,8 @@
 
         .rank {
           text-align: center;
-          width: 96px;
-          min-width: 96px;
+          width: 106px;
+          min-width: 106px;
         }
 
         .sport {
@@ -255,12 +274,13 @@
         }
 
         .team-name {
-          width: 780px;
-          min-width: 780px;
+          width: 500px;
+          min-width: 500px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
           margin-right: 24px;
+          margin-left: 160px;
         }
 
         .avg-score {

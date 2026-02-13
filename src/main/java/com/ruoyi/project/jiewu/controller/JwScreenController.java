@@ -19,6 +19,15 @@ import java.util.Map;
 @RequestMapping("/jiewu/screensend")
 public class JwScreenController extends BaseController {
 
+    @PostMapping("/sendScreenOpt")
+    @ResponseBody
+    public AjaxResult sendScreenOpt(String opt, Long matchId) {
+        JSONObject msg = new JSONObject();
+        msg.put("type", "opt");
+        msg.put("opt", opt);
+        WebsocketServe.sendUserTypeMessage("playMusicEr-" + matchId, msg.toJSONString());
+        return AjaxResult.success(1);
+    }
 
     // 发送播放音乐
     @PostMapping("/sendMusic")
@@ -65,4 +74,16 @@ public class JwScreenController extends BaseController {
         WebsocketServe.sendUserTypeMessage("playMusicEr-" + matchId, msg.toJSONString());
         return AjaxResult.success(1);
     }
+
+    // 投屏一个选手的打分详情
+    @PostMapping("/sendScoreScreen")
+    @ResponseBody
+    public AjaxResult sendScoreScreen(Long jwSignRecordId, Long matchId) {
+        JSONObject msg = new JSONObject();
+        msg.put("type", "sendScoreScreen");
+        msg.put("jwSignRecordId", jwSignRecordId);
+        WebsocketServe.sendUserTypeMessage("playMusicEr-" + matchId, msg.toJSONString());
+        return AjaxResult.success(1);
+    }
+
 }

@@ -4,7 +4,7 @@
       <el-form-item style="margin-right: 88px" label="比赛" prop="matchId" v-if="!matchId">
         <ELSelectMatch :matchId.sync="matchId"/>
       </el-form-item>
-      <el-form-item label="组别" prop="gameItemId" style="margin-bottom: 0">
+      <el-form-item label="组别(乐山用)" prop="gameItemId" style="margin-bottom: 0">
         <el-select style="width: 360px" v-model="gameItemId" placeholder="组别" clearable @change="gameItemChange">
           <el-option
             v-for="gameItem in JwGameItemList"
@@ -24,6 +24,7 @@
             inactive-text="不分场地">
           </el-switch>
           <div class="qing" @click.stop="xianshidafen">显示打分</div>
+          <div class="qing" @click.stop="xianshi3dafen">显示3打分</div>
           <div class="qing" @click.stop="qingPing">清屏</div>
         </div>
         <el-radio-group v-model="showNum">
@@ -396,7 +397,7 @@
   import {listJwEight, saveEightPro, clearEightPro} from "@/api/jiewu/jwEight";
   import {getJwMatch} from "@/api/jiewu/jwMatch";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
-  import {startPk, getPkScores, xianshidafen} from "@/api/jiewu/JwAppScore";
+  import {startPk, getPkScores, xianshidafen, xianshi3dafen} from "@/api/jiewu/JwAppScore";
 
   export default {
     name: 'battlePhoneNew',
@@ -439,11 +440,11 @@
       setInterval(this.getList, 2000)
     },
     methods: {
-      cancelScoreHandel(e){
+      cancelScoreHandel(e) {
         let that = this;
         e.stopPropagation();
         let pk = e.target.closest(".battle-item").getAttribute("data-pk");
-        clearEightPro({gameItemId: this.gameItemId, playerPosition: pk,}).then(res=>{
+        clearEightPro({gameItemId: this.gameItemId, playerPosition: pk,}).then(res => {
 
         })
 
@@ -467,7 +468,7 @@
         let p2Score = 0;
 
         for (let lun = 1; lun <= 3; lun++) {
-          console.log(this.pkScoreList, pk)
+
           if (((this.pkScoreList || []).filter(item => (item.lun == lun)).length) > 0) {
             let pk1ScoreList1 = (this.pkScoreList || []).filter(item => (item.lun == lun && item.playerPkGroup == pk && item.playerId == sport1.playerId));
             let pk1ScoreList2 = (this.pkScoreList || []).filter(item => (item.lun == lun && item.playerPkGroup == pk && item.playerId == sport2.playerId));
@@ -489,7 +490,7 @@
           return;
         }
 
-        let proSport = p1Score > p2Score ? sport1 : sport2
+        let proSport = p1Score > p2Score ? sport1 : sport2;
         let nerPro = {
           gameItemId: this.gameItemId,
           playerId: proSport.playerId,
@@ -554,6 +555,11 @@
 
         })
       },
+      xianshi3dafen() {
+        xianshi3dafen({}).then(res => {
+
+        })
+      },
       getPkScores() {
         // if (this.currentPk) {
         getPkScores({gameItemId: this.gameItemId, currentPkGroup: ""}).then(res => {
@@ -590,7 +596,7 @@
         }
       },
       getSportName(positoin, index) {
-        // index = this.sportConfig[positoin + "." + index];
+        // return index;
         let sport = this.jwEightList.find(item => item.playerPosition == positoin && item.playerIndex == index);
 
         return (sport && sport.jwSignRecordSportList && sport.jwSignRecordSportList.length > 0) ? (sport.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " - ";
@@ -738,6 +744,7 @@
             height: 24px;
             line-height: 24px;
             overflow: hidden;
+
             &:last-child {
               margin-top: 4px;
             }

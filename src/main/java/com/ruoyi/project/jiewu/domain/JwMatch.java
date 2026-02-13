@@ -67,6 +67,37 @@ public class JwMatch extends BaseEntity {
 
     private Long startBackNum;
 
+    @Excel(name = "管理密码")
+    private String manageCode;
+
+    private String matchConfig;
+
+    private Long lastBackNum;
+
+    public Long getLastBackNum() {
+        return lastBackNum;
+    }
+
+    public void setLastBackNum(Long lastBackNum) {
+        this.lastBackNum = lastBackNum;
+    }
+
+    public String getMatchConfig() {
+        return matchConfig;
+    }
+
+    public void setMatchConfig(String matchConfig) {
+        this.matchConfig = matchConfig;
+    }
+
+    public String getManageCode() {
+        return manageCode;
+    }
+
+    public void setManageCode(String manageCode) {
+        this.manageCode = manageCode;
+    }
+
     public String getIsShowGrade() {
         return isShowGrade;
     }

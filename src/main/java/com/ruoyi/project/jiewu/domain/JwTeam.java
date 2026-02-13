@@ -7,6 +7,7 @@ import com.ruoyi.framework.web.domain.BaseEntity;
 
 import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * 代表队对象 jw_team
@@ -60,6 +61,16 @@ public class JwTeam extends BaseEntity
 
     @Excel(name = "背号")
     private String backNums;
+
+    private List<JwTeamLeader> jwTeamLeaderList;
+
+    public List<JwTeamLeader> getJwTeamLeaderList() {
+        return jwTeamLeaderList;
+    }
+
+    public void setJwTeamLeaderList(List<JwTeamLeader> jwTeamLeaderList) {
+        this.jwTeamLeaderList = jwTeamLeaderList;
+    }
 
     public String getBackNums() {
         return backNums;

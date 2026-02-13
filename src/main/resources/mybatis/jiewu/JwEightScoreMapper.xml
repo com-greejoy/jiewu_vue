@@ -16,10 +16,11 @@
         <result property="lun"    column="lun"    />
         <result property="judgeName"    column="judge_name"    />
         <result property="subScore"    column="subScore"    />
+        <result property="matchId" column="match_id"/>
     </resultMap>
 
     <sql id="selectJwEightScoreVo">
-        select id, judge_id, player_id, lun, subScore, player_pk_group, create_time, player_group, judge_num, equally from jw_eight_score
+        select id, judge_id, player_id, match_id, lun, subScore, player_pk_group, create_time, player_group, judge_num, equally from jw_eight_score
     </sql>
 
     <select id="selectJwEightScoreList" parameterType="JwEightScore" resultMap="JwEightScoreResult">
@@ -68,6 +69,7 @@
             <if test="equally != null">equally,</if>
             <if test="lun != null">lun,</if>
             <if test="subScore != null">subScore,</if>
+            <if test="matchId != null">match_id,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="judgeId != null">#{judgeId},</if>
@@ -79,6 +81,7 @@
             <if test="equally != null">#{equally},</if>
             <if test="lun != null">#{lun},</if>
             <if test="subScore != null">#{subScore},</if>
+            <if test="matchId != null">#{matchId},</if>
         </trim>
     </insert>
 

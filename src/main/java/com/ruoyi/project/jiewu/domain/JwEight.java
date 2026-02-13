@@ -25,9 +25,19 @@ public class JwEight extends BaseEntity{
 
     private String groupIndex;
 
+    private Long matchId;
+
     private String description;
     private Long eightOrder;
     private String backNumber;
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
 
     public String getBackNumber() {
         return backNumber;

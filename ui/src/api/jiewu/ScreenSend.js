@@ -9,6 +9,16 @@ export function sendMusic(data) {
   })
 }
 
+// 屏幕操作
+export function sendScreenOpt(data) {
+  return request({
+    url: '/jiewu/screensend/sendScreenOpt',
+    method: 'post',
+    params: data
+  })
+}
+
+
 // 投屏对阵图
 export function sendBattle(data) {
   return request({
@@ -35,5 +45,15 @@ export function sendJinJiSport(data) {
     params: data
   })
 }
+
+// 投屏一个选手的打分详情
+export function sendScoreScreen(data) {
+  return request({
+    url: '/jiewu/screensend/sendScoreScreen',
+    method: 'post',
+    params: data
+  })
+}
+
 
 

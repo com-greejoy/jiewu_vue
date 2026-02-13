@@ -30,6 +30,7 @@ public class JwHaiScore extends BaseEntity{
 
     private String judgeName;
     private String backNumber;
+    private String judgeImg;
 
 
     public JwHaiScore(Long matchId, Long gameItemId, Long scheduleItemId, Long sportId, Long judgeId, String score, String scoreType) {
@@ -43,6 +44,14 @@ public class JwHaiScore extends BaseEntity{
     }
 
     public JwHaiScore() {
+    }
+
+    public String getJudgeImg() {
+        return judgeImg;
+    }
+
+    public void setJudgeImg(String judgeImg) {
+        this.judgeImg = judgeImg;
     }
 
     public String getJudgeName() {

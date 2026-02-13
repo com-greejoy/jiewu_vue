@@ -213,70 +213,32 @@
       <div class="fee-items schedule"  id="printSchedule" v-if="downLoadSchedule" v-loading="scheduleLoading">
         <div class="match-name" v-html="JwScheduleInfoList[0].matchName"></div>
         <div class="title-name" >竞赛日程表</div>
-
-        <div class="fee-item">
-          <div class="index-v h game-item s">7月26日赛程</div>
-        </div>
         <div class="fee-item">
           <div class="index-v h time">比赛时间</div>
           <div class="index-v h game-item s">比赛组别</div>
           <div class="index-v h area">场地</div>
         </div>
-        <div v-for="schedulePlace in JwScheduleInfoList.filter(ss=>ss.scheduleName == '第一阶段')">
+        <div v-for="schedulePlace in JwScheduleInfoList">
+<!--          <div class="fee-item" style="font-weight: 900; justify-content: center; height: 32px;line-height: 32px;font-size: 16px;">{{schedulePlace.scheduleName}} {{parseTime(schedulePlace.beginTime, '{m}月{d}日')}}</div>-->
           <div class="fee-item" v-for="item in schedulePlace.schedulePlaceList">
             <div class="index-v time">
-              {{schedulePlace.scheduleName}}：第{{item.placeOrder}}场：
+              第{{item.placeOrder}}场：
               {{parseTime(item.placeTime, '{h}:{i}')}}
             </div>
             <div class="index-v game-item sd">
               <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList.sort((a, b)=> a.area - b.area)">
-                <div class="index-v name">
-                  <span v-if="itemm.itemProcess == '1'">
-                    {{itemm.itemName}}
-                  ({{itemm.sportCount}} {{(itemm.itemName.includes('齐舞') || itemm.itemName.includes('团队')) ? '队' : '人'}})
-                  </span>
-                  <span v-else>
-                    {{itemm.itemName.replaceAll("决赛", "-晋级赛-半决赛-季军赛-决赛")}}
-                  </span>
-                  </div>
-                <div class="index-v area">{{getAreaLabel(itemm)}}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-
-        <div class="fee-item" style="margin-top: 260px;">
-          <div class="index-v h game-item s">7月27日赛程</div>
-        </div>
-        <div class="fee-item">
-          <div class="index-v h time">比赛时间</div>
-          <div class="index-v h game-item s">比赛组别</div>
-          <div class="index-v h area">场地</div>
-        </div>
-        <div  v-for="schedulePlace in JwScheduleInfoList.filter(ss=>ss.scheduleName == '第二阶段')">
-          <div class="fee-item" v-for="item in schedulePlace.schedulePlaceList">
-            <div class="index-v time">
-              {{schedulePlace.scheduleName}}：第{{item.placeOrder}}场：
-              {{parseTime(item.placeTime, '{h}:{i}')}}
-            </div>
-            <div class="index-v game-item sd">
-              <div class="gama-item-s" v-for="itemm in item.jwScheduleItemList.sort((a, b)=> a.area - b.area)">
-                <div class="index-v name">
-                  <span v-if="itemm.itemProcess == '1'">
-                    {{itemm.itemName}}
-                  ({{itemm.sportCount}} {{(itemm.itemName.includes('齐舞') || itemm.itemName.includes('团队')) ? '队' : '人'}})
-                  </span>
-                  <span v-else>
-                    {{itemm.itemName.replaceAll("决赛", "-晋级赛-半决赛-季军赛-决赛")}}
-                  </span>
+                <div class="index-v name" v-if="itemm.itemProcess == '1'">
+<!--                  {{itemm.itemName}}-->
+                  {{itemm.itemName}} ({{itemm.sportCount}} {{(itemm.itemName.includes('齐舞') || itemm.itemName.includes('混合') || itemm.itemName.includes('团队')) ? '队' : '人'}})
+                </div>
+                <div class="index-v name" v-if="itemm.itemProcess != '1'">
+                  {{itemm.itemName}}
                 </div>
                 <div class="index-v area">{{getAreaLabel(itemm)}}</div>
               </div>
             </div>
           </div>
         </div>
-
       </div>
     </el-dialog>
 
@@ -784,15 +746,15 @@
     color: #000;
     width: 520pt;
 
-    width: 620pt;
-    padding: 24pt;
-    page-break-inside: avoid;
+    /*width: 620pt;*/
+    /*padding: 24pt;*/
+    /*page-break-inside: avoid;*/
     &.schedule{
       .fee-item{
         .index-v{
           padding: 6px 0;
           &.time {
-            width: 228px;
+            width: 136px;
 
             padding-left: 8px;
           }
@@ -813,6 +775,10 @@
       }
       .name{
         flex: 1;
+        div{
+          white-space: normal;
+          word-break: keep-all;
+        }
       }
     }
 
@@ -821,7 +787,7 @@
       flex-direction: row;
       border: 1px solid #000;
       /*border-bottom: none;*/
-      page-break-inside: avoid;
+      /*page-break-inside: avoid;*/
 
       &:last-child {
         border-bottom: 1px solid #000;

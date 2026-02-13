@@ -66,8 +66,9 @@ public class JwSignRecordController extends BaseController {
         }
         startOrderBy();
         // 以组别的形式显示
-        List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordList(jwSignRecord);
+        List<JwSignRecord> list = jwSignRecordService.selectQiWuJwSignRecordList(jwSignRecord);
         if (list != null && list.size() > 0) {
+
             list.forEach(jwSignRecord1 -> jwSignRecord1.setJwSignRecordSportList(jwSignRecordSportService.selectJwSignRecordSportListById(jwSignRecord1.getId())));
         }
         return getDataTable(list);
@@ -174,11 +175,17 @@ public class JwSignRecordController extends BaseController {
 
             for (JwSportImport jwSportImport : userList) {
 
-                jwSportImport.setPlayerGroup(new DecimalFormat("000").format(Long.valueOf(jwSportImport.getPlayerGroup())));
-                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemByCode(jwSportImport.getPlayerGroup(), matchId);
+//                jwSportImport.setPlayerGroup(new DecimalFormat("000").format(Long.valueOf(jwSportImport.getPlayerGroup())));
+//                String code = jwSportImport.getPlayerGroup().split(":")[0];
+//                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemByCode(code, matchId);
+                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemByName(jwSportImport.getPlayerGroup(), matchId);
                 JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSportImport.getPlayerTeam());
                 List<Long> sportIds = new ArrayList<>();
                 String[] playerNames = jwSportImport.getPlayerName().replaceAll(" ", "").split("&");
+//                String[] playerNames = jwSportImport.getPlayerName().split(" ");
+                if(jwTeam == null){
+                    throw new GlobalException(jwSportImport.getPlayerTeam());
+                }
                 for (String playerName : playerNames) {
                     System.out.println(playerName + "----" + jwSportImport.getPlayerTeam());
                     JwSport jwSport = jwSportService.selectJwSportByName(playerName, null, jwTeam.getCreateUserId());
@@ -195,7 +202,6 @@ public class JwSignRecordController extends BaseController {
                 }
                 if (jwGameItem == null) {
                     throw new GlobalException(jwSportImport.getPlayerGroup());
-
                 }
                 jwSignRecordService.saveSign(jwGameItem, sportIds.toArray(new Long[0]), jwTeam.getId(), null, jwSportImport.getBackNum());
             }

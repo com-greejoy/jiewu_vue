@@ -77,34 +77,53 @@ public class JwSportController extends BaseController {
         ExcelUtil<JwSport> util = new ExcelUtil<>(JwSport.class);
         List<JwSport> userList = util.importExcel(file.getInputStream());
         for (JwSport jwSport : userList) {
-            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), null, null);
-            if (jwSport1 == null) {
-                if(StringUtils.isNotEmpty(jwSport.getIdCard()) && jwSport.getIdCard().length() > 15){
-                    try{
-                        jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
-                        jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
-                    }catch (Exception e){
-                        System.out.println(jwSport.getIdCard());
-                        throw new GlobalException(jwSport.getIdCard());
-                    }
-                }else{
-                    jwSport.setSex("m");
-                    jwSport.setAge(5l);
-                }
-
-                if (jwSport.getAge() <= 0 || jwSport.getAge() >= 99) {
-                    jwSport.setAge(10l);
-                }
-               JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
-                if(jwTeam == null){
-                    throw new GlobalException(jwSport.getTeamName());
-                }
-                jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
-
-                jwSportService.insertJwSport(jwSport);
-            }else{
-                System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
+            JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
+            if(jwTeam == null){
+                throw new GlobalException(jwSport.getTeamName());
             }
+            JwSport jwSport1 = jwSportService.selectJwSportByName(jwSport.getPlayerName(), null, jwTeam.getCreateUserId());
+            if (jwSport1 == null) {
+                System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
+            }else{
+
+                jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
+                JwSport up = new JwSport();
+                up.setPlayerName(jwSport.getPlayerName());
+                up.setPlayerPhone(jwSport.getPlayerPhone());
+                up.setIdCard(jwSport.getIdCard());
+                up.setId(jwSport1.getId());
+                jwSportService.updateJwSport(up);
+            }
+
+
+//            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), null, null);
+//            if (jwSport1 == null) {
+//                if(StringUtils.isNotEmpty(jwSport.getIdCard()) && jwSport.getIdCard().length() > 15){
+//                    try{
+//                        jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
+//                        jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
+//                    }catch (Exception e){
+//                        System.out.println(jwSport.getIdCard());
+//                        throw new GlobalException(jwSport.getIdCard());
+//                    }
+//                }else{
+//                    jwSport.setSex("m");
+//                    jwSport.setAge(5l);
+//                }
+//
+//                if (jwSport.getAge() <= 0 || jwSport.getAge() >= 99) {
+//                    jwSport.setAge(10l);
+//                }
+//               JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
+//                if(jwTeam == null){
+//                    throw new GlobalException(jwSport.getTeamName());
+//                }
+//                jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
+//
+//                jwSportService.insertJwSport(jwSport);
+//            }else{
+//                System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
+//            }
         }
         return success();
     }

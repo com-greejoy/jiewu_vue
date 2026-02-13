@@ -2,22 +2,22 @@ package com.ruoyi.project.jiewu.controller;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.IDCardUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.project.jiewu.domain.*;
-import com.ruoyi.project.jiewu.service.JwScheduleItemService;
-import com.ruoyi.project.jiewu.service.JwSignRecordSportService;
+import com.ruoyi.project.jiewu.service.*;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.ruoyi.framework.aspectj.lang.annotation.Log;
 import com.ruoyi.framework.aspectj.lang.enums.BusinessType;
-import com.ruoyi.project.jiewu.service.JwGameItemService;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.common.utils.poi.ExcelUtil;
@@ -36,6 +36,12 @@ public class JwGameItemController extends BaseController {
 
     @Autowired
     private JwSignRecordSportService jwSignRecordSportService;
+
+    @Autowired
+    private JwHaiScoreService jwHaiScoreService;
+
+    @Autowired
+    private JwSignRecordService jwSignRecordService;
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwGameItem:list')")
     @GetMapping("/list")
@@ -66,7 +72,8 @@ public class JwGameItemController extends BaseController {
                     jwSignRecordSport.setGameItemId(item.getId());
                     jwSignRecordSport.setMatchId(item.getMatchId());
                     return new JwGameItemCount(item.getCode(), item.getName(), item.getSignCount(), jwSignRecordSportService.selectJwSignRecordSportList(jwSignRecordSport).size());
-                }).collect(Collectors.toList());;
+                }).collect(Collectors.toList());
+        ;
         ExcelUtil<JwGameItemCount> util = new ExcelUtil<>(JwGameItemCount.class);
         util.exportExcel(response, jwGameItemCountList, "组别报名数量");
     }
@@ -81,7 +88,7 @@ public class JwGameItemController extends BaseController {
         queryItem.setId(id);
         List<JwGameItem> jwGameItemList = jwGameItemService.selectJwGameItemListWithCount(queryItem);
 
-        if(jwGameItemList != null && jwGameItemList.size() > 0){
+        if (jwGameItemList != null && jwGameItemList.size() > 0) {
             return AjaxResult.success(jwScheduleItemService.reGroupJwGameItem(jwGameItemList.get(0)));
         }
         return AjaxResult.error("没有选择组别");
@@ -93,9 +100,38 @@ public class JwGameItemController extends BaseController {
     @PostMapping("/lockJwGameItem")
     @ResponseBody
     public AjaxResult lockJwGameItem(Long id) {
-        if(StringUtils.isLongNotNull(id)){
+        if (StringUtils.isLongNotNull(id)) {
             return AjaxResult.success(jwScheduleItemService.lockScoreByGameItem(id));
-        }else{
+        } else {
+            return AjaxResult.success(1);
+        }
+    }
+
+    // 同步一个组别的成绩
+    @Log(title = "同步一个组别的成绩", businessType = BusinessType.UPDATE)
+    @PostMapping("/uploadGameItemGrade")
+    @ResponseBody
+    public AjaxResult uploadGameItemGrade(JwSignRecord jwSignRecord) {
+        if (StringUtils.isLongNotNull(jwSignRecord.getGameItemId())) {
+            return AjaxResult.success(jwGameItemService.uploadGameItemGrade(jwSignRecord));
+        } else {
+            return AjaxResult.success(1);
+        }
+    }
+
+    // 获取一个组别线上线下的成绩做对比
+    @Log(title = "获取一个组别线上线下的成绩做对比", businessType = BusinessType.UPDATE)
+    @PostMapping("/getGameItemGradeComPar")
+    @ResponseBody
+    public AjaxResult getGameItemGradeComPar(JwSignRecord jwSignRecord) {
+        if (StringUtils.isLongNotNull(jwSignRecord.getGameItemId())) {
+            List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listGameItemGradeDes(jwSignRecord);
+            List<JwSignRecord> jwSignRecordListOnline = jwSignRecordService.selectJwSignRecordHaiScoreUp(jwSignRecord);
+            Map<String, List<JwSignRecord>> res = new HashMap<>();
+            res.put("jwSignRecordList", jwSignRecordList);
+            res.put("jwSignRecordListOnline", jwSignRecordListOnline);
+            return AjaxResult.success(res);
+        } else {
             return AjaxResult.success(1);
         }
     }
@@ -122,7 +158,7 @@ public class JwGameItemController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwGameItem:remove')")
     @Log(title = "比赛项目", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
+    @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(jwGameItemService.deleteJwGameItemByIds(ids));
     }
@@ -131,41 +167,56 @@ public class JwGameItemController extends BaseController {
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file) throws Exception {
 
-            ExcelUtil<JwGameItem> util = new ExcelUtil<>(JwGameItem.class);
-            List<JwGameItem> jwGameItemList = util.importExcel(file.getInputStream());
+        ExcelUtil<JwGameItem> util = new ExcelUtil<>(JwGameItem.class);
+        List<JwGameItem> jwGameItemList = util.importExcel(file.getInputStream());
 
-            for (JwGameItem jwGameItem : jwGameItemList) {
-                jwGameItem.setShowMinYear(jwGameItem.getMinYear());
-                jwGameItem.setShowMaxYear(jwGameItem.getMaxYear());
+        for (JwGameItem jwGameItem : jwGameItemList) {
+            jwGameItem.setShowMinYear(jwGameItem.getMinYear());
+            jwGameItem.setShowMaxYear(jwGameItem.getMaxYear());
 
-                // ------ 李金鑫的 年龄上下浮动2岁
-                jwGameItem.setMinYear(jwGameItem.getMinYear() - 2);
-                jwGameItem.setMaxYear(jwGameItem.getMaxYear() + 2);
-                // ------  李金鑫的 年龄上下浮动2岁
+            // ------ 李金鑫的 年龄上下浮动2岁
+//            jwGameItem.setMinYear(jwGameItem.getMinYear() - 2);
+//            jwGameItem.setMaxYear(jwGameItem.getMaxYear() + 2);
+            // ------  李金鑫的 年龄上下浮动2岁
+
+            jwGameItem.setMatchType("1"); //比赛模式
+            jwGameItem.setGroupMode("3"); // 分组模式
+            jwGameItem.setGroupLimit(1l);
+            jwGameItem.setSingleDuration(60l);
+            jwGameItem.setSexCon("n");
+            jwGameItem.setMinSport(1);
+            jwGameItem.setMaxSport(1);
+            jwGameItem.setIsMusic("N");
 
 
+            if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
+                jwGameItem.setSportLimit("3"); //比赛模式
+            } else {
+                jwGameItem.setSportLimit("1"); //项目类型
 
-                if(jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")){
-                    jwGameItem.setSportLimit("3"); //比赛模式
-                }else{
-                    jwGameItem.setSportLimit("1"); //项目类型
+                if (jwGameItem.getName().contains("精英")) {
+                    jwGameItem.setMatchType("2");
+                    jwGameItem.setPromotionNum(32l);
                 }
+            }
 
-                jwGameItem.setMatchType("1"); //比赛模式
-                jwGameItem.setGroupMode("1"); // 分组模式
-                jwGameItem.setGroupLimit(1l);
-                jwGameItem.setSingleDuration(60l);
-                jwGameItem.setSexCon("0");
-                jwGameItem.setMinSport(1);
-                jwGameItem.setMaxSport(1);
-//                if(jwGameItem.getRemark().contains("小齐舞")){
-//                    jwGameItem.setMinSport(3);
-//                    jwGameItem.setMaxSport(5);
-//                }
-                if(jwGameItem.getRemark().contains("齐舞")){
-                    jwGameItem.setMinSport(5);
-                    jwGameItem.setMaxSport(99);
-                }
+            if (jwGameItem.getName().contains("小齐舞")) {
+                jwGameItem.setMinSport(3);
+                jwGameItem.setMaxSport(6);
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("大齐舞")) {
+                jwGameItem.setMinSport(7);
+                jwGameItem.setMaxSport(20);
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("作品")) {
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("混合小作品")) {
+                jwGameItem.setMinSport(2);
+                jwGameItem.setMaxSport(3);
+            }
 //                if(jwGameItem.getRemark().contains("六人一组")){
 //                    jwGameItem.setMinSport(6);
 //                    jwGameItem.setMaxSport(6);
@@ -174,9 +225,9 @@ public class JwGameItemController extends BaseController {
 //                    jwGameItem.setMinSport(1);
 //                    jwGameItem.setMaxSport(99);
 //                }
-                jwGameItem.setCode(new DecimalFormat("000").format(Long.valueOf(jwGameItem.getCode())));
-                jwGameItemService.insertJwGameItem(jwGameItem);
-            }
+            jwGameItem.setCode(new DecimalFormat("000").format(Long.valueOf(jwGameItem.getCode())));
+            jwGameItemService.insertJwGameItem(jwGameItem);
+        }
 
         return success();
     }

@@ -55,7 +55,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="placeTime != null "> and jsp.place_time = #{placeTime}</if>
             <if test="lockScore != null and lockScore != ''"> and jsi.lock_score = #{lockScore}</if>
         </where>
-        order by jsp.place_order asc
+        order by jsp.place_order asc, jsp.id desc
     </select>
 
     <select id="selectJwSchedulePlaceById" parameterType="Long" resultMap="JwSchedulePlaceResult">

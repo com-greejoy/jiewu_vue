@@ -204,7 +204,6 @@ public class JwMatchTeamController extends BaseController {
     @ResponseBody
     public AjaxResult getTeamScheduleInfoList(Long matchId, Long teamId) {
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
-
         return AjaxResult.success(jwSignRecordList);
     }
 

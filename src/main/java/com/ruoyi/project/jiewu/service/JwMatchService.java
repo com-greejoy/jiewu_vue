@@ -4,9 +4,11 @@ import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.mapper.JwMatchMapper;
 import com.ruoyi.project.jiewu.mapper.JwTeamMapper;
+import org.apache.ibatis.annotations.Param;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -117,8 +119,19 @@ public class JwMatchService {
         return jwMatchMapper.updateJwMatchInvitationList(matchId, invitationList);
     }
 
+    public int updateJwMatchLastBackNum(Long matchId, Long lastBackNum){
+        return jwMatchMapper.updateJwMatchLastBackNum(matchId, lastBackNum);
+    }
+
+    @Transactional
     public int deleteJwMatchByIds(Long[] ids) {
-        return jwMatchMapper.deleteJwMatchByIds(ids);
+        // 删除比赛
+        if(ids != null && ids.length > 0){
+            for(Long id : ids){
+                deleteJwMatchById(id);
+            }
+        }
+        return 1;
     }
 
     public int deleteJwMatchById(Long id) {

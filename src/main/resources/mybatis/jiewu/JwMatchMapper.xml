@@ -24,11 +24,15 @@
         <result property="invitationCode"    column="Invitation_code"    />
         <result property="invitationList"    column="Invitation_list"    />
         <result property="isShowGrade"    column="is_show_grade"    />
+        <result property="manageCode"    column="manage_code"    />
+        <result property="matchConfig"    column="match_config"    />
+        <result property="lastBackNum"    column="last_back_num"    />
+
     </resultMap>
 
     <sql id="selectJwMatchVo">
-        select id, match_name, begin_time, end_time, start_back_num, is_show, main_img, battle_img, seal_unit,
-        sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations, Invitation_code, Invitation_list from jw_match
+        select id, match_name, match_config, begin_time, last_back_num, end_time, start_back_num, is_show, main_img, battle_img, seal_unit,
+        sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations, manage_code, Invitation_code, Invitation_list from jw_match
     </sql>
 
     <!--获取没开始的比赛和正在报名的比赛-->
@@ -42,7 +46,6 @@
         left join jw_match jm on jm.id = jmu.match_id
         where jmu.user_id = #{userId}
     </select>
-
 
     <select id="selectJwMatchList" parameterType="JwMatch" resultMap="JwMatchResult">
         <include refid="selectJwMatchVo"/>
@@ -88,6 +91,9 @@
             <if test="invitationCode != null">Invitation_code,</if>
             <if test="invitationList != null">Invitation_list,</if>
             <if test="isShowGrade != null">is_show_grade,</if>
+            <if test="manageCode != null">manage_code,</if>
+            <if test="matchConfig != null">match_config,</if>
+            <if test="lastBackNum != null">last_back_num,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchName != null">#{matchName},</if>
@@ -108,6 +114,9 @@
             <if test="invitationCode != null">#{invitationCode},</if>
             <if test="invitationList != null">#{invitationList},</if>
             <if test="isShowGrade != null">#{isShowGrade},</if>
+            <if test="manageCode != null">#{manageCode},</if>
+            <if test="matchConfig != null">#{matchConfig},</if>
+            <if test="lastBackNum != null">#{lastBackNum},</if>
         </trim>
     </insert>
 
@@ -132,6 +141,9 @@
             <if test="invitationCode != null">Invitation_code = #{invitationCode},</if>
             <if test="invitationList != null">Invitation_list = #{invitationList},</if>
             <if test="isShowGrade != null">is_show_grade = #{isShowGrade},</if>
+            <if test="manageCode != null">manage_code = #{manageCode},</if>
+            <if test="matchConfig != null">match_config = #{matchConfig},</if>
+            <if test="lastBackNum != null">last_back_num = #{lastBackNum},</if>
         </trim>
         where id = #{id}
     </update>
@@ -142,8 +154,34 @@
         where id = #{matchId}
     </update>
 
+    <update id="updateJwMatchLastBackNum">
+        update jw_match
+        set last_back_num = #{lastBackNum}
+        where id = #{matchId}
+    </update>
+
     <delete id="deleteJwMatchById" parameterType="Long">
-        delete from jw_match where id = #{id}
+        -- 删决赛成绩
+        delete from jw_eight_score where match_id = #{id};
+        delete from jw_eight where match_id = #{id};
+        -- 删海选成绩
+        delete from jw_hai_score where match_id = #{id};
+        -- 删赛程
+        delete from jw_schedule_info where match_id = #{id};
+        delete from jw_schedule_item where match_id = #{id};
+        delete from jw_schedule_place where match_id = #{id};
+        -- 删裁判关联
+        delete from jw_judge_match where match_id = #{id};
+        -- 删报名记录
+        delete from jw_sign_record_sport where match_id = #{id};
+        delete from jw_sign_record where match_id = #{id};
+        -- 删报名队伍关联
+        delete from jw_match_team where match_id = #{id};
+        delete from jw_match_user where match_id = #{id};
+        -- 删比赛项目
+        delete from jw_game_item where match_id = #{id};
+        -- 删比赛
+        delete from jw_match where id = #{id};
     </delete>
 
     <delete id="deleteJwMatchByIds" parameterType="String">

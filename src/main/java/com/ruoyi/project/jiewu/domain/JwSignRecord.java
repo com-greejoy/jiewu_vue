@@ -67,6 +67,10 @@ public class JwSignRecord extends BaseEntity
 
     private Long scheduleItemId;
 
+    private String lockJudgeScore;
+
+    private Long backNumOrder;
+
     private List<JwSignRecordSport> jwSignRecordSportList;
 
     // 海选打分明细
@@ -93,6 +97,32 @@ public class JwSignRecord extends BaseEntity
     private Date placeTime;
 
     private String showImg;
+
+    private String isMusic;
+
+    public Long getBackNumOrder() {
+        return backNumOrder;
+    }
+
+    public void setBackNumOrder(Long backNumOrder) {
+        this.backNumOrder = backNumOrder;
+    }
+
+    public String getLockJudgeScore() {
+        return lockJudgeScore;
+    }
+
+    public void setLockJudgeScore(String lockJudgeScore) {
+        this.lockJudgeScore = lockJudgeScore;
+    }
+
+    public String getIsMusic() {
+        return isMusic;
+    }
+
+    public void setIsMusic(String isMusic) {
+        this.isMusic = isMusic;
+    }
 
     public String getShowImg() {
         return showImg;

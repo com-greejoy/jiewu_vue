@@ -51,11 +51,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-
     <select id="selectJwHaiScoreListBySport" parameterType="Long" resultMap="JwHaiScoreResult">
         <include refid="selectJwHaiScoreVo"/>
         <where>
             <if test="sportId != null "> and sport_id = #{sportId}</if>
+             and score is not null
         </where>
     </select>
 

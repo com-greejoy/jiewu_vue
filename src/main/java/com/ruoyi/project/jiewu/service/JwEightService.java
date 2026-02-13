@@ -1,6 +1,9 @@
 package com.ruoyi.project.jiewu.service;
 
 import java.util.List;
+
+import com.ruoyi.framework.aspectj.lang.annotation.DataSource;
+import com.ruoyi.framework.aspectj.lang.enums.DataSourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.project.jiewu.mapper.JwEightMapper;
@@ -58,5 +61,15 @@ public class JwEightService {
         return jwEightMapper.deleteAllJwEight(gameItemId);
     }
 
+    // 删除线上的对阵名单
+    @DataSource(value = DataSourceType.SLAVE)
+    public int deleteAllJwEightUp(Long gameItemId) {
+        return jwEightMapper.deleteAllJwEight(gameItemId);
+    }
+    // 同步线上的对阵名单
+    @DataSource(value = DataSourceType.SLAVE)
+    public int insertJwEightUp(JwEight jwEight) {
+        return jwEightMapper.insertJwEight(jwEight);
+    }
 
 }

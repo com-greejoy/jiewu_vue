@@ -60,12 +60,12 @@
         currentJudge: {},
         matchJudgeList: [],
         showScore: false,
-        matchId:  17,
+        matchId:  24,
       }
     },
     created() {
       this.matchId = this.$route.query.matchId;
-      this.matchId = 17;
+      this.matchId = 24;
       if (!this.matchId) {
         this.showMatchSelect = true;
       } else {
@@ -109,6 +109,7 @@
               item.img = process.env.VUE_APP_BASE_URL + item.img;
             }
           })
+          this.match.matchConfig = JSON.parse(this.match.matchConfig || "{}");
           // this.currentJudge = this.matchJudgeList[0]
           // this.showScore = true;
         });

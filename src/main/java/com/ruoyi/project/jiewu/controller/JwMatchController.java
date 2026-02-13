@@ -18,12 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 赛事管理Controller
- * 
- * @author ruoyi
- * @date 2024-05-27
- */
 @RestController
 @RequestMapping("/jiewu/jwMatch")
 public class JwMatchController extends BaseController {
@@ -34,9 +28,6 @@ public class JwMatchController extends BaseController {
     @Autowired
     private PdfUtils pdfUtils;
 
-    /**
-     * 查询赛事管理列表
-     */
 //    @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:list')")
     @GetMapping("/list")
     public TableDataInfo list(JwMatch jwMatch) {
@@ -45,9 +36,6 @@ public class JwMatchController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 导出赛事管理列表
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:export')")
     @Log(title = "赛事管理", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
@@ -57,15 +45,11 @@ public class JwMatchController extends BaseController {
         util.exportExcel(response, list, "赛事管理数据");
     }
 
-    /**
-     * 获取赛事管理详细信息
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(jwMatchService.selectJwMatchById(id));
     }
-
 
     // 生成背号PDF
     @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:add')")
@@ -85,9 +69,6 @@ public class JwMatchController extends BaseController {
         return toAjax(jwMatchService.insertJwMatch(jwMatch));
     }
 
-    /**
-     * 修改赛事管理
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:edit')")
     @Log(title = "赛事管理", businessType = BusinessType.UPDATE)
     @PutMapping
@@ -108,9 +89,6 @@ public class JwMatchController extends BaseController {
         return toAjax(jwMatchService.updateJwMatch(jwMatch));
     }
 
-    /**
-     * 删除赛事管理
-     */
     @PreAuthorize("@ss.hasPermi('jiewu:jwMatch:remove')")
     @Log(title = "赛事管理", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")

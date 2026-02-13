@@ -5,10 +5,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.web.domain.AjaxResult;
+import com.ruoyi.framework.web.domain.server.Sys;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.system.domain.SysDictData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +34,15 @@ public class JwScheduleItemService {
     private JwSchedulePlaceService jwSchedulePlaceService;
 
     @Autowired
+    private JwScheduleItemService jwScheduleItemService;
+
+    @Autowired
     private JwMatchService jwMatchService;
 
     @Autowired
     private JwSignRecordService jwSignRecordService;
 
-    public static String T = "0000";
+//    public static String T = "0000";
 
     // 获取比赛项目的小项
     public List<JwScheduleItem> selectJwScheduleItemByGameItemId(Long gameItemId) {
@@ -63,6 +68,13 @@ public class JwScheduleItemService {
 
         List<JwScheduleInfo> jwScheduleInfoList = jwScheduleInfoService.selectJwScheduleInfoByMatchId(matchId);
 
+        JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
+        JSONObject matchConfig = JSONObject.parse(jwMatch.getMatchConfig());
+
+        int hMatchCount = matchConfig.getIntValue("hMatchCount"); // 海选同时上几人
+        int scheduleTime = matchConfig.getIntValue("scheduleTime"); //  每场的间隔时间 分钟
+        int pkPlaceCount = matchConfig.getIntValue("pkPlaceCount");  // 决赛对阵分几个场地
+
         if (jwScheduleInfoList != null && jwScheduleInfoList.size() > 0) {
             jwScheduleInfoList.forEach(jwScheduleInfo -> {
                 JwSchedulePlace query = new JwSchedulePlace();
@@ -75,6 +87,7 @@ public class JwScheduleItemService {
                 // 计算每场的时间
                 if (jwSchedulePlaceList != null && jwSchedulePlaceList.size() > 0) {
                     for (JwSchedulePlace jwSchedulePlace : jwSchedulePlaceList) {
+
                         JwSchedulePlace update = new JwSchedulePlace();
                         update.setId(jwSchedulePlace.getId());
                         update.setPlaceTime(beginTime);
@@ -84,93 +97,84 @@ public class JwScheduleItemService {
                         AtomicInteger placeTime = new AtomicInteger();
                         if (jwScheduleItemList != null && jwScheduleItemList.size() > 0) {
 
-                            if(jwScheduleItemList.size() == 1){
+                            if (jwScheduleItemList.size() == 1) {
                                 JwScheduleItem jwScheduleItem = jwScheduleItemList.get(0);
                                 JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwScheduleItem.getGameItemId());
                                 if ("2".equals(jwScheduleItem.getItemProcess()) && StringUtils.isLongNotNull(jwGameItem.getPromotionNum())) {
-                                    // 计算决赛对阵时间 不分圈
-//                                    if(32l == jwGameItem.getPromotionNum()){
-//                                        placeTime = 70 * 60;
-//                                    }else if(16l == jwGameItem.getPromotionNum()){
-//                                        placeTime = 35 * 60;
-//                                    }else if(8l == jwGameItem.getPromotionNum()){
-//                                        placeTime = 18 * 60;
-//                                    }else if(4l == jwGameItem.getPromotionNum()){
-//                                        placeTime = 10 * 60;
-//                                    }
-
-                                    // 计算决赛对阵时间  分圈
-                                    if (32l == jwGameItem.getPromotionNum()) {
-                                        placeTime.set(50 * 60);
-                                    } else if (16l == jwGameItem.getPromotionNum()) {
-                                        placeTime.set(25 * 60);
-                                    } else if (8l == jwGameItem.getPromotionNum()) {
-                                        placeTime.set(16 * 60);
-                                    } else if (4l == jwGameItem.getPromotionNum()) {
-                                        placeTime.set(10 * 60);
+                                    if (pkPlaceCount == 1) {
+                                        // 计算决赛对阵时间 不分圈
+                                        if (32l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(70 * 60);
+                                        } else if (16l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(35 * 60);
+                                        } else if (8l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(18 * 60);
+                                        } else if (4l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(10 * 60);
+                                        }
+                                    } else if (pkPlaceCount == 2) {
+                                        // 计算决赛对阵时间  分圈
+                                        if (32l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(50 * 60);
+                                        } else if (16l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(25 * 60);
+                                        } else if (8l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(16 * 60);
+                                        } else if (4l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(10 * 60);
+                                        }
+                                    } else if (pkPlaceCount == 4) {
+                                        // 计算决赛对阵时间  分 四个圈
+                                        if (32l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(30 * 60);
+                                        } else if (16l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(16 * 60);
+                                        } else if (8l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(10 * 60);
+                                        } else if (4l == jwGameItem.getPromotionNum()) {
+                                            placeTime.set(8 * 60);
+                                        }
                                     }
 
-                                    // 计算决赛对阵时间  分 四个圈
-//                                    if (32l == jwGameItem.getPromotionNum()) {
-//                                        placeTime.set(30 * 60);
-//                                    } else if (16l == jwGameItem.getPromotionNum()) {
-//                                        placeTime.set(16 * 60);
-//                                    } else if (8l == jwGameItem.getPromotionNum()) {
-//                                        placeTime.set(10 * 60);
-//                                    } else if (4l == jwGameItem.getPromotionNum()) {
-//                                        placeTime.set(8 * 60);
-//                                    }
-//
-//                                    if ("4".equals(jwGameItem.getSportLimit())) {
-//                                        // 团队battle
-//                                        placeTime.set((48 * 60));
-//                                    }
-                                }else {
+                                    if ("4".equals(jwGameItem.getSportLimit())) {
+                                        // 团队battle
+                                        placeTime.set((48 * 60));
+                                    }
+                                } else {
                                     if ("1".equals(jwGameItem.getSportLimit())) {
                                         // 单人
-                                        if (placeTime.get() < jwScheduleItem.getSportCount() * 60) {
-                                            placeTime.set((int) (jwScheduleItem.getSportCount() * 60));
+                                        if (placeTime.get() < jwScheduleItem.getSportCount() * jwGameItem.getSingleDuration()) {
+                                            placeTime.set((int) (jwScheduleItem.getSportCount() * jwGameItem.getSingleDuration()));
                                         }
 
-                                        // 不分圈  就全部加在一起
-//                                        placeTime += jwSignRecordList.size() * 60;
-
-                                        // 单人作品的
-                                        if (jwGameItem.getName().contains("单人作品")) {
-                                            placeTime.set((int) (jwScheduleItem.getSportCount() * 120));
-                                        }
                                     } else if ("3".equals(jwGameItem.getSportLimit())) {
-                                        // 魏振宇中学生比赛的单独处理
-//                                        if(jwGameItem.getName().contains("个人")){
-//                                            placeTime = jwSignRecordList.size() * 120;
-//                                        }else{
-//                                            placeTime = jwSignRecordList.size() * 180;
-//                                        }
-                                        placeTime.set((int) (jwScheduleItem.getSportCount() * 180));
-                                        // 齐舞
-//                                        placeTime.set((int) (jwScheduleItem.getSportCount() * 180 + 5 * 60));
+
+                                        placeTime.set((int) (jwScheduleItem.getSportCount() * jwGameItem.getSingleDuration()));
+
                                     } else if ("4".equals(jwGameItem.getSportLimit())) {
 
                                         // 团队battle
-                                        placeTime.set((int) (jwScheduleItem.getSportCount() * 180));
+                                        placeTime.set((int) (jwScheduleItem.getSportCount() * 60));
+//                                      placeTime.set((int) (jwScheduleItem.getSportCount() * 180));
                                     }
                                 }
-                            }else{
+                            } else {
                                 // 获取 一个场次里面每个场地的人数，然后取最大值
                                 Optional<Map.Entry<String, Long>> maxEntry = jwScheduleItemList.stream().collect(Collectors.groupingBy(JwScheduleItem::getArea, Collectors.summingLong(JwScheduleItem::getSportCount))).entrySet().stream().max(Map.Entry.comparingByValue());
                                 maxEntry.ifPresent(entry -> {
                                     Long maxSportCount = entry.getValue();
 
-                                    // 一个圈上两个人
-//                                    placeTime.set((int) (Math.ceil(maxSportCount / 2) * 60));
-
-                                    // 一个圈上一个人
-                                    placeTime.set((int) (maxSportCount * 60));
+                                    if (hMatchCount == 1) {
+                                        // 一个圈上一个人
+                                        placeTime.set((int) (maxSportCount * 60));
+                                    } else {
+                                        // 一个圈上两个人
+                                        placeTime.set((int) (Math.ceil(maxSportCount / 2) * 60));
+                                    }
                                 });
                             }
                         }
-
-
+                        
 //                        if (jwScheduleItemList != null && jwScheduleItemList.size() > 0) {
 //                            for (JwScheduleItem jwScheduleItem : jwScheduleItemList) {
 //                                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwScheduleItem.getGameItemId());
@@ -234,7 +238,7 @@ public class JwScheduleItemService {
 //                            }
 //                        }
 
-                        placeTime.addAndGet(120);
+                        placeTime.addAndGet(scheduleTime * 60);
 
                         jwSchedulePlaceService.updateJwSchedulePlace(update);
 
@@ -270,11 +274,9 @@ public class JwScheduleItemService {
         // 4.根据比赛项目生成小项
         if (jwGameItemList != null && jwGameItemList.size() > 0) {
             for (JwGameItem jwGameItem : jwGameItemList) {
-
                 generateScheduleItem(jwGameItem);
             }
         }
-
         return AjaxResult.success();
     }
 
@@ -291,6 +293,29 @@ public class JwScheduleItemService {
         // 获取所有报名记录  根据代表队排序
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordListByMatchId(matchId);
 
+
+        // -------------根据比赛组别上场顺序排序
+//        for (JwSignRecord jwSignRecord : jwSignRecordList) {
+//            JwScheduleItem item = jwScheduleItemService.selectJwScheduleItemById(jwSignRecord.getScheduleItemId());
+//            JwSchedulePlace jwSchedulePlace = jwSchedulePlaceService.selectJwSchedulePlaceById(item.getSchedulePlaceId());
+//            JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwSchedulePlace.getScheduleInfoId());
+//            jwSignRecord.setBackNumOrder(jwScheduleInfo.getIndexOrder() * 10000000 + jwSchedulePlace.getPlaceOrder() * 100000 + jwSignRecord.getScheduleItemId() * 1000 + jwSignRecord.getIndexOrder());
+//        }
+//        jwSignRecordList.sort(Comparator.comparingLong(JwSignRecord::getBackNumOrder));
+//        for (JwSignRecord jwSignRecord : jwSignRecordList) {
+//            System.out.println(jwSignRecord.getBackNumOrder());
+//            // 背号 直接加一
+//            JwSignRecord jwSignRecord1 = new JwSignRecord();
+//            jwSignRecord1.setId(jwSignRecord.getId());
+//            jwSignRecord1.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(startBackNum));
+//            startBackNum++;
+//
+//            jwSignRecordService.updateJwSignRecord(jwSignRecord1);
+//        }
+        // ----------根据比赛组别上场顺序排序
+
+
+        //  -------------  根据代表队排序
         for (JwSignRecord jwSignRecord : jwSignRecordList) {
             JwSignRecord jwSignRecord1 = new JwSignRecord();
             jwSignRecord1.setId(jwSignRecord.getId());
@@ -307,25 +332,27 @@ public class JwScheduleItemService {
 //                            jwSignRecord1.setBackNumber(new DecimalFormat(t).format(startBackNum));
 //                            startBackNum++;
                         } else {
-                            jwSignRecord1.setBackNumber(new DecimalFormat(T).format(startBackNum));
+                            jwSignRecord1.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(startBackNum));
                             startBackNum++;
                         }
                     } else {
-                        jwSignRecord1.setBackNumber(new DecimalFormat(T).format(startBackNum));
+                        jwSignRecord1.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(startBackNum));
                         startBackNum++;
                     }
                 } else {
-                    jwSignRecord1.setBackNumber(new DecimalFormat(T).format(startBackNum));
+                    jwSignRecord1.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(startBackNum));
                     startBackNum++;
                 }
 //                jwSignRecordService.selectbackNumBySport();
             } else if ("4".equals(jwSignRecord.getSportLimit()) || "3".equals(jwSignRecord.getSportLimit()) || "2".equals(jwSignRecord.getSportLimit())) {
                 // 齐舞的背号 直接加一
-                jwSignRecord1.setBackNumber(new DecimalFormat(T).format(startBackNum));
+                jwSignRecord1.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(startBackNum));
                 startBackNum++;
             }
             jwSignRecordService.updateJwSignRecord(jwSignRecord1);
         }
+        //  ---------------  根据代表队排序
+
 
         return AjaxResult.success();
     }
@@ -503,5 +530,15 @@ public class JwScheduleItemService {
     // 修改项目名字
     public int changeItemName(Long gameItemId, String oldName, String newName) {
         return jwScheduleItemMapper.changeItemName(gameItemId, oldName, newName);
+    }
+
+    private String getZeroString(Long number) {
+        number = Math.abs(number);
+        int length = String.valueOf(number).length();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append('0');
+        }
+        return sb.toString();
     }
 }

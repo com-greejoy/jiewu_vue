@@ -2,12 +2,12 @@
   <div class="battle-con" :style="{ backgroundImage: isPhone ? '' : 'url(' + background + ')' }">
     <div class="eight-box" @click="cancelShow">
       <div class="game-item-name">
-        <div>
+        <div class="background-linear-gradient" v-if="!p1.playerName || !p2.playerName">
           {{currentGameItem.name}}
         </div>
       </div>
       <!--<div class="title-desc">决赛对阵</div>-->
-      <div class="eight-con" :class="{four: currentGameItem.promotionNum == 4, eight: currentGameItem.promotionNum == 8, sixteen: currentGameItem.promotionNum == 16, thirtyTwo: currentGameItem.promotionNum == 32 , fvf: currentGameItem.name.indexOf('团队battle') > -1}">
+      <div class="eight-con background-linear-gradient-box" :class="{four: currentGameItem.promotionNum == 4, eight: currentGameItem.promotionNum == 8, sixteen: currentGameItem.promotionNum == 16, thirtyTwo: currentGameItem.promotionNum == 32 , fvf: currentGameItem.name.indexOf('团队battle') > -1}">
         <div class="order-row" data-p="32" v-if="currentGameItem.promotionNum == 32">
           <div class="order-item player-name" data-position="32" data-pk="16.1" data-t="1" @click="sportClick" @contextmenu.prevent="onRightClick">{{getSportName(32, 1)}}</div>
           <!--<div class="order-item vs">vs</div>-->
@@ -152,11 +152,11 @@
           <!--<div class="order-item"></div>-->
 
         </div>
-        <div class="line-row" data-p='8' v-if="currentGameItem.promotionNum >= 8" style="height: 816px;">
-          <div class="line-item" style="height: 272px;" data-p="4.1">
+        <div class="line-row" data-p='8' v-if="currentGameItem.promotionNum >= 8" style="height: 812px;">
+          <div class="line-item" style="height: 266px;" data-p="4.1">
             <div class="line"></div>
           </div>
-          <div class="line-item" style="height: 272px;" data-p="4.3">
+          <div class="line-item" style="height: 266px;" data-p="4.3">
             <div class="line"></div>
           </div>
         </div>
@@ -213,7 +213,10 @@
               <div class="guanjun-line" style="height: 60px; margin-left: 35px; margin-bottom: 51px;transform: skew(-30deg);"></div>
             </div>
           </div>
-          <div class="order-item player-name" data-position="3" data-t="0" @contextmenu.prevent="onRightClick">{{getSportName(3, 0)}}</div>
+
+          <div style="margin-bottom: 0" class="order-item player-name" data-position="3" data-t="0" @contextmenu.prevent="onRightClick">{{getSportName(3, 0)}}</div>
+          <div style="font-size: 40px;color: #fff; margin-bottom: -42px;text-align: center;">季军</div>
+
         </div>
         <div class="order-row">
           <div class="order-item"></div>
@@ -252,11 +255,11 @@
           <div class="order-item"></div>
         </div>
 
-        <div class="line-row right-line" data-p='8' style="height: 816px;" v-if="currentGameItem.promotionNum >= 8">
-          <div class="line-item" style="height: 272px;" data-p="4.1">
+        <div class="line-row right-line" data-p='8' style="height: 812px;" v-if="currentGameItem.promotionNum >= 8">
+          <div class="line-item" style="height: 266px;" data-p="4.1">
             <div class="line"></div>
           </div>
-          <div class="line-item" style="height: 272px;" data-p="4.3">
+          <div class="line-item" style="height: 266px;" data-p="4.3">
             <div class="line"></div>
           </div>
         </div>
@@ -423,9 +426,9 @@
         <div class="sport-con">
           <div class="sport-left" :style="{ backgroundImage: 'url(' + getUserImg(p1) + ')' }">
             <div class="sport-info">
-<!--              <div class="sport-img">-->
-<!--                <el-image src="http://192.168.10.188:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
-<!--              </div>-->
+              <!--              <div class="sport-img">-->
+              <!--                <el-image src="http://192.168.10.188:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
+              <!--              </div>-->
               <div class="sport-name">{{p1.playerName}}</div>
               <div class="sport-back">{{p1.backNumber}}</div>
               <div class="sport-score">{{p1Score}}</div>
@@ -434,9 +437,9 @@
           <div class="PK">VS</div>
           <div class="sport-right" :style="{ backgroundImage: 'url(' + getUserImg(p2) + ')' }">
             <div class="sport-info">
-<!--              <div class="sport-img">-->
-<!--              <el-image src="http://192.168.10.188:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
-<!--              </div>-->
+              <!--              <div class="sport-img">-->
+              <!--              <el-image src="http://192.168.10.188:801/pokejiewu/web/static/img/profile.473f5971.jpg" fit="cover"/>-->
+              <!--              </div>-->
               <div class="sport-name">{{p2.playerName}}</div>
               <div class="sport-back">{{p2.backNumber}}</div>
               <div class="sport-score le">{{p2Score}}</div>
@@ -458,15 +461,18 @@
               <div class="score-judge j-s" v-if="scoreLun1 && scoreLun1.length > 0" v-for="item in scoreLun1" :class="{blue: item.playerId == p1.playerId, red: item.playerId == p2.playerId}"></div>
             </div>
           </div>
-<!--          <div class="score-row" v-if="scoreLun2 && scoreLun2.length > 0 && (currentPk.split('.')[0] == '3' || currentPk.split('.')[0] == '1')">   季军赛打不打第二轮  -->
-          <div class="score-row" v-if="scoreLun2 && scoreLun2.length > 0 && (currentPk.split('.')[0] == '1') && !(currentGameItem.name.indexOf('团队battle') > -1)">
+
+          <div class="score-row" v-if="isTwoLun == '2'">
+            <!-- <div class="score-row" v-if="scoreLun2 && scoreLun2.length > 0 && (currentPk.split('.')[0] == '3' || currentPk.split('.')[0] == '1')">-->
+            <!-- <div class="score-row" v-if="scoreLun2 && scoreLun2.length > 0 && (currentPk.split('.')[0] == '1') && !(currentGameItem.name.indexOf('团队battle') > -1)"> 季军赛打不打第二轮 -->
             <div class="score-label">第二轮</div>
             <div class="score-judges">
               <div class="score-judge j-s" v-for="item in scoreLun2" :class="{blue: item.playerId == p1.playerId, red: item.playerId == p2.playerId}"></div>
             </div>
           </div>
-<!--          <div class="score-row" :class="{show3Score: !show3Score}" v-if="scoreLun3 && scoreLun3.length > 0 && (currentPk.split('.')[0] == '3' || currentPk.split('.')[0] == '1') && checkShow3Lun()">-->
-          <div class="score-row" :class="{show3Score: !show3Score}" v-if="scoreLun3 && scoreLun3.length > 0 && (currentPk.split('.')[0] == '1') && checkShow3Lun() && !(currentGameItem.name.indexOf('团队battle') > -1)">
+          <div class="score-row" :class="{show3Score: !show3Score}" v-if="isTwoLun == '2' && checkShow3Lun()">
+            <!-- <div class="score-row" :class="{show3Score: !show3Score}" v-if="scoreLun3 && scoreLun3.length > 0 && (currentPk.split('.')[0] == '3' || currentPk.split('.')[0] == '1') && checkShow3Lun()">-->
+            <!-- <div class="score-row" :class="{show3Score: !show3Score}" v-if="scoreLun3 && scoreLun3.length > 0 && (currentPk.split('.')[0] == '1') && checkShow3Lun() && !(currentGameItem.name.indexOf('团队battle') > -1)">-->
             <div class="score-label">第三轮</div>
             <div class="score-judges">
               <div class="score-judge j-s three" v-for="item in scoreLun3" :class="{blue: item.playerId == p1.playerId, red: item.playerId == p2.playerId}"></div>
@@ -514,8 +520,6 @@
           </div>
         </div>
       </div>
-
-
 
       <div class="current-battle" v-if="!isPhone && p5.playerName && p6.playerName">
         <div class="changdi-label">
@@ -639,6 +643,7 @@
     },
     data() {
       return {
+        isTwoLun: "1",
         show3Score: false, // 显示第三轮打分
         showScore: false,
         currentPk: "",
@@ -685,12 +690,18 @@
         scoreLun6: [],
 
         isFenChangDi: false,
+        inte: null,
       };
     },
     computed: {},
+    destroyed() {
+      if (this.inte) {
+        clearInterval(this.inte);
+      }
+    },
     created() {
       this.getList();
-      setInterval(this.getList, 2000);
+      this.inte = setInterval(this.getList, 2000);
       this.getMatchInfo();
       if (!this.isPhone) {
         this.initSocket();
@@ -698,10 +709,10 @@
       }
     },
     methods: {
-      getUserImg(p){
-        if(p.jwSignRecordSportList[0].showImg){
+      getUserImg(p) {
+        if (p.jwSignRecordSportList[0].showImg) {
           return process.env.VUE_APP_BASE_URL + p.jwSignRecordSportList[0].showImg;
-        }else{
+        } else {
           return null;
         }
 
@@ -740,12 +751,12 @@
 
               // 发送开始打分了
               let currentPkGroup = JSON.parse(data.currentPkGroup);
-              if(currentPkGroup.lun != 3){
+              if (currentPkGroup.lun != 3) {
                 // 发送第三轮就不隐藏打分
                 that.showScore = false;
               }
               that.show3Score = false;
-
+              that.isTwoLun = currentPkGroup.isTwoLun;
 
               if (currentPkGroup.currentPk == "null") {
                 that.p1 = {};
@@ -790,7 +801,7 @@
                     p2.currentPk = this.currentPk;
                     that.p1 = p1;
                     that.p2 = p2;
-                  } else if (area == "B"){
+                  } else if (area == "B") {
                     let p3 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk1);
                     let p4 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk2);
                     p3.playerName = (p3 && p3.jwSignRecordSportList) ? (p3.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " ";
@@ -799,7 +810,7 @@
                     p4.currentPk = this.currentPk;
                     that.p3 = p3;
                     that.p4 = p4;
-                  }else if (area == "C"){
+                  } else if (area == "C") {
                     let p5 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk1);
                     let p6 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk2);
                     p5.playerName = (p5 && p5.jwSignRecordSportList) ? (p5.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " ";
@@ -808,7 +819,7 @@
                     p6.currentPk = this.currentPk;
                     that.p5 = p5;
                     that.p6 = p6;
-                  }else if (area == "D"){
+                  } else if (area == "D") {
                     let p7 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk1);
                     let p8 = eightList.find(item => item.playerPosition + "." + item.playerIndex == currentPkGroup.pk2);
                     p7.playerName = (p7 && p7.jwSignRecordSportList) ? (p7.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " ";
@@ -853,14 +864,13 @@
             p1Score++;
           } else if (pk1ScoreList1.length < pk1ScoreList2.length) {
             p2Score++;
-          }else{
-            if(pk1ScoreList1.length != 0 &&  pk1ScoreList2.length != 0){
+          } else {
+            if (pk1ScoreList1.length != 0 && pk1ScoreList2.length != 0) {
               p1Score++;
               p2Score++;
             }
           }
         }
-
         return p1Score + p2Score > 1 && p1Score == p2Score && this.showScore;
       },
       getPkScores() {
@@ -873,16 +883,21 @@
           let scoreLun1 = [], scoreLun2 = [], scoreLun3 = [];
           // 所有裁判名字
           let A = "A"; // 单独处理决赛和季军赛
-          if(this.currentPk.split('.')[0] == '3' || this.currentPk.split('.')[0] == '1'){
+          if (this.currentPk.split('.')[0] == '3' || this.currentPk.split('.')[0] == '1') {
             A = "ALL"
           }
           let judeNames = [...new Set(((res.data || []).filter(item => item.changDi == A).concat(pkScoreList1)).map(({judgeName}) => judgeName))].sort();
           console.log(judeNames)
+
+          const order = ['裁判1','裁判2','裁判3','裁判4','裁判5','裁判6','裁判7','裁判8','裁判9','裁判10','裁判11','裁判12','裁判13','裁判14','裁判15'];
+
+          judeNames = judeNames.sort((a, b) => order.indexOf(a) - order.indexOf(b));
+
           for (let lun = 1; lun <= 3; lun++) {
             // if (((pkScoreList1 || []).filter(item => (item.lun == lun)).length) > 0) {
             let pk1ScoreList1 = (pkScoreList1 || []).filter(item => (item.lun == lun && item.playerPkGroup == this.p1.currentPk && item.playerId == this.p1.playerId));
             let pk1ScoreList2 = (pkScoreList1 || []).filter(item => (item.lun == lun && item.playerPkGroup == this.p2.currentPk && item.playerId == this.p2.playerId));
-            if(lun == 1 || lun == 2 || (lun == 3 && this.show3Score)){
+            if (lun == 1 || lun == 2 || (lun == 3 && this.show3Score)) {
               if (pk1ScoreList1.length > pk1ScoreList2.length) {
                 p1Score++;
               } else if (pk1ScoreList1.length < pk1ScoreList2.length) {
@@ -1084,17 +1099,17 @@
       getSportName(positoin, index) {
         // return index;
 
-        if(this.currentGameItem.name.indexOf('团队battle') > -1){
+        if (this.currentGameItem.name.indexOf('团队battle') > -1) {
 
           let sport = this.jwEightList.find(item => item.playerPosition == positoin && item.playerIndex == index);
-          if(sport){
-            return  `${sport.backNumber?sport.backNumber: ""}
+          if (sport) {
+            return `${sport.backNumber ? sport.backNumber : ""}
              ${((sport && sport.jwSignRecordSportList) ? (sport.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " ")}`;
 
-          }else{
+          } else {
             return "";
           }
-        }else{
+        } else {
           let sport = this.jwEightList.find(item => item.playerPosition == positoin && item.playerIndex == index);
           return (sport && sport.jwSignRecordSportList) ? (sport.jwSignRecordSportList.map(item => item.playerName).join(" ")) : " ";
         }
@@ -1127,25 +1142,28 @@
       left: 0;
       right: 0;
       color: #fff;
-
     }
 
-    &.fvf{
-      .current-battle .sport-con{
+    &.fvf {
+      .current-battle .sport-con {
         height: 772px;
-        .sport-left{
+
+        .sport-left {
           box-shadow: 0 20px 160px 20px #409EFF;
         }
-        .sport-right{
+
+        .sport-right {
           box-shadow: 0 20px 160px 20px #F56C6C;
         }
-        .sport-left, .sport-right{
+
+        .sport-left, .sport-right {
           height: 100%;
           /*background-size: 100% 100%;*/
           background-size: auto 100%;
           background-repeat: no-repeat;
           background-position-x: center;
-          .sport-info{
+
+          .sport-info {
             height: 100%;
             justify-content: end;
           }
@@ -1189,7 +1207,7 @@
 
     //控制第三轮的
     .current-battle .score-con .show3Score.score-row {
-       .score-judges .score-judge.j-s {
+      .score-judges .score-judge.j-s {
         &::before {
           background-image: none;
           background-color: #DCDFE6;
@@ -1226,15 +1244,15 @@
           .score-judges {
             .score-judge {
               white-space: nowrap;
-              font-size: 18pt;
-              width: 66pt;
+              font-size: 22pt;
+              width: 96pt;
 
             }
           }
         }
       }
 
-      &.four{
+      &.four {
         left: 24pt;
         top: 24pt;
         bottom: 24pt;
@@ -1242,18 +1260,22 @@
         flex-wrap: wrap;
         padding-top: 76pt;
 
-        .step-text{
+        .step-text {
           top: 8pt;
         }
-        .current-battle{
+
+        .current-battle {
           width: 50%;
           min-width: 50%;
-          .sport-con{
+          padding-top: 0;
+
+          .sport-con {
             margin: 24pt 56pt;
             padding: 32pt 56pt;
             margin-bottom: 0;
           }
-          .score-con{
+
+          .score-con {
             padding: 24pt 56pt;
             margin-bottom: 16pt;
             margin-top: 24pt;
@@ -1267,6 +1289,7 @@
       width: 0;
       flex: 1;
       color: #1d2939;
+      padding-top: 120pt;
 
       .changdi-label {
         display: none;
@@ -1338,7 +1361,10 @@
 
           .sport-name {
             margin-bottom: 8px;
-            font-size: 48pt;
+            font-size: 64pt;
+            white-space: nowrap;
+            /*height: 280px;*/
+            /*line-height: 280px;*/
           }
 
           .sport-back {
@@ -1375,7 +1401,7 @@
       .score-con {
         display: flex;
         flex-direction: column;
-        padding: 56pt 56pt;
+        padding: 56pt 32pt;
         margin: 56pt 56pt;
         box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
         background: #fff;
@@ -1394,10 +1420,13 @@
             line-height: 56pt;
             width: 180pt;
             min-width: 180pt;
+            width: 148pt;
+            min-width: 148pt;
             font-weight: 600;
             font-size: 40pt;
             height: 56pt;
             margin-right: 32pt;
+            margin-right: 0pt;
           }
 
           .score-judges {
@@ -1459,6 +1488,7 @@
   }
 
   .battle-con {
+
     z-index: 9;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -1477,18 +1507,19 @@
   .game-item-name {
     font-size: 64px;
     text-align: center;
-    margin-top: 390px;
-    margin-bottom: 30px;
+    margin-top: 410px;
+    margin-bottom: 160px;
     letter-spacing: 4px;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    div{
-      background: #1ab394;
+
+    div {
+      /*background: #1ab394;*/
       padding: 8px 64px;
       transform: skew(-30deg);
-      background: linear-gradient(to right, #d5282a, #444446);
+      /*background: linear-gradient(90deg, #673b6e, #ec3b79);*/
     }
   }
 
@@ -1550,9 +1581,10 @@
       }
     }
 
-    &.fvf{
+    &.fvf {
       transform: scale(1.8);
-      .order-row .order-item[data-position]{
+
+      .order-row .order-item[data-position] {
         width: 280px;
         height: 98px;
         white-space: normal;
@@ -1564,14 +1596,14 @@
         overflow: hidden;
         text-overflow: ellipsis;
 
-        &[data-position="3"][data-t="0"]{
+        &[data-position="3"][data-t="0"] {
           margin-left: -44px;
         }
 
-        &.guanjun-item{
+        &.guanjun-item {
           height: 280px;
 
-          div{
+          div {
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -1580,22 +1612,25 @@
           }
         }
       }
-      .line-row[data-p="2.1"]{
+
+      .line-row[data-p="2.1"] {
         height: 570px;
       }
 
-      .line-row[data-p="8"]{
+      .line-row[data-p="8"] {
         height: 1000px !important;
-        .line-item{
+
+        .line-item {
           height: 336px !important;
         }
       }
 
-      .guanjun-line{
+      .guanjun-line {
         height: 88px !important;
-        margin-bottom: 88px!important;
+        margin-bottom: 88px !important;
       }
-      .guanjun-item div{
+
+      .guanjun-item div {
         width: 240px;
         height: 112px;
         min-height: 112px;
@@ -1624,7 +1659,7 @@
         border: 2px solid #fff;
         /*margin-right: 16px;*/
         margin-bottom: 22px;
-        font-size: 36px;
+        font-size: 32px;
         letter-spacing: 2px;
         color: #fff;
         border-radius: 4px;
@@ -1645,14 +1680,14 @@
         }
 
         &[data-position] {
-          background: #333333;
+          /*background: #333333;*/
           white-space: nowrap;
           border: none;
           border-radius: 0;
           transform: skew(-30deg);
           /*background: linear-gradient(to right bottom, #e817a4, #8217f9);*/
-          background: linear-gradient(to right bottom, #f6c328, #f83b01);
-          background: linear-gradient(to right, #d5282a, #444446);
+          /*background: linear-gradient(to right bottom, #f6c328, #f83b01);*/
+          /*background: linear-gradient(90deg, #673b6e, #ec3b79);*/
 
           span {
             transform: skew(30deg);
@@ -1676,6 +1711,9 @@
       .win {
         color: #f8ac59;
         border: 2px solid #f8ac59;
+
+        color: #fff;
+        border: 2px solid #fff;
       }
     }
 

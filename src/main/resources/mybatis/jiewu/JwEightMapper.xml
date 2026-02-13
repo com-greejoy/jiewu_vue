@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="playerPkGroup"    column="player_pk_group"    />
         <result property="gameItemId"    column="game_item_id"    />
         <result property="groupIndex"    column="group_index"    />
+        <result property="matchId" column="match_id"/>
     </resultMap>
 
     <resultMap id="JwEightSportResult" type="JwEight" extends="JwEightResult">
@@ -26,7 +27,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectJwEightVo">
-        select id, player_id, player_index, player_position, player_pk_group, game_item_id, group_index from jw_eight
+        select id, player_id, match_id, player_index, player_position, player_pk_group, game_item_id, group_index from jw_eight
     </sql>
 
     <select id="getEightOrder" parameterType="Long" resultMap="JwEightResult">
@@ -79,6 +80,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="playerPkGroup != null">player_pk_group,</if>
             <if test="gameItemId != null">game_item_id,</if>
             <if test="groupIndex != null">group_index,</if>
+            <if test="matchId != null">match_id,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="playerId != null">#{playerId},</if>
@@ -87,6 +89,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="playerPkGroup != null">#{playerPkGroup},</if>
             <if test="gameItemId != null">#{gameItemId},</if>
             <if test="groupIndex != null">#{groupIndex},</if>
+            <if test="matchId != null">#{matchId},</if>
          </trim>
     </insert>
 

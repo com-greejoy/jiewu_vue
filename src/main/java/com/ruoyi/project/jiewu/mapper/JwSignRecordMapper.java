@@ -15,6 +15,8 @@ public interface JwSignRecordMapper {
 
     public List<JwSignRecord> selectJwSignRecordList(JwSignRecord jwSignRecord);
 
+    public List<JwSignRecord> selectQiWuJwSignRecordList(JwSignRecord jwSignRecord);
+
     public List<JwSignRecord> selectJwSignRecordListWithUserGameItem(Long teamId, Long gameItemId, String backNumber);
 
     public List<JwSignRecord> selectJwSignRecordListWithAllInfo(@Param("gameItemId") Long gameItemId, @Param("scheduleItemId") Long scheduleItemId);
@@ -53,6 +55,8 @@ public interface JwSignRecordMapper {
     public int insertJwSignRecord(JwSignRecord jwSignRecord);
 
     public int updateJwSignRecord(JwSignRecord jwSignRecord);
+
+    public int updateJwSignRecordUpScore(JwSignRecord jwSignRecord);
 
     public int clearAllBackNum(@Param("matchId") Long matchId);
 

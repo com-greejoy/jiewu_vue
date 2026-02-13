@@ -97,6 +97,9 @@ public class JwTeamService {
 
     public BigDecimal getSignRecordFee(JwGameItem jwGameItem, JwSignRecord jwSignRecord){
         BigDecimal fee = new BigDecimal("0");
+        if(jwGameItem == null){
+            return fee;
+        }
         // 单人  双人的 直接就是组别价格
         if ("1".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
             if(BigDecimalUtil.isNotNull(jwGameItem.getFee())) {

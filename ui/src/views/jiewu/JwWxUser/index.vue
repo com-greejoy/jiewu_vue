@@ -82,7 +82,7 @@
 
     <el-table v-loading="loading" :data="JwWxUserList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="ID" align="center" prop="id" />
+      <el-table-column label="ID" width="60" align="center" prop="id" />
       <el-table-column label="姓名" show-overflow-tooltip align="center" prop="name" />
       <el-table-column label="手机号" align="center" prop="mobile" />
       <!--<el-table-column label="性别" align="center" prop="sex">-->
@@ -269,10 +269,9 @@ export default {
       //
       // ];
       const units = [
-        "JR舞蹈工作室","IMOK街舞","ROCKINGHOUSE舞蹈房子","UNKNOWN目黑","Wildest","艾斯街舞",
-        "布吉街舞","成都AC&DD舞蹈室","东者","聚变街舞",
-        "乐山吾樂流行舞","谜舞","旺旺舞蹈工作室","沃特街舞", "吾空街舞", "舞刻街舞", "舞一艺术空间", "星承街舞",
-        "星空间新都校区","艺青辰艺术学校","资阳星圆素","个人"
+        "chenlong","SD仪街舞","爱舞艺术","步客街舞","超元素街舞","成都市东光实验小学",
+        "街本街街舞","南充am街舞","南充道鑫双语学校","南充轻舞飞扬艺术学校",
+        "南充一中附属小学","舞星街舞","西充舞飞扬舞蹈艺术学校","星动力街舞", "炫酷街舞", "营山嘉昱艺术学校", "营山有你街舞"
       ];
 
 

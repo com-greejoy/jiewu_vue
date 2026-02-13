@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.domain.JwGameItem;
 import com.ruoyi.project.jiewu.domain.JwScheduleItem;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.mapper.JwEightMapper;
@@ -34,6 +35,9 @@ public class JwEightScoreService {
 
     @Autowired
     private JwEightService jwEightService;
+
+    @Autowired
+    private JwGameItemService jwGameItemService;
 
     @Autowired
     private JwEightMapper jwEightMapper;
@@ -66,6 +70,7 @@ public class JwEightScoreService {
         jwScore.setCreateTime(DateUtils.getNowDate());
         jwScore.setLun(lun);
         jwScore.setSubScore(subScore);
+        jwScore.setMatchId(jwSignRecord.getMatchId());
 //        jwScore.setJudgeNum(judgeNum);
 
         List<JwEightScore> jwEightScoreList;

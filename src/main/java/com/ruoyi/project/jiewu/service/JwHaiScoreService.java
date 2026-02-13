@@ -10,10 +10,13 @@ import java.util.stream.Collectors;
 
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.framework.aspectj.lang.annotation.DataSource;
+import com.ruoyi.framework.aspectj.lang.enums.DataSourceType;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.mapper.JwEightMapper;
 import com.ruoyi.project.jiewu.mapper.JwTeamMapper;
+import io.swagger.annotations.Scope;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ruoyi.project.jiewu.mapper.JwHaiScoreMapper;
@@ -45,6 +48,9 @@ public class JwHaiScoreService {
 
     @Autowired
     private JwEightMapper jwEightMapper;
+
+    @Autowired
+    private JwMatchTeamService jwMatchTeamService;
 
     public JwHaiScore selectJwHaiScoreById(Long id) {
         return jwHaiScoreMapper.selectJwHaiScoreById(id);
@@ -93,7 +99,7 @@ public class JwHaiScoreService {
         JwSignRecord jwSignRecord = jwSignRecordService.selectJwSignRecordById(sportId);
 
         JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(jwSignRecord.getScheduleItemId());
-        if (jwScheduleItem == null || "Y".equals(jwScheduleItem.getLockScore())) {
+        if (jwScheduleItem == null || "Y".equals(jwScheduleItem.getLockScore()) || "Y".equals(jwSignRecord.getLockJudgeScore())) {
             return 1;
         }
 
@@ -322,6 +328,7 @@ public class JwHaiScoreService {
                 jwEight.setPlayerPosition(String.valueOf(promotionNum));// 多少强 32 16 8
                 jwEight.setGameItemId(gameItemId);
                 jwEight.setGroupIndex(promotionNum + "强");
+                jwEight.setMatchId(jwGameItem.getMatchId());
                 jwEightService.insertJwEight(jwEight);
             });
 
@@ -333,6 +340,7 @@ public class JwHaiScoreService {
                     jwEight.setPlayerPosition("16");// 多少强 32 16 8
                     jwEight.setGameItemId(gameItemId);
                     jwEight.setGroupIndex("16强");
+                    jwEight.setMatchId(jwGameItem.getMatchId());
                     jwEightService.insertJwEight(jwEight);
                 }
             }
@@ -344,6 +352,7 @@ public class JwHaiScoreService {
                     jwEight.setPlayerPosition("8");// 多少强 32 16 8
                     jwEight.setGameItemId(gameItemId);
                     jwEight.setGroupIndex("8强");
+                    jwEight.setMatchId(jwGameItem.getMatchId());
                     jwEightService.insertJwEight(jwEight);
                 }
             }
@@ -355,6 +364,7 @@ public class JwHaiScoreService {
                     jwEight.setPlayerPosition("4");// 多少强 32 16 8
                     jwEight.setGameItemId(gameItemId);
                     jwEight.setGroupIndex("半决赛");
+                    jwEight.setMatchId(jwGameItem.getMatchId());
                     jwEightService.insertJwEight(jwEight);
                 }
             }
@@ -364,6 +374,7 @@ public class JwHaiScoreService {
             jwEight8.setGroupIndex("季军争夺");
             jwEight8.setPlayerPosition("3");
             jwEight8.setPlayerIndex(1l);
+            jwEight8.setMatchId(jwGameItem.getMatchId());
             jwEightService.insertJwEight(jwEight8);
 
             JwEight jwEight9 = new JwEight();
@@ -371,6 +382,7 @@ public class JwHaiScoreService {
             jwEight9.setGroupIndex("季军争夺");
             jwEight9.setPlayerPosition("3");
             jwEight9.setPlayerIndex(2l);
+            jwEight9.setMatchId(jwGameItem.getMatchId());
             jwEightService.insertJwEight(jwEight9);
 
             JwEight jwEight10 = new JwEight();
@@ -379,6 +391,7 @@ public class JwHaiScoreService {
             jwEight10.setPlayerPosition("3");
             jwEight10.setPlayerIndex(0l);
 //            jwEight10.setEightOrder("3.3");
+            jwEight10.setMatchId(jwGameItem.getMatchId());
             jwEightService.insertJwEight(jwEight10);
 
             JwEight jwEight5 = new JwEight();
@@ -386,6 +399,7 @@ public class JwHaiScoreService {
             jwEight5.setGroupIndex("冠军争夺");
             jwEight5.setPlayerPosition("2");
             jwEight5.setPlayerIndex(1l);
+            jwEight5.setMatchId(jwGameItem.getMatchId());
             jwEightService.insertJwEight(jwEight5);
 
             JwEight jwEight6 = new JwEight();
@@ -393,6 +407,7 @@ public class JwHaiScoreService {
             jwEight6.setGroupIndex("冠军争夺");
             jwEight6.setPlayerPosition("2");
             jwEight6.setPlayerIndex(2l);
+            jwEight6.setMatchId(jwGameItem.getMatchId());
             jwEightService.insertJwEight(jwEight6);
 
             JwEight jwEight7 = new JwEight();
@@ -400,6 +415,7 @@ public class JwHaiScoreService {
             jwEight7.setGroupIndex("冠军");
             jwEight7.setPlayerIndex(1l);
             jwEight7.setPlayerPosition("1");
+            jwEight7.setMatchId(jwGameItem.getMatchId());
 //            jwEight7.setEightOrder("1");
             jwEightService.insertJwEight(jwEight7);
 
@@ -453,7 +469,6 @@ public class JwHaiScoreService {
                         if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
                     }
                 });
-
             }
         }
 //        list = list.stream().filter(jwSignRecord1 -> jwSignRecord1.getJwTeam().getTeamName().contains("充轻舞飞扬艺术")).collect(Collectors.toList());
@@ -462,10 +477,10 @@ public class JwHaiScoreService {
 
     // 获取比赛全部成绩
     // 获取比赛 项目成绩
-    public List<JwSignRecord> listAllGameItemGradeDes(Long matchId) {
+    public List<JwSignRecord> listAllGameItemGradeDes(Long matchId, Long gameItemId) {
         List<JwSignRecord> list = new ArrayList<>();
         if (StringUtils.isLongNotNull(matchId)) {
-            List<JwGameItem> gameItemList = jwGameItemService.selectJwGameItemListByMatchId(matchId, null);
+            List<JwGameItem> gameItemList = jwGameItemService.selectJwGameItemListByMatchId(matchId, gameItemId);
             if (gameItemList != null && gameItemList.size() > 0) {
                 gameItemList.sort(Comparator.comparing(JwGameItem::getCode));
                 gameItemList.forEach(jwGameItem -> {
@@ -495,7 +510,6 @@ public class JwHaiScoreService {
                             jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
                         }
 
-
                         if (jwSignRecordList != null && jwSignRecordList.size() != 0) {
                             jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                             jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
@@ -510,6 +524,9 @@ public class JwHaiScoreService {
                                 });
                             }
 
+                            jwSignRecordList.forEach(jwSignRecord1 -> {
+                                jwSignRecord1.setJwGameItem(jwGameItem);
+                            });
                         }
                         list.addAll(jwSignRecordList);
                     }
@@ -517,7 +534,7 @@ public class JwHaiScoreService {
             }
         }
 
-        list.sort(Comparator.comparing(JwSignRecord::getTeamId));
+        list.sort(Comparator.comparing(jwSignRecord -> jwMatchTeamService.getJwMatchTeam(matchId, jwSignRecord.getTeamId()).getIndexOrder()));
         return list;
     }
 

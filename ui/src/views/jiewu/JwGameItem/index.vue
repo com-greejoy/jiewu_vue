@@ -172,6 +172,11 @@
           <image-preview v-if="scope.row.screenImg" :src="scope.row.screenImg" :width="50" :height="50"/>
         </template>
       </el-table-column>
+      <el-table-column label="音乐" align="center" prop="isMusic">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isMusic"/>
+        </template>
+      </el-table-column>
       <el-table-column label="备注" show-overflow-tooltip align="center" prop="remark"/>
       <el-table-column label="操作" width="280" fixed="right" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -356,6 +361,15 @@
             <!--</el-radio>-->
             <!--</el-radio-group>-->
             <!--</el-form-item>-->
+            <el-form-item label="音乐" prop="isMusic">
+              <el-radio-group v-model="form.isMusic">
+                <el-radio
+                  v-for="dict in dict.type.sys_yes_no"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
           </el-col>
           <el-col :span="12">
             <el-form-item label="分组模式" prop="groupMode">
@@ -529,7 +543,7 @@
 
   export default {
     name: "JwGameItem",
-    dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode'],
+    dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode', 'sys_yes_no'],
     data() {
       return {
         showSetJudge: false,

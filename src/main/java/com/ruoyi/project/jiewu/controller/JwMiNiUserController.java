@@ -74,6 +74,9 @@ public class JwMiNiUserController extends BaseController {
     @Autowired
     private JwMatchService jwMatchService;
 
+    @Autowired
+    private JwTeamLeaderService jwTeamLeaderService;
+
     @PostMapping("/auth")
     @ResponseBody
     public AjaxResult auth(String code)  {
@@ -641,4 +644,67 @@ public class JwMiNiUserController extends BaseController {
         jwSignRecordService.updateJwSignRecord(jwSignRecord);
         return AjaxResult.success(avatar);
     }
+
+    // 获取 队伍人员
+    @PostMapping("/getWxLeaderList")
+    @ResponseBody
+    public AjaxResult getWxLeaderList(@RequestHeader("Authorization") String openId, String searchName, Long matchId){
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            List<JwTeamLeader> jwTeamLeaderList = jwTeamLeaderService.selectJwTeamLeaderListByWxUser(zwWxUser.getId(), searchName, matchId);
+
+            return AjaxResult.success(jwTeamLeaderList);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
+    // 添加 队伍人员
+    @PostMapping("/addWxLeader")
+    @ResponseBody
+    public AjaxResult addWxLeader(@RequestHeader("Authorization") String openId, @Validated JwTeamLeader jwTeamLeader)   {
+
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+
+            if(!Validator.isMobile(jwTeamLeader.getLeaderPhone())){
+                return AjaxResult.error("手机号格式错误");
+            }
+
+            List<JwTeamLeader> jwTeamLeaderList = jwTeamLeaderService.selectJwTeamLeaderListByNamePhone(jwTeamLeader);
+            if(jwTeamLeaderList != null && jwTeamLeaderList.size() >= 1){
+                return AjaxResult.error("人员已经存在");
+            }
+
+            if(StringUtils.isLongNotNull(jwTeamLeader.getId())){
+                jwTeamLeaderService.updateJwTeamLeader(jwTeamLeader);
+            }else{
+                jwTeamLeader.setCreateUserId(zwWxUser.getId());
+                jwTeamLeaderService.insertJwTeamLeader(jwTeamLeader);
+            }
+            return AjaxResult.success(jwTeamLeader);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
+
+    // 删除 队伍人员
+    @PostMapping("/delWxLeader")
+    @ResponseBody
+    public AjaxResult delWxLeader(@RequestHeader("Authorization") String openId, Long id)   {
+
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+
+            if(StringUtils.isLongNotNull(id)){
+                jwTeamLeaderService.deleteJwTeamLeaderById(id);
+            }
+            return AjaxResult.success(1);
+        }else{
+            return AjaxResult.error("错误");
+        }
+    }
+
+
 }

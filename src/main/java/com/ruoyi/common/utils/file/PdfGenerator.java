@@ -4,12 +4,17 @@ import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.project.jiewu.domain.JwGameItem;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSport;
 
 import com.ruoyi.project.jiewu.domain.JwTeam;
+import com.ruoyi.project.jiewu.service.JwGameItemService;
+import com.ruoyi.project.monitor.service.ISysJobLogService;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -72,6 +77,217 @@ public class PdfGenerator {
         }
         return ' ';
     }
+
+
+    public static byte[] generateGradeWord(List<JwSignRecord> records, String matchName) throws IOException {
+        XWPFDocument document = new XWPFDocument();
+
+        // 创建标题
+        XWPFParagraph titleParagraph = document.createParagraph();
+        titleParagraph.setAlignment(ParagraphAlignment.CENTER);
+
+        XWPFRun titleRun1 = titleParagraph.createRun();
+        titleRun1.setText(matchName);
+        titleRun1.setFontSize(18);
+        titleRun1.setBold(true);
+        titleRun1.addBreak();
+
+        XWPFRun titleRun = titleParagraph.createRun();
+        titleRun.setText("成绩单");
+        titleRun.setFontSize(16);
+        titleRun.setBold(true);
+
+        XWPFRun aaa22 = titleParagraph.createRun();
+        aaa22.setText("");
+        aaa22.setFontSize(16);
+        aaa22.setBold(true);
+        aaa22.addBreak();
+
+        Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(Collectors.groupingBy(jws -> jws.getJwGameItem().getCode() + ":" + jws.getJwGameItem().getName()));
+
+        String[] keyS = groupedRecords.keySet().toArray(new String[0]);
+
+        Arrays.sort(keyS, (s1, s2) -> {
+            Long m1 = Long.parseLong(s1.split(":")[0]);
+            Long m2 = Long.parseLong(s2.split(":")[0]);
+            return Long.compare(m1, m2);
+        });
+
+        // 添加每个分组的数据为表格
+        for (String key : keyS) {
+            JwGameItem jwGameItem = SpringUtils.getBean(JwGameItemService.class).selectJwGameItemByCode(key.split(":")[0], records.get(0).getMatchId());
+            List<JwSignRecord> jwSignRecordList = groupedRecords.get(key);
+            if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
+
+                // 按照上场序号排序
+                List<JwSignRecord> sortedList = jwSignRecordList.stream().sorted(Comparator.comparingLong(JwSignRecord::getRankOrder)).collect(Collectors.toList());
+
+                // 创建分组标题
+                XWPFParagraph groupTitleParagraph = document.createParagraph();
+                groupTitleParagraph.setAlignment(ParagraphAlignment.CENTER);
+                XWPFRun groupTitleRun = groupTitleParagraph.createRun();
+                groupTitleRun.setText(key);
+                groupTitleRun.setFontSize(14);
+                groupTitleRun.setBold(true);
+
+                // 设置页面宽度（假设为100%）
+                CTTblWidth tableWidth = CTTblWidth.Factory.newInstance();
+                tableWidth.setType(STTblWidth.PCT);
+                tableWidth.setW(BigInteger.valueOf(5000));
+
+                // 创建表格
+                int cols = 5;
+                if(jwGameItem.getMatchType().equals("2")){
+                    cols = 6;
+                }
+                XWPFTable table = document.createTable(sortedList.size() + 1, cols); // 表头+数据行数
+                table.getCTTbl().addNewTblPr().setTblW(tableWidth);
+
+                int columnCount = 5;
+                for (int col = 0; col < columnCount; col++) {
+                    CTTblWidth cellWidth = CTTblWidth.Factory.newInstance();
+                    cellWidth.setType(STTblWidth.DXA);
+                    int w = 2000;
+                    if(jwGameItem.getMatchType().equals("2")){
+                        switch (col) {
+                            case 0:
+                                w = 500;
+                                break;
+                            case 1:
+                                w = 1000;
+                                break;
+                            case 2:
+                                w = 1000;
+                                break;
+                            case 3:
+                                w = 800;
+                                break;
+                            case 4:
+                                w = 2000;
+                                break;
+                            case 5:
+                                w = 2000;
+                                break;
+                        }
+                    }else{
+                        switch (col) {
+                            case 0:
+                                w = 500;
+                                break;
+                            case 1:
+                                w = 800;
+                                break;
+                            case 2:
+                                w = 800;
+                                break;
+                            case 3:
+                                w = 2000;
+                                break;
+                            case 4:
+                                w = 2000;
+                                break;
+                        }
+                    }
+
+                    cellWidth.setW(BigInteger.valueOf(w)); // 2000 对应于大约25%
+
+                    for (XWPFTableRow row : table.getRows()) {
+                        XWPFTableCell cell = row.getCell(col);
+                        if (cell.getCTTc().getTcPr() == null) {
+                            cell.getCTTc().addNewTcPr();
+                        }
+                        cell.getCTTc().getTcPr().setTcW(cellWidth);
+                    }
+                }
+
+                // 设置表头
+                XWPFTableRow headerRow = table.getRow(0);
+                String[] headers = {"名次", "成绩", "背号", "选手", "代表队"};
+                if(jwGameItem.getMatchType().equals("2")){
+                    headers = new String[]{"名次", "决赛成绩", "海选成绩", "背号", "选手", "代表队"};
+                }
+                for (int i = 0; i < headers.length; i++) {
+
+                    if (headerRow.getCell(i) == null) {
+                        headerRow.createCell();
+                    }
+
+                    XWPFTableCell cell = headerRow.getCell(i);
+                    XWPFParagraph p = cell.getParagraphs().get(0);
+                    if (p == null) {
+                        p = cell.addParagraph();
+                    }
+                    p.setAlignment(ParagraphAlignment.CENTER);
+                    XWPFRun run = p.createRun();
+                    run.setText(headers[i]);
+                    run.setBold(true);
+                    cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                }
+
+                // 添加记录到表格中，并设置单元格内容居中
+                int rowIndex = 1;
+                for (JwSignRecord record : sortedList) {
+                    XWPFTableRow dataRow = table.getRow(rowIndex++);
+                    String[] rowContents = {
+                            String.valueOf(record.getRankOrder()),
+                            String.valueOf(record.getAvgScore()),
+                            String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
+                            record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
+                            record.getTeamName()
+                    };
+                    if(jwGameItem.getMatchType().equals("2")){
+                        rowContents = new String[]{
+                                String.valueOf(record.getRankOrder()),
+                                String.valueOf(StringUtils.isNotEmpty(record.getDescription()) ? record.getDescription() : "-"),
+                                String.valueOf(record.getAvgScore()),
+                                String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
+                                record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
+                                record.getTeamName()
+                        };
+                    }
+
+                    for (int i = 0; i < rowContents.length; i++) {
+                        XWPFTableCell cell = dataRow.getCell(i);
+
+                        XWPFParagraph p = cell.getParagraphs().get(0);
+                        if (p == null) {
+                            p = cell.addParagraph();
+                        }
+
+                        p.setAlignment(ParagraphAlignment.CENTER);
+
+                        XWPFRun run = p.createRun();
+                        run.setText(rowContents[i]);
+                        cell.setVerticalAlignment(XWPFTableCell.XWPFVertAlign.CENTER);
+                    }
+                }
+                // 创建分组标题  中间空行
+                XWPFParagraph groupTitleParagraph2 = document.createParagraph();
+                groupTitleParagraph2.setAlignment(ParagraphAlignment.LEFT);
+                XWPFRun groupTitleRun2 = groupTitleParagraph2.createRun();
+                groupTitleRun2.setText("");
+                groupTitleRun2.setFontSize(34);
+                groupTitleRun2.setBold(true);
+                XWPFParagraph groupTitleParagraph3 = document.createParagraph();
+                groupTitleParagraph3.setAlignment(ParagraphAlignment.LEFT);
+                XWPFRun groupTitleRun3 = groupTitleParagraph3.createRun();
+                groupTitleRun3.setText("");
+                groupTitleRun3.setFontSize(34);
+                groupTitleRun3.setBold(true);
+            }
+        }
+
+        // 调用方法来设置整个文档的页边距
+        setPageMargins(document, 720, 720, 720, 720);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        document.write(byteArrayOutputStream);
+        document.close();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
 
     public static byte[] generateWord(List<JwSignRecord> records, String matchName, JwTeam jwTeam) throws IOException {
         XWPFDocument document = new XWPFDocument();

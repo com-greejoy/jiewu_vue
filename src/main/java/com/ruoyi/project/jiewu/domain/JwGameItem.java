@@ -90,6 +90,16 @@ public class JwGameItem extends BaseEntity {
     private String judgeIdD;
     private String judgeIdAll;
 
+    private String isMusic;
+
+    public String getIsMusic() {
+        return isMusic;
+    }
+
+    public void setIsMusic(String isMusic) {
+        this.isMusic = isMusic;
+    }
+
     public String getJudgeIdC() {
         return judgeIdC;
     }

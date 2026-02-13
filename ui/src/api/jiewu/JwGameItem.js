@@ -60,3 +60,21 @@ export function lockJwGameItem(data) {
     params: data
   })
 }
+
+// 获取一个组别线上线下的成绩做对比
+export function getGameItemGradeComPar(data) {
+  return request({
+    url: '/jiewu/JwGameItem/getGameItemGradeComPar',
+    method: 'post',
+    params: data
+  })
+}
+
+// 同步一个组别的成绩
+export function uploadGameItemGrade(data) {
+  return request({
+    url: '/jiewu/JwGameItem/uploadGameItemGrade',
+    method: 'post',
+    params: data
+  })
+}

@@ -1,14 +1,22 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.file.PdfGenerator;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSportExport;
+import com.ruoyi.project.jiewu.service.JwMatchService;
 import com.ruoyi.project.jiewu.service.JwSignRecordService;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +39,11 @@ public class JwHaiScoreController extends BaseController {
     @Autowired
     private JwSignRecordService jwSignRecordService;
 
+    @Autowired
+    private JwMatchService jwMatchService;
+
+
+
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
     @GetMapping("/list")
     public AjaxResult list(JwSignRecord jwSignRecord) {
@@ -39,6 +52,17 @@ public class JwHaiScoreController extends BaseController {
             return AjaxResult.success(list);
         } else {
             return AjaxResult.success(new ArrayList<>());
+        }
+    }
+
+    //    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
+    @PostMapping("/listJwHaiScoreBySportrrr")
+    @ResponseBody
+    public AjaxResult listJwHaiScoreBySportrrr(JwSignRecord jwSignRecord) {
+        if (StringUtils.isLongNotNull(jwSignRecord.getId())) {
+            return AjaxResult.success(jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord));
+        } else {
+            return AjaxResult.success(0);
         }
     }
 
@@ -55,7 +79,7 @@ public class JwHaiScoreController extends BaseController {
     @Log(title = "全部成绩表", businessType = BusinessType.EXPORT)
     @PostMapping("/exportAllGrade")
     public void exportAllGrade(HttpServletResponse response, Long matchId) {
-        List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId);
+        List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId, null);
         List<JwSignRecordSportExport> jwSignRecordSportExportList = new ArrayList<>();
 
         jwSignRecordList.forEach(jwSignRecord -> {
@@ -76,6 +100,47 @@ public class JwHaiScoreController extends BaseController {
         util.exportExcel(response, jwSignRecordSportExportList, "全部成绩表");
     }
 
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
+    @Log(title = "全部成绩", businessType = BusinessType.EXPORT)
+    @PostMapping("/downloadAllScore")
+    public ResponseEntity<byte[]> downloadAllScore(Long matchId) {
+        List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId, null);
+        try {
+            // 调用服务生成Word文档并返回字节数组
+            byte[] wordBytes = PdfGenerator.generateGradeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName());
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "schedule.docx");
+            // 返回带有字节数据和响应头的ResponseEntity
+            return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            // 处理异常情况
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
+    @Log(title = "组别成绩", businessType = BusinessType.EXPORT)
+    @PostMapping("/downloadGameItemScore")
+    public ResponseEntity<byte[]> downloadGameItemScore(Long matchId, Long gameItemId) {
+        List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId, gameItemId);
+        try {
+            // 调用服务生成Word文档并返回字节数组
+            byte[] wordBytes = PdfGenerator.generateGradeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName());
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "schedule.docx");
+            // 返回带有字节数据和响应头的ResponseEntity
+            return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            // 处理异常情况
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:query')")
     @GetMapping(value = "/{id}")
@@ -128,7 +193,7 @@ public class JwHaiScoreController extends BaseController {
     @PostMapping("/listAllGameItemGradeDes")
     @ResponseBody
     public AjaxResult listAllGameItemGradeDes(Long matchId) {
-        return AjaxResult.success(jwHaiScoreService.listAllGameItemGradeDes(matchId));
+        return AjaxResult.success(jwHaiScoreService.listAllGameItemGradeDes(matchId, null));
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")

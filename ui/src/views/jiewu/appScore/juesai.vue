@@ -3,8 +3,8 @@
     <div class="select-chang">
       <el-radio size="mini" v-model="currentArea" label="A" border>A场地</el-radio>
       <el-radio size="mini" v-model="currentArea" label="B" border>B场地</el-radio>
-      <el-radio size="mini" v-model="currentArea" label="C" border>C场地</el-radio>
-      <el-radio size="mini" v-model="currentArea" label="D" border>D场地</el-radio>
+<!--      <el-radio size="mini" v-model="currentArea" label="C" border>C场地</el-radio>-->
+<!--      <el-radio size="mini" v-model="currentArea" label="D" border>D场地</el-radio>-->
 
       <el-radio size="mini" @change="lunChange" v-model="lun" label="1" border>第一轮</el-radio>
       <el-radio size="mini" @change="lunChange" v-model="lun" label="2" v-if="currentPk == '1.1' || currentPk == '3.0'" border>第二轮</el-radio>
@@ -95,6 +95,7 @@
       <div class="show-queren" v-show="showSave" @click.stop="showSave = false">
         <div class="judge-con" @click.stop="aaa">
           <div class="judge-title">确认获胜者</div>
+          <div class="judge-title">第 {{lun}} 轮</div>
           <div class="judge-item">
             <div v-if="((p1.score || 0) * 1) > ((p2.score || 0) * 1)" class="sport-info-win blue">
               <div class="sport-name">{{p1.playerName}}</div>
@@ -188,7 +189,7 @@
           this.score3l = jss[2] * 1;
           this.score4l = jss[3] * 1;
           this.score5l = jss[4] * 1;
-          this.scoreChange()
+          this.scoreChange();
         } else {
           this.score1l = 50;
           this.score1r = 0;
@@ -200,7 +201,7 @@
           this.score4r = 0;
           this.score5l = 50;
           this.score5r = 0;
-          this.scoreChange()
+          this.scoreChange();
         }
       },
       getGenScore(score) {
@@ -216,7 +217,12 @@
 
         this.eightList = data.list || [];
         // if ((this.lun != currentPkGroup.lun || this.currentPk != currentPkGroup.currentPk) && (currentPkGroup.area == "全" || currentPkGroup.area == this.currentArea)) {
-        if (currentPkGroup.lun == 3 && this.lun != 3) {
+        // if (currentPkGroup.lun == 3 && this.lun != 3) {
+        //   this.lun = currentPkGroup.lun;
+        //   this.lunChange()
+        // }
+
+        if (currentPkGroup.lun != this.lun) {
           this.lun = currentPkGroup.lun;
           this.lunChange()
         }

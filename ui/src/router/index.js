@@ -41,6 +41,12 @@ export const constantRoutes = [
       }
     ]
   },
+
+  {
+    path: '/zhuChiMusic',
+    hidden: true,
+    component: () => import('@/views/jiewu/JwQiWuMusic/zhuChiMusic')
+  },
   {
     path: '/JwQiWuMusicScreen',
     hidden: true,
@@ -61,6 +67,11 @@ export const constantRoutes = [
     path: '/battlePhoneNew',
     hidden: true,
     component: () => import('@/views/jiewu/JwQiWuMusicScreen/battlePhoneNew')
+  },
+  {
+    path: '/battlePhoneNewLeShan',
+    hidden: true,
+    component: () => import('@/views/jiewu/JwQiWuMusicScreen/battlePhoneNewleshan')
   },
   {
     path: '/login',

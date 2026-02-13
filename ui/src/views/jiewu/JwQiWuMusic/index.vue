@@ -18,7 +18,7 @@
         <el-select filterable v-model="queryParams.gameItemId" placeholder="组别" clearable>
 
           <el-option
-            v-if="gameItem.sportLimit == 3"
+            v-if="gameItem.isMusic == 'Y'"
             v-for="gameItem in JwGameItemList"
             :key="gameItem.id"
             :label="gameItem.code + ' : ' + gameItem.name"
@@ -107,10 +107,10 @@
 
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button @click="handleUploadMusic(scope.row)" type="warning" size="small" icon="el-icon-video-play" >上传</el-button>
-          <el-button @click="handleDoloadMusic(scope.row)" type="warning" size="small" icon="el-icon-video-play" >下载</el-button>
-          <el-button v-if="scope.row.worksMusic" @click="handleOpenMusic(scope.row)" type="success" size="small" icon="el-icon-video-play" ></el-button>
-          <el-button @click="handlePlayMusic(scope.row)" type="success" size="small" icon="el-icon-video-play" >远程</el-button>
+          <el-button @click="handleUploadMusic(scope.row)" type="warning" size="mini" icon="el-icon-video-play" >上传</el-button>
+          <el-button @click="handleDoloadMusic(scope.row)" type="warning" size="mini" icon="el-icon-video-play" >下载</el-button>
+          <el-button v-if="scope.row.worksMusic" @click="handleOpenMusic(scope.row)" type="success" size="mini" icon="el-icon-video-play" ></el-button>
+          <el-button @click="handlePlayMusic(scope.row)" type="success" size="mini" icon="el-icon-video-play" >远程</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -215,8 +215,8 @@
       };
     },
     created() {
-      this.getTeamList()
-      this.getGameItemList()
+      this.getTeamList();
+      this.getGameItemList();
       this.getList();
     },
     watch: {
@@ -373,7 +373,8 @@
       },
       getList() {
         this.loading = true;
-        this.queryParams.sportLimit = 3;
+        // this.queryParams.sportLimit = 3;
+        this.queryParams.isMusic = 'Y';
         listQiWuMusic(this.queryParams).then(response => {
           this.JwSignRecordList = response.rows || [];
           this.showJwSignRecordList = this.JwSignRecordList;

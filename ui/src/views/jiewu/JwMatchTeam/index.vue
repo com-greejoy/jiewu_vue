@@ -135,8 +135,8 @@
       <!--<el-table-column type="selection" width="55" align="center"/>-->
       <el-table-column label="ID" width="64" align="center" prop="id"/>
       <el-table-column label="序号" width="64" align="center" prop="indexOrder"/>
+      <el-table-column label="CID" width="64" align="left" prop="createUserId"/>
       <el-table-column label="代表队" align="left" prop="teamName"/>
-
       <el-table-column label="单人" width="120" align="center" prop="singleCount">
         <template slot-scope="scope">
           <el-link :underline="false" type="success" style="font-weight: 600">{{scope.row.singleCount||0}} 人</el-link>
@@ -764,10 +764,10 @@
                   return prev;
                 }
               }, 0);
-              if (index == 3) {
+              if (index == 4) {
                 sums[index] += ' 人';
               }
-              if (index == 4) {
+              if (index == 5) {
                 sums[index] += ' 队 / ';
 
                 const values2 = data.map(item => Number(item["qiSportCount"]));
@@ -783,7 +783,7 @@
 
                 sums[index] += ss + ' 人';
               }
-              if (index == 5) {
+              if (index == 6) {
                 sums[index] += ' 元';
               }
             } else {

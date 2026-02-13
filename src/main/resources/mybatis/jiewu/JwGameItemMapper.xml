@@ -38,10 +38,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="judgeIdC"    column="judge_id_c"    />
         <result property="judgeIdD"    column="judge_id_d"    />
         <result property="judgeIdAll"    column="judge_id_all"    />
+        <result property="isMusic"    column="is_music"    />
     </resultMap>
 
     <sql id="selectJwGameItemVo">
-        select id, match_id, code, show_min_year, judge_id, judge_id_b, judge_id_c, judge_id_d, judge_id_all, show_max_year, name,
+        select id, match_id, code, is_music, show_min_year, judge_id, judge_id_b, judge_id_c, judge_id_d, judge_id_all, show_max_year, name,
         max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
         single_duration, match_type, promotion_num, min_year, max_year,
         fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
@@ -160,6 +161,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdC != null">judge_id_c,</if>
             <if test="judgeIdD != null">judge_id_d,</if>
             <if test="judgeIdAll != null">judge_id_all,</if>
+            <if test="isMusic != null">is_music,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -192,6 +194,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdC != null">#{judgeIdC},</if>
             <if test="judgeIdD != null">#{judgeIdD},</if>
             <if test="judgeIdAll != null">#{judgeIdAll},</if>
+            <if test="isMusic != null">#{isMusic},</if>
          </trim>
     </insert>
 
@@ -228,6 +231,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdC != null">judge_id_c = #{judgeIdC},</if>
             <if test="judgeIdD != null">judge_id_d = #{judgeIdD},</if>
             <if test="judgeIdAll != null">judge_id_all = #{judgeIdAll},</if>
+            <if test="isMusic != null">is_music = #{isMusic},</if>
         </trim>
         where id = #{id}
     </update>

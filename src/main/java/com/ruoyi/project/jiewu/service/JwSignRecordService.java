@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import com.ruoyi.common.exception.GlobalException;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.uuid.UUID;
+import com.ruoyi.framework.aspectj.lang.annotation.DataSource;
+import com.ruoyi.framework.aspectj.lang.enums.DataSourceType;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.jiewu.domain.*;
 import org.apache.ibatis.annotations.Param;
@@ -123,6 +126,11 @@ public class JwSignRecordService {
     public List<JwSignRecord> selectJwSignRecordList(JwSignRecord jwSignRecord) {
         return jwSignRecordMapper.selectJwSignRecordList(jwSignRecord);
     }
+
+    public List<JwSignRecord> selectQiWuJwSignRecordList(JwSignRecord jwSignRecord) {
+        return jwSignRecordMapper.selectQiWuJwSignRecordList(jwSignRecord);
+    }
+
 
     // 获取代表队 某个组别的报名信息
     public List<JwSignRecord> selectJwSignRecordListWithUserGameItem(Long teamId, Long gameItemId, String backNumber) {
@@ -381,7 +389,6 @@ public class JwSignRecordService {
                     if (StringUtils.isEmpty(backNum)) {
                         addNewBackNum(jwSignRecord);
                     }
-
                 }
             }
         }
@@ -407,6 +414,7 @@ public class JwSignRecordService {
 
     //  新增加报报名 判断需不需加背号
     private void addNewBackNum(JwSignRecord jwSignRecord) {
+        JwMatch jwMatch = jwMatchService.selectJwMatchById(jwSignRecord.getMatchId());
         JwSignRecord updateJ = new JwSignRecord();
         updateJ.setId(jwSignRecord.getId());
         String backNum = selectMaxBackNum(jwSignRecord.getMatchId());
@@ -422,17 +430,17 @@ public class JwSignRecordService {
                         if (b != null && StringUtils.isNotEmpty(b.getBackNumber())) {
                             updateJ.setBackNumber(b.getBackNumber());
                         } else {
-                            updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
+                            updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
                         }
                     } else {
-                        updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
+                        updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
                     }
                 } else {
-                    updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
+                    updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
                 }
             } else if ("4".equals(jwSignRecord.getSportLimit()) || "3".equals(jwSignRecord.getSportLimit()) || "2".equals(jwSignRecord.getSportLimit())) {
                 // 齐舞的背号 直接加一
-                updateJ.setBackNumber(new DecimalFormat(T).format(Long.valueOf(backNum) + 1));
+                updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
             }
             jwSignRecordService.updateJwSignRecord(updateJ);
         }
@@ -494,4 +502,32 @@ public class JwSignRecordService {
         return jwSignRecordMapper.selectJwSignRecordListWithJudgeScore(judgeId, scheduleItemId);
     }
 
+
+    private String getZeroString(Long number) {
+        number = Math.abs(number);
+        int length = String.valueOf(number).length();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append('0');
+        }
+        return sb.toString();
+    }
+
+    // 获取选手的打分明细  线上数据
+    @DataSource(value = DataSourceType.SLAVE)
+    public List<JwSignRecord> selectJwSignRecordHaiScoreUp(JwSignRecord jwSignRecord) {
+        return jwSignRecordMapper.selectJwSignRecordHaiScore(jwSignRecord);
+    }
+
+    // 清除一个组别的打分排名 线上数据
+    @DataSource(value = DataSourceType.SLAVE)
+    public int clearScoreByGameItemUp(Long gameItemId) {
+        return jwSignRecordMapper.clearScoreByGameItem(gameItemId);
+    }
+
+    //  更新一个组别的打分数据
+    @DataSource(value = DataSourceType.SLAVE)
+    public int updateJwSignRecordUpScore(JwSignRecord jwSignRecord) {
+        return jwSignRecordMapper.updateJwSignRecordUpScore(jwSignRecord);
+    }
 }

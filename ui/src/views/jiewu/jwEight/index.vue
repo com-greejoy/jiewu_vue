@@ -39,7 +39,8 @@
   import {listJwEight, getJwEight, delJwEight, addJwEight, updateJwEight, saveEightPro} from "@/api/jiewu/jwEight";
   import {listJwGameItem} from "@/api/jiewu/JwGameItem";
   import {getJwMatch} from "@/api/jiewu/jwMatch";
-  import battle from '@/views/jiewu/JwQiWuMusicScreen/battle'
+  import battle from '@/views/jiewu/JwQiWuMusicScreen/battle'   //普通用的
+  // import battle from '@/views/jiewu/JwQiWuMusicScreen/battleNewLeShan'; // 乐山用的
   import {sendBattle} from "@/api/jiewu/ScreenSend";
 
   export default {
@@ -105,7 +106,7 @@
       getGameItemList() {
         this.JwGameItemList = [];
         listJwGameItem({matchId: this.queryParams.matchId, pageNum: 1, pageSize: 5000, matchType: 2}).then(response => {
-          this.JwGameItemList = response.rows;
+          this.JwGameItemList = (response.rows || []).filter(ite=>ite.signCount > 0);
         });
       },
 

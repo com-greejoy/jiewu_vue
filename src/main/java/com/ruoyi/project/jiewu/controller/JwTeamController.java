@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.project.jiewu.service.JwTeamLeaderService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,6 +37,9 @@ public class JwTeamController extends BaseController {
     @Autowired
     private JwTeamService jwTeamService;
 
+    @Autowired
+    private JwTeamLeaderService jwTeamLeaderService;
+
     /**
      * 查询代表队列表
      */
@@ -47,6 +51,14 @@ public class JwTeamController extends BaseController {
             startPage();
         }
         List<JwTeam> list = jwTeamService.selectJwTeamList(jwTeam);
+        if(list != null && list.size() > 0){
+            if(StringUtils.isLongNotNull(jwTeam.getMatchId())){
+                list.forEach(jwTeam1 -> {
+                    jwTeam1.setJwTeamLeaderList(jwTeamLeaderService.selectJwTeamLeaderListByWxUser(jwTeam1.getCreateUserId(), null, jwTeam.getMatchId()));
+                });
+            }
+
+        }
         return getDataTable(list);
     }
 

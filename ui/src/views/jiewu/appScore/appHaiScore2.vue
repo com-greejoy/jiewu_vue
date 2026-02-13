@@ -9,24 +9,21 @@
       <div class="lou-out" @click="logout">退出<i class="el-icon-right"></i></div>
     </div>
     <div class="hai-score-body" v-if="!isJueSai" v-loading="loadSport">
-      <div class="sport-item-con-h" :class="{inputMode: match.matchConfig.hScoreMode == '1'}">
+      <div class="sport-item-con-h">
         <div class="sport-item-con">
           <div class="no-user" @click="selectGameItemHandel" v-if="!currentGameItem || !currentGameItem.id">选择组别</div>
           <div class="sport-item-box" v-for="sport in sportList">
             <div class="sport-item" :class="{select: currentSport.id == sport.id}" @click="selectSport(sport)">
               <div class="sport-index">{{sport.indexOrder}}</div>
-<!--              <div class="sport-index">{{sport.backNumber}}</div>-->
-<!--              <div class="sport-name w"  v-if="sport.worksName"> {{sport.worksName}}</div>-->
+<!--              <div class="sport-index">{{sport.backNumber}}</div> -->
               <div class="sport-name">({{sport.backNumber}}) {{sport.playerName}}</div>
-              <div class="sport-score" v-if="match.matchConfig.hScoreMode == '1'">
-                <input type="number" v-model="sport.judgeScore" @keyup="saveScoreHandel">
+              <div class="sport-score">{{sport.judgeScore || ""}}
               </div>
-              <div class="sport-score" v-else>{{sport.judgeScore || ""}}</div>
             </div>
           </div>
         </div>
       </div>
-      <div class="score-con" v-if="match.matchConfig.hScoreMode == '2'">
+      <div class="score-con">
         <div class="no-user" v-if="!currentSport || !currentSport.id">先选择选手</div>
         <div class="score-row zong-fen">
           <span class="demonstration">总分（100分制）</span>
@@ -115,7 +112,7 @@
   import juesai from '@/views/jiewu/appScore/juesai';
 
   export default {
-    name: "appHaiScore2",
+    name: "appHaiScore",
     components: {juesai},
     props: {
       match: {
@@ -185,13 +182,13 @@
       },
       selectSport(sport) {
         this.currentSport = {};
-        // sport.judgeScore = (sport.judgeScore || 0) * 1;
-        // let avg = (sport.judgeScore / 5).toFixed(2);
-        // this.score1 = (avg * 5).toFixed(2) * 1;
-        // this.score2 = (avg * 5).toFixed(2) * 1;
-        // this.score3 = (avg * 5).toFixed(2) * 1;
-        // this.score4 = (avg * 5).toFixed(2) * 1;
-        // this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
+        sport.judgeScore = (sport.judgeScore || 0) * 1;
+        let avg = (sport.judgeScore / 5).toFixed(2);
+        this.score1 = (avg * 5).toFixed(2) * 1;
+        this.score2 = (avg * 5).toFixed(2) * 1;
+        this.score3 = (avg * 5).toFixed(2) * 1;
+        this.score4 = (avg * 5).toFixed(2) * 1;
+        this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
 
         // this.score1 = 0;
         // this.score2 = 0;
@@ -220,17 +217,17 @@
           })
         }
       },
-      saveScoreHandel() {
+      async saveScoreHandel() {
         if (this.currentSport.id) {
           // 将当前保存任务追加到串行队列末尾
           let judgeId =this.currentJudge.id * 1;
-          let scoreAll = this.currentSport.judgeScore * 1;
+          let scoreAll = this.scoreAll * 1;
           let sportId = this.currentSport.id * 1;
           this.requestChain = this.requestChain.then(() => {
-            return this.doSaveSocre(judgeId, scoreAll, sportId)
-          }).catch(err => {
-            console.warn('请求链中发生错误，但继续执行:', err)
-          })
+              return this.doSaveSocre(judgeId, scoreAll, sportId)
+            }).catch(err => {
+              console.warn('请求链中发生错误，但继续执行:', err)
+            })
         }
       },
 
@@ -238,13 +235,6 @@
         console.log(scoreAll)
         return  saveScore({"judgeId": judgeId, "score": scoreAll || null, "sportId": sportId})
       },
-      // async saveScoreHandel() {
-      //   if (this.currentSport.id) {
-      //     await saveScore({"judgeId": this.currentJudge.id, "score": this.currentSport.judgeScore || null, "sportId": this.currentSport.id}).then(res => {
-      //
-      //     })
-      //   }
-      // },
       scoreChangeALL(v) {
         if(v === 80){
           return;
@@ -383,7 +373,7 @@
       }
 
       .sport-item-box {
-        width: 95% !important;
+        width: 90% !important;
 
         .sport-score {
           width: 56pt !important;
@@ -449,16 +439,15 @@
         box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
         margin: 12pt;
         border-radius: 12px;
-        &.inputMode{
-          margin-bottom: 280pt;
-        }
+        margin-bottom: 0;
+
         .sport-item-con {
           flex: 1;
           display: flex;
           flex-direction: row;
           flex-wrap: wrap;
           flex-grow: 0;
-          padding: 12pt 0;
+          padding: 12pt;
 
           .sport-item-box {
             width: 50%;
@@ -515,9 +504,6 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
                 margin: 0 6pt;
-                .w{
-                  width: 200px;
-                }
               }
 
               .sport-score {
@@ -526,21 +512,7 @@
                 font-weight: 600;
                 width: 40pt;
                 text-align: center;
-                /*border-bottom: 1px solid #606266;*/
-                input{
-                  border: none;
-                  width: 100%;
-                  height: 100%;
-                  background: transparent;
-                  border-bottom: 1px solid #606266;
-                  outline: none;
-                  text-align: center;
-                  font-size: 16px;
-                  font-weight: 900;
-                  &:focus{
-                    outline: none;
-                  }
-                }
+                border-bottom: 1px solid #606266;
               }
             }
           }

@@ -1,6 +1,14 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="CID" prop="createUserId">
+        <el-input
+          v-model="queryParams.createUserId"
+          placeholder="CID"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item label="名字" prop="teamName">
         <el-input
           v-model="queryParams.teamName"

@@ -13,18 +13,18 @@ public class IDCardUtils {
     private static final String SECOND_ID_CARD_REGULAR_EXP = "(^\\d{18}$)|(^\\d{17}(\\d|X|x)$|(^\\d{15}$))";
     private static final int SECOND_ID_CARD_LENGTH = 18;
 
-    public static boolean isIdCard(String idCard){
-        if (StringUtils.isBlank(idCard)){
+    public static boolean isIdCard(String idCard) {
+        if (StringUtils.isBlank(idCard)) {
             return false;
         }
         StringBuilder idCardBuilder = new StringBuilder(idCard);
         // 正则表达式
         boolean matches = idCard.matches(SECOND_ID_CARD_REGULAR_EXP);
         // 第二代身份证的验证
-        if (matches && idCardBuilder.length() == SECOND_ID_CARD_LENGTH){
+        if (matches && idCardBuilder.length() == SECOND_ID_CARD_LENGTH) {
             int index = getIdCardCheckIndex(idCardBuilder);
             // 获取传入身份证的检验码
-            String check = String.valueOf(idCardBuilder.charAt(idCardBuilder.length()-1));
+            String check = String.valueOf(idCardBuilder.charAt(idCardBuilder.length() - 1));
             // 检验码校验
             return StringUtils.equalsIgnoreCase(CHECK_INDEX[index], check);
         }
@@ -36,9 +36,9 @@ public class IDCardUtils {
 //
 //    }
 
-    private static int getIdCardCheckIndex(StringBuilder idCardBuilder){
+    private static int getIdCardCheckIndex(StringBuilder idCardBuilder) {
         // 判断传入的是17位还是18位身份证号
-        int length = idCardBuilder.length() == SECOND_ID_CARD_LENGTH ? idCardBuilder.length()-1 : idCardBuilder.length();
+        int length = idCardBuilder.length() == SECOND_ID_CARD_LENGTH ? idCardBuilder.length() - 1 : idCardBuilder.length();
         // 计算出校验码
         int sum = 0;
         // length=17, i=0、2、3...16
@@ -55,7 +55,7 @@ public class IDCardUtils {
 
     public static Long getAge(String idCard) {
         try {
-            if(StringUtils.isNotEmpty(idCard))idCard = idCard.replaceAll(" ", "");
+            if (StringUtils.isNotEmpty(idCard)) idCard = idCard.replaceAll(" ", "");
             String birth = idCard.substring(6, 14);
             int year = Integer.parseInt(birth.substring(0, 4));
             int month = Integer.parseInt(birth.substring(4, 6));
@@ -67,7 +67,7 @@ public class IDCardUtils {
             int curDay = cal.get(Calendar.DAY_OF_MONTH);
 
             // 暂时改成一月一号
-            curYear = 2025;
+//            curYear = 2025;
 
             int age = curYear - year;
             // 暂时改成一月一号
@@ -75,7 +75,7 @@ public class IDCardUtils {
 //                age--;
 //            }
             return Long.valueOf(age);
-        }catch (Exception e){
+        } catch (Exception e) {
             return 0l;
         }
 
@@ -83,11 +83,11 @@ public class IDCardUtils {
     }
 
     public static String getGender(String idCard) {
-        try{
-        if(StringUtils.isNotEmpty(idCard))idCard = idCard.replaceAll(" ", "");
-        int genderNum = Integer.parseInt(idCard.substring(idCard.length() - 2, idCard.length() - 1));
-        return genderNum % 2 == 0 ? "f" : "m";
-        }catch (Exception e){
+        try {
+            if (StringUtils.isNotEmpty(idCard)) idCard = idCard.replaceAll(" ", "");
+            int genderNum = Integer.parseInt(idCard.substring(idCard.length() - 2, idCard.length() - 1));
+            return genderNum % 2 == 0 ? "f" : "m";
+        } catch (Exception e) {
             return "m";
         }
     }

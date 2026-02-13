@@ -9,6 +9,16 @@ export function listJwHaiScore(query) {
   })
 }
 
+// 获取一个选手的打分详细
+export function listJwHaiScoreBySport(data) {
+  return request({
+    url: '/jiewu/JwHaiScore/listJwHaiScoreBySportrrr',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
 // 查询海选打分详细
 export function getJwHaiScore(id) {
   return request({

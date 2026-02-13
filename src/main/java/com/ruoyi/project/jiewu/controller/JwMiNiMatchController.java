@@ -13,6 +13,7 @@ import com.ruoyi.framework.redis.RedisCache;
 import com.ruoyi.framework.web.controller.BaseController;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.jiewu.domain.*;
+import com.ruoyi.project.jiewu.mapper.JwMatchUserMapper;
 import com.ruoyi.project.jiewu.service.*;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.checkerframework.checker.units.qual.A;
@@ -55,6 +56,9 @@ public class JwMiNiMatchController extends BaseController {
 
     @Autowired
     private JwHaiScoreService jwHaiScoreService;
+
+    @Autowired
+    private JwMatchUserMapper jwMatchUserMapper;
 
     @PostMapping("/listMatchGameItem")
     @ResponseBody
@@ -120,7 +124,7 @@ public class JwMiNiMatchController extends BaseController {
     // 获取微信用户管理的比赛
     @PostMapping("/listWxUserMatchList")
     @ResponseBody
-    public AjaxResult listWxUserMatchList(@RequestHeader("Authorization") String openId) {
+    public AjaxResult listWxUserMatchList(@RequestHeader(value = "Authorization", required = false) String openId) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
             List<JwMatch> jwMatchList = jwMatchService.listWxUserMatchList(zwWxUser.getId());
@@ -229,5 +233,28 @@ public class JwMiNiMatchController extends BaseController {
         return AjaxResult.success("拜拜");
     }
 
-
+    @PostMapping("/verifyMatchManageCode")
+    @ResponseBody
+    public AjaxResult verifyMatchManageCode(@RequestHeader("Authorization") String openId, String invitationCode, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(StringUtils.isEmpty(invitationCode)){
+            return AjaxResult.error("请输入密码");
+        }
+        if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
+            JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
+            if(jwMatch.getManageCode().equals(invitationCode)){
+                JwMatchUser jwMatchUser = new JwMatchUser();
+                jwMatchUser.setMatchId(matchId);
+                jwMatchUser.setUserId(zwWxUser.getId());
+                List<JwMatchUser> JwMatchUsers =  jwMatchUserMapper.selectJwMatchUserList(jwMatchUser);
+                if(JwMatchUsers == null || JwMatchUsers.size() <= 0){
+                    jwMatchUserMapper.insertJwMatchUser(jwMatchUser);
+                }
+                return AjaxResult.success(1);
+            }else{
+                return AjaxResult.success(0);
+            }
+        }
+        return AjaxResult.success("拜拜");
+    }
 }

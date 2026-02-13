@@ -297,3 +297,15 @@
 .is-multiple  .el-select-dropdown__wrap {
   max-height: 55vh !important;
 }
+
+.background-linear-gradient{
+  transform: skew(-30deg);
+  //background: linear-gradient(90deg, #673b6e, #ec3b79);
+  //background: linear-gradient(90deg, #4a2604, #df7c0f);
+  background:linear-gradient(90deg, #d32928, #544444);
+}
+
+.background-linear-gradient-box .order-item[data-position]{
+  //background: linear-gradient(90deg, #4a2604, #df7c0f);
+  background:linear-gradient(90deg, #d32928, #544444);
+}

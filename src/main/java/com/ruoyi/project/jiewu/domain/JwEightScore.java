@@ -31,6 +31,16 @@ public class JwEightScore extends BaseEntity{
 
     private String changDi;
 
+    private Long matchId;
+
+    public Long getMatchId() {
+        return matchId;
+    }
+
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
+    }
+
     public String getChangDi() {
         return changDi;
     }

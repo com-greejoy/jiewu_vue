@@ -6,10 +6,12 @@
     </video>
     <el-image class="img" :src="match.mainImg" fit="fill" v-if="match.mainImg"></el-image>
 
-    <Battle v-if="showBattle"  :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></Battle>
+    <Battle v-if="showBattle" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></Battle>
 
     <HaiXuanGrade v-if="showHaiXuanGrade" :minOrder.sync="battle.minOrder" :maxOrder.sync="battle.maxOrder" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></HaiXuanGrade>
     <JinJiSport v-if="showjinJiSport" :gameItemId.sync="battle.gameItemId" :currentGameItem.sync="battle.currentGameItem" :matchId.sync="matchId"></JinJiSport>
+
+    <SportJudgeScore v-if="showSportJudgeScore" :jwSignRecordId.sync="jwSignRecordId" :matchId.sync="matchId"></SportJudgeScore>
 
   </div>
 </template>
@@ -17,21 +19,23 @@
 <script>
   import {getJwMatch} from "@/api/jiewu/jwMatch";
   import {getJwGameItem} from "@/api/jiewu/JwGameItem";
-  import Battle from '@/views/jiewu/JwQiWuMusicScreen/battle';
+  import Battle from '@/views/jiewu/JwQiWuMusicScreen/battle';  // 普通用的
+  // import Battle from '@/views/jiewu/JwQiWuMusicScreen/battleNewLeShan'; // 乐山用的
   import HaiXuanGrade from '@/views/jiewu/JwQiWuMusicScreen/haiXuanGrade';
   import JinJiSport from '@/views/jiewu/JwQiWuMusicScreen/jinjiSport';
+  import SportJudgeScore from '@/views/jiewu/JwQiWuMusicScreen/sportJudgeScore';
 
   export default {
     name: "JwQiWuMusicScreen",
-    components: {Battle, HaiXuanGrade, JinJiSport},
+    components: {Battle, HaiXuanGrade, JinJiSport, SportJudgeScore},
     data() {
       return {
-
-
         battle: {},
         showBattle: false,
         showHaiXuanGrade: false,
         showjinJiSport: false,
+        showSportJudgeScore: false,
+        jwSignRecordId: null,
         ws: null,
         timeout: 2000,
         interval: 10000,
@@ -62,6 +66,7 @@
       },
     },
     created() {
+      this.matchId = 24;
       if (!this.matchId) {
         this.showMatchSelect = true;
       } else {
@@ -110,11 +115,13 @@
 
           if (e.data != "heart") {
             let data = JSON.parse(e.data);
-
+            console.log(data);
             that.musicOpen = false;
             that.showBattle = false;
             that.showHaiXuanGrade = false;
             that.showjinJiSport = false;
+            that.showSportJudgeScore = false;
+
 
             if (data.type == "sendMusic" && data.worksMusic) {
               // 播放音乐视频
@@ -155,6 +162,18 @@
                   that.showjinJiSport = true;
                 })
               }, 100)
+            } else if (data.type == "sendScoreScreen" && data.jwSignRecordId) {
+              // 投屏一个选手的打分详情
+              setTimeout(() => {
+                that.jwSignRecordId = data.jwSignRecordId;
+                that.showSportJudgeScore = true;
+              }, 100)
+            } else if (data.type == "opt") {
+
+              if (data.opt == "rendReload") {
+                // 刷新页面
+                window.location.reload();
+              }
             }
           }
         };

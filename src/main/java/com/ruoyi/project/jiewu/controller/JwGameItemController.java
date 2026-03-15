@@ -188,35 +188,49 @@ public class JwGameItemController extends BaseController {
             jwGameItem.setMaxSport(1);
             jwGameItem.setIsMusic("N");
 
-
-            if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
-                jwGameItem.setSportLimit("3"); //比赛模式
-            } else {
-                jwGameItem.setSportLimit("1"); //项目类型
-
-                if (jwGameItem.getName().contains("精英")) {
-                    jwGameItem.setMatchType("2");
-                    jwGameItem.setPromotionNum(32l);
-                }
-            }
-
-            if (jwGameItem.getName().contains("小齐舞")) {
-                jwGameItem.setMinSport(3);
-                jwGameItem.setMaxSport(6);
-                jwGameItem.setIsMusic("Y");
-            }
-            if (jwGameItem.getName().contains("大齐舞")) {
-                jwGameItem.setMinSport(7);
-                jwGameItem.setMaxSport(20);
-                jwGameItem.setIsMusic("Y");
-            }
-            if (jwGameItem.getName().contains("作品")) {
-                jwGameItem.setIsMusic("Y");
-            }
-            if (jwGameItem.getName().contains("混合小作品")) {
+            if (jwGameItem.getName().contains("双人")) {
+                jwGameItem.setSportLimit("2");
                 jwGameItem.setMinSport(2);
+                jwGameItem.setMaxSport(2);
+            } else if (jwGameItem.getName().contains("三人")) {
+                jwGameItem.setSportLimit("5");
+                jwGameItem.setMinSport(3);
                 jwGameItem.setMaxSport(3);
+            } else if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("群舞") || jwGameItem.getName().contains("多人")) {
+                jwGameItem.setSportLimit("3");
+                jwGameItem.setMinSport(4);
+                jwGameItem.setMaxSport(99);
+            } else  {
+                jwGameItem.setSportLimit("1");
             }
+//            if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
+//                jwGameItem.setSportLimit("3"); //比赛模式
+//            } else {
+//                jwGameItem.setSportLimit("1"); //项目类型
+//
+//                if (jwGameItem.getName().contains("精英")) {
+//                    jwGameItem.setMatchType("2");
+//                    jwGameItem.setPromotionNum(32l);
+//                }
+//            }
+
+//            if (jwGameItem.getName().contains("小齐舞")) {
+//                jwGameItem.setMinSport(3);
+//                jwGameItem.setMaxSport(6);
+//                jwGameItem.setIsMusic("Y");
+//            }
+//            if (jwGameItem.getName().contains("大齐舞")) {
+//                jwGameItem.setMinSport(7);
+//                jwGameItem.setMaxSport(20);
+//                jwGameItem.setIsMusic("Y");
+//            }
+//            if (jwGameItem.getName().contains("作品")) {
+//                jwGameItem.setIsMusic("Y");
+//            }
+//            if (jwGameItem.getName().contains("混合小作品")) {
+//                jwGameItem.setMinSport(2);
+//                jwGameItem.setMaxSport(3);
+//            }
 //                if(jwGameItem.getRemark().contains("六人一组")){
 //                    jwGameItem.setMinSport(6);
 //                    jwGameItem.setMaxSport(6);

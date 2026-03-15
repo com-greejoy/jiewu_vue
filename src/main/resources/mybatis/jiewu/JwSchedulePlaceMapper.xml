@@ -25,6 +25,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="area"    column="area"    />
         <result property="sportCount"    column="sportCount" />
         <result property="itemProcess"    column="item_process"    />
+        <result property="scheduleIndex"    column="schedule_index"    />
     </resultMap>
 
     <sql id="selectJwSchedulePlaceVo">
@@ -42,7 +43,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="listJwSchedulePlaceWithScheduleItem" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceWithScheduleItemResult">
-        select jsp.*, jsi.item_process,  jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id, jsi.item_name, jsi.shcedule_time, jsi.area, jsi.sportCount
+        select jsp.*, jsi.item_process,  jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id,
+        jsi.item_name, jsi.shcedule_time, jsi.area, jsi.sportCount, jsi.schedule_index
         from jw_schedule_place jsp
         left join (select jsii.*, count(jsr.id) as sportCount from jw_schedule_item jsii
         left join jw_sign_record jsr on jsr.schedule_item_id = jsii.id

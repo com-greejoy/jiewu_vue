@@ -52,6 +52,9 @@ public class JwGameItem extends BaseEntity {
 //    @Excel(name = "显示最大年龄")
     private Long showMaxYear;
 
+    @Excel(name = "组别类别")
+    private String gameType;
+
     @Excel(name = "备注")
     private String remark;
 
@@ -82,6 +85,8 @@ public class JwGameItem extends BaseEntity {
 //    @Excel(name = "性别限制")
     private String sexCon;
 
+
+
     private Long signCount;
 
     private String judgeId;
@@ -91,6 +96,14 @@ public class JwGameItem extends BaseEntity {
     private String judgeIdAll;
 
     private String isMusic;
+
+    public String getGameType() {
+        return gameType;
+    }
+
+    public void setGameType(String gameType) {
+        this.gameType = gameType;
+    }
 
     public String getIsMusic() {
         return isMusic;

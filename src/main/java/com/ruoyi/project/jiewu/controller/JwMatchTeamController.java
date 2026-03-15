@@ -108,95 +108,97 @@ public class JwMatchTeamController extends BaseController {
     }
 
     private List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){
-        List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
 
-        if (jwSignRecords != null && jwSignRecords.size() > 0) {
-            for (JwSignRecord jwSignRecord : jwSignRecords) {
-                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
-                jwSignRecord.setJwGameItem(jwGameItem);
-                if ("1".equals(jwGameItem.getSportLimit())) {
-                    //  单人
-                    if (BigDecimalUtil.isNotNull(jwGameItem.getFee())) jwSignRecord.setFee(jwGameItem.getFee());
-
-                    // 按选手查看
-                    Long sportId = jwSignRecord.getJwSignRecordSportList().get(0).getSportId();
-                    List<JwSport> finalJwSportList = jwSportList;
-                    int index = IntStream.range(0, jwSportList.size())
-                            .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
-                            .findFirst()
-                            .orElse(-1);
-                    JwSport jwSport = null;
-                    if (index >= 0) {
-                        jwSport = jwSportList.get(index);
-                    } else {
-                        jwSport = jwSportService.selectJwSportById(sportId);
-                    }
-
-                    List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
-                    if (jwGameItems == null) {
-                        jwGameItems = new ArrayList<>();
-                    }
-                    jwGameItems.add(jwGameItem);
-                    jwSport.setJwGameItemList(jwGameItems);
-                    if (index >= 0) {
-                        jwSportList.set(index, jwSport);
-                    } else {
-                        jwSportList.add(jwSport);
-                    }
-
-                } else if ("4".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
-                    // 多人
-                    if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
-                        int sportCount = jwSignRecord.getJwSignRecordSportList().size();
-                        BigDecimal fee = jwGameItem.getFee();
-
-                        fee = jwTeamService.getSignRecordFee(jwGameItem, jwSignRecord);
-
-                        // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
-//                        if (sportCount > jwGameItem.getFeeMaxSport() && BigDecimalUtil.isNotNull(fee)) {
-//                            fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
+        return jwSignRecordService.genJwSignRecords( teamId,  matchId, jwSportList);
+//        List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
+//
+//        if (jwSignRecords != null && jwSignRecords.size() > 0) {
+//            for (JwSignRecord jwSignRecord : jwSignRecords) {
+//                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
+//                jwSignRecord.setJwGameItem(jwGameItem);
+//                if ("1".equals(jwGameItem.getSportLimit())) {
+//                    //  单人
+//                    if (BigDecimalUtil.isNotNull(jwGameItem.getFee())) jwSignRecord.setFee(jwGameItem.getFee());
+//
+//                    // 按选手查看
+//                    Long sportId = jwSignRecord.getJwSignRecordSportList().get(0).getSportId();
+//                    List<JwSport> finalJwSportList = jwSportList;
+//                    int index = IntStream.range(0, jwSportList.size())
+//                            .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
+//                            .findFirst()
+//                            .orElse(-1);
+//                    JwSport jwSport = null;
+//                    if (index >= 0) {
+//                        jwSport = jwSportList.get(index);
+//                    } else {
+//                        jwSport = jwSportService.selectJwSportById(sportId);
+//                    }
+//
+//                    List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
+//                    if (jwGameItems == null) {
+//                        jwGameItems = new ArrayList<>();
+//                    }
+//                    jwGameItems.add(jwGameItem);
+//                    jwSport.setJwGameItemList(jwGameItems);
+//                    if (index >= 0) {
+//                        jwSportList.set(index, jwSport);
+//                    } else {
+//                        jwSportList.add(jwSport);
+//                    }
+//
+//                } else if ("5".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
+//                    // 多人
+//                    if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
+//                        int sportCount = jwSignRecord.getJwSignRecordSportList().size();
+//                        BigDecimal fee = jwGameItem.getFee();
+//
+//                        fee = jwTeamService.getSignRecordFee(jwGameItem, jwSignRecord);
+//
+//                        // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
+////                        if (sportCount > jwGameItem.getFeeMaxSport() && BigDecimalUtil.isNotNull(fee)) {
+////                            fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
+////                        }
+//                        jwSignRecord.setFee(fee);
+//
+//                        BigDecimal avgfee = jwSignRecord.getFee().divide(new BigDecimal(sportCount), 0, RoundingMode.DOWN);
+//                        jwSignRecord.setAvgFee(avgfee);
+//
+//                        for (JwSignRecordSport jwSignRecordSport : jwSignRecord.getJwSignRecordSportList()) {
+//
+//                            Long sportId = jwSignRecordSport.getSportId();
+//
+//                            List<JwSport> finalJwSportList = jwSportList;
+//                            int index = IntStream.range(0, jwSportList.size())
+//                                    .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
+//                                    .findFirst()
+//                                    .orElse(-1);
+//                            JwSport jwSport = null;
+//                            if (index >= 0) {
+//                                jwSport = jwSportList.get(index);
+//                            } else {
+//                                jwSport = jwSportService.selectJwSportById(sportId);
+//                            }
+//
+//                            List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
+//                            if (jwGameItems == null) {
+//                                jwGameItems = new ArrayList<>();
+//                            }
+//                            jwGameItem.setFee(avgfee);
+//                            jwGameItems.add(jwGameItem);
+//
+//                            jwSport.setJwGameItemList(jwGameItems);
+//                            if (index >= 0) {
+//                                jwSportList.set(index, jwSport);
+//                            } else {
+//                                jwSportList.add(jwSport);
+//                            }
 //                        }
-                        jwSignRecord.setFee(fee);
-
-                        BigDecimal avgfee = jwSignRecord.getFee().divide(new BigDecimal(sportCount), 0, RoundingMode.DOWN);
-                        jwSignRecord.setAvgFee(avgfee);
-
-                        for (JwSignRecordSport jwSignRecordSport : jwSignRecord.getJwSignRecordSportList()) {
-
-                            Long sportId = jwSignRecordSport.getSportId();
-
-                            List<JwSport> finalJwSportList = jwSportList;
-                            int index = IntStream.range(0, jwSportList.size())
-                                    .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
-                                    .findFirst()
-                                    .orElse(-1);
-                            JwSport jwSport = null;
-                            if (index >= 0) {
-                                jwSport = jwSportList.get(index);
-                            } else {
-                                jwSport = jwSportService.selectJwSportById(sportId);
-                            }
-
-                            List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
-                            if (jwGameItems == null) {
-                                jwGameItems = new ArrayList<>();
-                            }
-                            jwGameItem.setFee(avgfee);
-                            jwGameItems.add(jwGameItem);
-
-                            jwSport.setJwGameItemList(jwGameItems);
-                            if (index >= 0) {
-                                jwSportList.set(index, jwSport);
-                            } else {
-                                jwSportList.add(jwSport);
-                            }
-                        }
-                    }
-                }
-            }
-            jwSignRecords.sort(Comparator.comparing(s -> s.getJwGameItem().getCode()));
-        }
-        return jwSignRecords;
+//                    }
+//                }
+//            }
+//            jwSignRecords.sort(Comparator.comparing(s -> s.getJwGameItem().getCode()));
+//        }
+//        return jwSignRecords;
     }
 
     // 获取代表队赛程
@@ -238,7 +240,7 @@ public class JwMatchTeamController extends BaseController {
         List<JwSignRecord> jwSignRecordList = genJwSignRecords(teamId, matchId, jwSportList);
         try {
             // 调用服务生成Word文档并返回字节数组
-            byte[] wordBytes = PdfGenerator.generateFeeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
+            byte[] wordBytes = PdfGenerator.generateFeeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId), jwTeamService.selectJwTeamById(teamId));
             // 设置响应头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);

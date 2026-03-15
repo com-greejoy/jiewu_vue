@@ -74,6 +74,16 @@ public class JwMatch extends BaseEntity {
 
     private Long lastBackNum;
 
+    private String qunCode;
+
+    public String getQunCode() {
+        return qunCode;
+    }
+
+    public void setQunCode(String qunCode) {
+        this.qunCode = qunCode;
+    }
+
     public Long getLastBackNum() {
         return lastBackNum;
     }

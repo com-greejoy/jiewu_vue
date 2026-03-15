@@ -110,6 +110,7 @@
         <result property="shceduleTime" column="shcedule_time"/>
         <result property="area" column="area"/>
         <result property="lockScore" column="lock_score"/>
+        <result property="scheduleIndex"    column="schedule_index"    />
     </resultMap>
 
     <resultMap type="JwTeam" id="JwTeamResult">
@@ -186,7 +187,7 @@
         a.works_name, a.works_music, a.works_music_name, a.works_video,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex, jt.id as sub_team_id,
-        jsi.item_name, jsii.schedule_name, jsp.place_order, jsi.area, jsp.place_time
+        jsi.item_name, jsii.schedule_name, jsp.place_order, jsi.area, jsi.shcedule_time, jsi.schedule_index, jsp.place_time
         from jw_sign_record a
         left join jw_team jt on jt.id = a.team_id
         left join jw_sign_record_sport b on b.sign_record_id = a.id

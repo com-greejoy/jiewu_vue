@@ -753,7 +753,7 @@
             sums[index] = '总计';
             return;
           }
-          if (index == 3 || index == 4 || index == 5) {
+          if (index == 3 || index == 4 || index == 5 || index == 6) {
             const values = data.map(item => Number(item[column.property]));
             if (!values.every(value => isNaN(value))) {
               sums[index] = values.reduce((prev, curr) => {

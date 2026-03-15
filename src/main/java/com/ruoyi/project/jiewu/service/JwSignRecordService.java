@@ -1,11 +1,16 @@
 package com.ruoyi.project.jiewu.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.ruoyi.common.exception.GlobalException;
+import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.uuid.UUID;
@@ -41,6 +46,9 @@ public class JwSignRecordService {
 
     @Autowired
     private JwSportService jwSportService;
+
+    @Autowired
+    private JwTeamService jwTeamService;
 
     @Autowired
     private JwSignRecordSportService jwSignRecordSportService;
@@ -338,7 +346,7 @@ public class JwSignRecordService {
                         addNewBackNum(jwSignRecord);
                     }
                 }
-            } else if ("3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit())) {
+            } else if ("3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "5".equals(jwGameItem.getSportLimit())) {
 
                 if (StringUtils.isLongNotNull(editId)) {
                     // 修改多人报名
@@ -438,7 +446,7 @@ public class JwSignRecordService {
                 } else {
                     updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
                 }
-            } else if ("4".equals(jwSignRecord.getSportLimit()) || "3".equals(jwSignRecord.getSportLimit()) || "2".equals(jwSignRecord.getSportLimit())) {
+            } else if ("5".equals(jwSignRecord.getSportLimit()) || "4".equals(jwSignRecord.getSportLimit()) || "3".equals(jwSignRecord.getSportLimit()) || "2".equals(jwSignRecord.getSportLimit())) {
                 // 齐舞的背号 直接加一
                 updateJ.setBackNumber(new DecimalFormat(getZeroString(jwMatch.getStartBackNum())).format(Long.valueOf(backNum) + 1));
             }
@@ -529,5 +537,97 @@ public class JwSignRecordService {
     @DataSource(value = DataSourceType.SLAVE)
     public int updateJwSignRecordUpScore(JwSignRecord jwSignRecord) {
         return jwSignRecordMapper.updateJwSignRecordUpScore(jwSignRecord);
+    }
+
+    public List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){
+        List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
+
+        if (jwSignRecords != null && jwSignRecords.size() > 0) {
+            for (JwSignRecord jwSignRecord : jwSignRecords) {
+                JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
+                jwSignRecord.setJwGameItem(jwGameItem);
+                if ("1".equals(jwGameItem.getSportLimit())) {
+                    //  单人
+                    if (BigDecimalUtil.isNotNull(jwGameItem.getFee())) jwSignRecord.setFee(jwGameItem.getFee());
+
+                    // 按选手查看
+                    Long sportId = jwSignRecord.getJwSignRecordSportList().get(0).getSportId();
+                    List<JwSport> finalJwSportList = jwSportList;
+                    int index = IntStream.range(0, jwSportList.size())
+                            .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
+                            .findFirst()
+                            .orElse(-1);
+                    JwSport jwSport = null;
+                    if (index >= 0) {
+                        jwSport = jwSportList.get(index);
+                    } else {
+                        jwSport = jwSportService.selectJwSportById(sportId);
+                    }
+
+                    List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
+                    if (jwGameItems == null) {
+                        jwGameItems = new ArrayList<>();
+                    }
+                    jwGameItems.add(jwGameItem);
+                    jwSport.setJwGameItemList(jwGameItems);
+                    if (index >= 0) {
+                        jwSportList.set(index, jwSport);
+                    } else {
+                        jwSportList.add(jwSport);
+                    }
+
+                } else if ("5".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
+                    // 多人
+                    if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
+                        int sportCount = jwSignRecord.getJwSignRecordSportList().size();
+                        BigDecimal fee = jwGameItem.getFee();
+
+                        fee = jwTeamService.getSignRecordFee(jwGameItem, jwSignRecord);
+
+                        // 如果报名人数超过规定人数, 就重新计算价格   价格 / 规定人数 * 实际人数
+//                        if (sportCount > jwGameItem.getFeeMaxSport() && BigDecimalUtil.isNotNull(fee)) {
+//                            fee = fee.multiply(new BigDecimal(sportCount)).divide(new BigDecimal(jwGameItem.getFeeMaxSport()), 0, RoundingMode.DOWN);
+//                        }
+                        jwSignRecord.setFee(fee);
+
+                        BigDecimal avgfee = jwSignRecord.getFee().divide(new BigDecimal(sportCount), 0, RoundingMode.DOWN);
+                        jwSignRecord.setAvgFee(avgfee);
+
+                        for (JwSignRecordSport jwSignRecordSport : jwSignRecord.getJwSignRecordSportList()) {
+
+                            Long sportId = jwSignRecordSport.getSportId();
+
+                            List<JwSport> finalJwSportList = jwSportList;
+                            int index = IntStream.range(0, jwSportList.size())
+                                    .filter(i -> sportId.equals(finalJwSportList.get(i).getId()))
+                                    .findFirst()
+                                    .orElse(-1);
+                            JwSport jwSport = null;
+                            if (index >= 0) {
+                                jwSport = jwSportList.get(index);
+                            } else {
+                                jwSport = jwSportService.selectJwSportById(sportId);
+                            }
+
+                            List<JwGameItem> jwGameItems = jwSport.getJwGameItemList();
+                            if (jwGameItems == null) {
+                                jwGameItems = new ArrayList<>();
+                            }
+                            jwGameItem.setFee(avgfee);
+                            jwGameItems.add(jwGameItem);
+
+                            jwSport.setJwGameItemList(jwGameItems);
+                            if (index >= 0) {
+                                jwSportList.set(index, jwSport);
+                            } else {
+                                jwSportList.add(jwSport);
+                            }
+                        }
+                    }
+                }
+            }
+            jwSignRecords.sort(Comparator.comparing(s -> s.getJwGameItem().getCode()));
+        }
+        return jwSignRecords;
     }
 }

@@ -16,10 +16,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="itemProcess"    column="item_process"    />
         <result property="sportCount"    column="sportCount"    />
         <result property="lockScore"    column="lock_score"    />
+        <result property="scheduleIndex"    column="schedule_index"    />
     </resultMap>
 
     <sql id="selectJwScheduleItemVo">
-        select id, match_id, game_item_id, schedule_info_id, lock_score, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
+        select id, match_id, game_item_id, schedule_index, schedule_info_id, lock_score, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
     </sql>
 
     <select id="selectJwScheduleItemByGameItemId" parameterType="Long" resultMap="JwScheduleItemResult">
@@ -49,6 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="area != null  and area != ''"> and jsi.area = #{area}</if>
             <if test="itemProcess != null  and itemProcess != ''"> and jsi.item_process = #{itemProcess}</if>
             <if test="lockScore != null  and lockScore != ''"> and jsi.lock_score = #{lockScore}</if>
+            <if test="scheduleIndex != null "> and jsi.schedule_index = #{scheduleIndex}</if>
         </where>
         group by jsi.id
     </select>
@@ -70,6 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="area != null">area,</if>
             <if test="itemProcess != null">item_process,</if>
             <if test="lockScore != null">lock_score,</if>
+            <if test="scheduleIndex != null">schedule_index,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -81,6 +84,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="area != null">#{area},</if>
             <if test="itemProcess != null">#{itemProcess},</if>
             <if test="lockScore != null">#{lockScore},</if>
+            <if test="scheduleIndex != null">#{scheduleIndex},</if>
          </trim>
     </insert>
 
@@ -96,6 +100,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="area != null">area = #{area},</if>
             <if test="itemProcess != null">item_process = #{itemProcess},</if>
             <if test="lockScore != null">lock_score = #{lockScore},</if>
+            <if test="scheduleIndex != null">schedule_index = #{scheduleIndex},</if>
         </trim>
         where id = #{id}
     </update>

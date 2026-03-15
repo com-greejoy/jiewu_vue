@@ -101,7 +101,7 @@ public class JwTeamService {
             return fee;
         }
         // 单人  双人的 直接就是组别价格
-        if ("1".equals(jwGameItem.getSportLimit()) || "2".equals(jwGameItem.getSportLimit())) {
+        if ("1".equals(jwGameItem.getSportLimit())) {
             if(BigDecimalUtil.isNotNull(jwGameItem.getFee())) {
                 fee = jwGameItem.getFee();
             }
@@ -117,7 +117,7 @@ public class JwTeamService {
 //                    }
 //                }
 //            }
-        } else if ("3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit())) {
+        } else if ("2".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "5".equals(jwGameItem.getSportLimit())) {
             // 多人
             if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
                 int sportCount = jwSignRecord.getJwSignRecordSportList().size();

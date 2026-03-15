@@ -77,7 +77,7 @@ public class JwMatchService {
 //                            allFee = allFee.add(jwGameItem.getFee());
 //                        }
 
-                    } else if ("2".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit())) {
+                    } else if ("2".equals(jwGameItem.getSportLimit()) || "3".equals(jwGameItem.getSportLimit()) || "4".equals(jwGameItem.getSportLimit()) || "5".equals(jwGameItem.getSportLimit())) {
                         // 多人
                         if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
                             int sportCount = jwSignRecord.getJwSignRecordSportList().size();

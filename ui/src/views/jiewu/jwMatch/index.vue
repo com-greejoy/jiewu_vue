@@ -337,19 +337,24 @@
         </el-row>
         <el-divider>图片</el-divider>
         <el-row>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="海报" prop="posterImg">
-              <image-upload v-model="form.posterImg"/>
+              <image-upload :limit="200" v-model="form.posterImg"/>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="赛事详情" prop="matchDetails">
-              <image-upload :limit="20" v-model="form.matchDetails"/>
+              <image-upload :limit="200" v-model="form.matchDetails"/>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="竞赛规程" prop="matchRegulations">
-              <image-upload :limit="20" v-model="form.matchRegulations"/>
+              <image-upload :limit="200" v-model="form.matchRegulations"/>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+            <el-form-item label="群二维码" prop="qunCode">
+              <image-upload :limit="1" v-model="form.qunCode"/>
             </el-form-item>
           </el-col>
         </el-row>
@@ -566,6 +571,7 @@
           invitationList: null,
           isShowGrade: null,
           manageCode: null,
+          qunCode: null,
           matchConfig: this.getInitConfing()
         };
         this.resetForm("form");

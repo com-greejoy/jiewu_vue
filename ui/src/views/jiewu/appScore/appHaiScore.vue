@@ -185,13 +185,16 @@
       },
       selectSport(sport) {
         this.currentSport = {};
-        // sport.judgeScore = (sport.judgeScore || 0) * 1;
-        // let avg = (sport.judgeScore / 5).toFixed(2);
-        // this.score1 = (avg * 5).toFixed(2) * 1;
-        // this.score2 = (avg * 5).toFixed(2) * 1;
-        // this.score3 = (avg * 5).toFixed(2) * 1;
-        // this.score4 = (avg * 5).toFixed(2) * 1;
-        // this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
+        if(this.match.matchConfig.hScoreMode == '2'){
+          sport.judgeScore = (sport.judgeScore || 0) * 1;
+          let avg = (sport.judgeScore / 5).toFixed(2);
+          this.score1 = (avg * 5).toFixed(2) * 1;
+          this.score2 = (avg * 5).toFixed(2) * 1;
+          this.score3 = (avg * 5).toFixed(2) * 1;
+          this.score4 = (avg * 5).toFixed(2) * 1;
+          this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
+
+        }
 
         // this.score1 = 0;
         // this.score2 = 0;

@@ -43,8 +43,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left join (
         select jsr.team_id, jsr.match_id, count(case when jsr.sport_limit = '1' then 1 end) as singleCount,
         sum(case when jsr.sport_limit = '1' then jsr.sportCount end) as singleSportCount,
-        count(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2' or jsr.sport_limit = '4') then 1 end) as qiCount,
-        sum(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2' or jsr.sport_limit = '4') then jsr.sportCount end) as qiSportCount
+        count(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2' or jsr.sport_limit = '4' or jsr.sport_limit = '5') then 1 end) as qiCount,
+        sum(case when (jsr.sport_limit = '3' or jsr.sport_limit = '2' or jsr.sport_limit = '4' or jsr.sport_limit = '5') then jsr.sportCount end) as qiSportCount
         from (
         select jr.*, count(jsrs.id) as sportCount from jw_sign_record jr
         left join jw_sign_record_sport jsrs on jsrs.match_id = #{matchId} and jsrs.sign_record_id = jr.id group by jr.id ) jsr

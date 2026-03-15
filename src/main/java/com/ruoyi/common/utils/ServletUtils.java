@@ -1,6 +1,7 @@
 package com.ruoyi.common.utils;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -11,6 +12,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,56 +21,49 @@ import com.ruoyi.common.core.text.Convert;
 
 /**
  * 客户端工具类
- * 
+ *
  * @author ruoyi
  */
-public class ServletUtils
-{
+public class ServletUtils {
     /**
      * 获取String参数
      */
-    public static String getParameter(String name)
-    {
+    public static String getParameter(String name) {
         return getRequest().getParameter(name);
     }
 
     /**
      * 获取String参数
      */
-    public static String getParameter(String name, String defaultValue)
-    {
+    public static String getParameter(String name, String defaultValue) {
         return Convert.toStr(getRequest().getParameter(name), defaultValue);
     }
 
     /**
      * 获取Integer参数
      */
-    public static Integer getParameterToInt(String name)
-    {
+    public static Integer getParameterToInt(String name) {
         return Convert.toInt(getRequest().getParameter(name));
     }
 
     /**
      * 获取Integer参数
      */
-    public static Integer getParameterToInt(String name, Integer defaultValue)
-    {
+    public static Integer getParameterToInt(String name, Integer defaultValue) {
         return Convert.toInt(getRequest().getParameter(name), defaultValue);
     }
 
     /**
      * 获取Boolean参数
      */
-    public static Boolean getParameterToBool(String name)
-    {
+    public static Boolean getParameterToBool(String name) {
         return Convert.toBool(getRequest().getParameter(name));
     }
 
     /**
      * 获取Boolean参数
      */
-    public static Boolean getParameterToBool(String name, Boolean defaultValue)
-    {
+    public static Boolean getParameterToBool(String name, Boolean defaultValue) {
         return Convert.toBool(getRequest().getParameter(name), defaultValue);
     }
 
@@ -78,8 +73,7 @@ public class ServletUtils
      * @param request 请求对象{@link ServletRequest}
      * @return Map
      */
-    public static Map<String, String[]> getParams(ServletRequest request)
-    {
+    public static Map<String, String[]> getParams(ServletRequest request) {
         final Map<String, String[]> map = request.getParameterMap();
         return Collections.unmodifiableMap(map);
     }
@@ -90,11 +84,9 @@ public class ServletUtils
      * @param request 请求对象{@link ServletRequest}
      * @return Map
      */
-    public static Map<String, String> getParamMap(ServletRequest request)
-    {
+    public static Map<String, String> getParamMap(ServletRequest request) {
         Map<String, String> params = new HashMap<>();
-        for (Map.Entry<String, String[]> entry : getParams(request).entrySet())
-        {
+        for (Map.Entry<String, String[]> entry : getParams(request).entrySet()) {
             params.put(entry.getKey(), StringUtils.join(entry.getValue(), ","));
         }
         return params;
@@ -103,76 +95,64 @@ public class ServletUtils
     /**
      * 获取request
      */
-    public static HttpServletRequest getRequest()
-    {
+    public static HttpServletRequest getRequest() {
         return getRequestAttributes().getRequest();
     }
 
     /**
      * 获取response
      */
-    public static HttpServletResponse getResponse()
-    {
+    public static HttpServletResponse getResponse() {
         return getRequestAttributes().getResponse();
     }
 
     /**
      * 获取session
      */
-    public static HttpSession getSession()
-    {
+    public static HttpSession getSession() {
         return getRequest().getSession();
     }
 
-    public static ServletRequestAttributes getRequestAttributes()
-    {
+    public static ServletRequestAttributes getRequestAttributes() {
         RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
         return (ServletRequestAttributes) attributes;
     }
 
     /**
      * 将字符串渲染到客户端
-     * 
+     *
      * @param response 渲染对象
-     * @param string 待渲染的字符串
+     * @param string   待渲染的字符串
      */
-    public static void renderString(HttpServletResponse response, String string)
-    {
-        try
-        {
+    public static void renderString(HttpServletResponse response, String string) {
+        try {
             response.setStatus(200);
             response.setContentType("application/json");
             response.setCharacterEncoding("utf-8");
             response.getWriter().print(string);
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     /**
      * 是否是Ajax异步请求
-     * 
+     *
      * @param request
      */
-    public static boolean isAjaxRequest(HttpServletRequest request)
-    {
+    public static boolean isAjaxRequest(HttpServletRequest request) {
         String accept = request.getHeader("accept");
-        if (accept != null && accept.contains("application/json"))
-        {
+        if (accept != null && accept.contains("application/json")) {
             return true;
         }
 
         String xRequestedWith = request.getHeader("X-Requested-With");
-        if (xRequestedWith != null && xRequestedWith.contains("XMLHttpRequest"))
-        {
+        if (xRequestedWith != null && xRequestedWith.contains("XMLHttpRequest")) {
             return true;
         }
 
         String uri = request.getRequestURI();
-        if (StringUtils.inStringIgnoreCase(uri, ".json", ".xml"))
-        {
+        if (StringUtils.inStringIgnoreCase(uri, ".json", ".xml")) {
             return true;
         }
 
@@ -182,37 +162,73 @@ public class ServletUtils
 
     /**
      * 内容编码
-     * 
+     *
      * @param str 内容
      * @return 编码后的内容
      */
-    public static String urlEncode(String str)
-    {
-        try
-        {
+    public static String urlEncode(String str) {
+        try {
             return URLEncoder.encode(str, Constants.UTF8);
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             return StringUtils.EMPTY;
         }
     }
 
     /**
      * 内容解码
-     * 
+     *
      * @param str 内容
      * @return 解码后的内容
      */
-    public static String urlDecode(String str)
-    {
-        try
-        {
+    public static String urlDecode(String str) {
+        try {
             return URLDecoder.decode(str, Constants.UTF8);
-        }
-        catch (UnsupportedEncodingException e)
-        {
+        } catch (UnsupportedEncodingException e) {
             return StringUtils.EMPTY;
+        }
+    }
+
+    public static void downloadFile(HttpServletResponse response, byte[] wordBytes, String fileName) {
+        OutputStream os = null;
+        try {
+            response.reset(); // 清除缓冲区，防止之前的干扰
+            response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
+            String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
+            response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);
+            response.setContentLength(wordBytes.length);
+
+             os = response.getOutputStream();
+                os.write(wordBytes);
+                os.flush();
+        } catch (Exception e) {
+            // 处理异常情况
+            e.printStackTrace();
+            if (!response.isCommitted()) {
+                response.reset(); // 清除可能写入的半截数据
+                response.setContentType("application/json;charset=UTF-8");
+                try {
+                    // 返回一个简单的 JSON 错误提示
+                    String errorMsg = "{\"code\": 500, \"msg\": \"文件下载失败: " + e.getMessage() + "\"}";
+                    response.getWriter().write(errorMsg);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                // 如果已提交，只能记录日志，无法通知前端具体错误（因为流已经发出去了）
+                System.err.println("文件下载过程中发生错误，且响应已部分提交: " + e.getMessage());
+            }
+        }finally {
+            // 6. 最终资源清理 (双重保险)
+            if (os != null) {
+                try {
+                    os.flush();
+                    os.close();
+                } catch (IOException e) {
+                    // 关闭时的异常通常可以忽略，或者记录日志
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

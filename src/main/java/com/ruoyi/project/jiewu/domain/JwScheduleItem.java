@@ -50,6 +50,16 @@ public class JwScheduleItem extends BaseEntity
 
     private Long sportCount;
 
+    private Long scheduleIndex;
+
+    public Long getScheduleIndex() {
+        return scheduleIndex;
+    }
+
+    public void setScheduleIndex(Long scheduleIndex) {
+        this.scheduleIndex = scheduleIndex;
+    }
+
     public String getLockScore() {
         return lockScore;
     }

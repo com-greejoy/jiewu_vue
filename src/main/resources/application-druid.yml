@@ -27,12 +27,12 @@ spring:
             slave:
                 # 从数据源开关/默认关闭
                 enabled: true
-#                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2025_10_1_s?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-#                username: root
-#                password: 123456
-                url: jdbc:mysql://39.108.52.175:3306/pokejiewu?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2026_05_01_up?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 username: root
-                password: Ut>y#l/o1oo
+                password: 123456
+#                url: jdbc:mysql://39.108.52.175:3306/pokejiewu?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+#                username: root
+#                password: Ut>y#l/o1oo
             # 初始连接数
             initialSize: 5
             # 最小连接池数量

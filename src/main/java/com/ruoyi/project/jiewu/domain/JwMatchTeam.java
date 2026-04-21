@@ -20,7 +20,17 @@ public class JwMatchTeam extends BaseEntity
     @Excel(name = "序号")
     private Long indexOrder;
 
-    public void setTeamId(Long teamId) 
+    private String erCode;
+
+    public String getErCode() {
+        return erCode;
+    }
+
+    public void setErCode(String erCode) {
+        this.erCode = erCode;
+    }
+
+    public void setTeamId(Long teamId)
     {
         this.teamId = teamId;
     }

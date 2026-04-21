@@ -3,6 +3,7 @@ package com.ruoyi.project.jiewu.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.mchange.lang.LongUtils;
 import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.ServletUtils;
@@ -21,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -59,6 +61,9 @@ public class JwMiNiMatchController extends BaseController {
 
     @Autowired
     private JwMatchUserMapper jwMatchUserMapper;
+
+    @Autowired
+    private JwMatchTeamService jwMatchTeamService;
 
     @PostMapping("/listMatchGameItem")
     @ResponseBody
@@ -191,7 +196,17 @@ public class JwMiNiMatchController extends BaseController {
             return AjaxResult.success(jwHaiScoreService.listGameItemGradeDes(jwSignRecord));
         }
         return AjaxResult.success("拜拜");
+    }
 
+    // 根据背号查成绩
+    @PostMapping("/getGradeByBackNum")
+    @ResponseBody
+    public AjaxResult getGradeByBackNum(@RequestHeader("Authorization") String openId, JwSignRecord jwSignRecord) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if(zwWxUser != null){
+            return AjaxResult.success(jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord));
+        }
+        return AjaxResult.success("拜拜");
     }
 
     @PostMapping("/checkMatchInvitationCode")
@@ -257,4 +272,18 @@ public class JwMiNiMatchController extends BaseController {
         }
         return AjaxResult.success("拜拜");
     }
+
+    @PostMapping("/deleteMatchTeam")
+    @ResponseBody
+    public AjaxResult deleteMatchTeam(@RequestHeader("Authorization") String openId, Long teamId, Long matchId) {
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        Assert.notNull(teamId, "拜拜");
+        Assert.notNull(matchId, "拜拜");
+        Assert.notNull(zwWxUser, "拜拜");
+
+        jwMatchTeamService.deleteJwMatchTeam(teamId, matchId);
+
+        return AjaxResult.success("拜拜");
+    }
+
 }

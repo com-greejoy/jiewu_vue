@@ -42,8 +42,6 @@ public class JwHaiScoreController extends BaseController {
     @Autowired
     private JwMatchService jwMatchService;
 
-
-
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
     @GetMapping("/list")
     public AjaxResult list(JwSignRecord jwSignRecord) {

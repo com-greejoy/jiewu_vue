@@ -34,10 +34,9 @@ public class RequestMINIInterceptor implements HandlerInterceptor {
 
                 String servletPath = request.getServletPath();
 
-                if (servletPath.toLowerCase().contains("notify") || servletPath.toLowerCase().contains("uploadfile") || servletPath.toLowerCase().contains("uploadmusic")) {
+                if (servletPath.toLowerCase().contains("notify") || servletPath.toLowerCase().contains("uploadfile") || servletPath.toLowerCase().contains("uploadmusic") || servletPath.toLowerCase().contains("getmatchteaminviteercode")) {
                     return true;
                 }
-
                 Map<String, String> headerMap = new HashMap<>();
                 Enumeration<String> headers = request.getHeaderNames();
                 while (headers.hasMoreElements()) {

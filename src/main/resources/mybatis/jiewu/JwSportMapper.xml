@@ -14,10 +14,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="backNumber"    column="backNumber"    />
         <result property="teamName"    column="teamName"    />
         <result property="playerPhone"    column="player_phone"    />
+        <result property="createAddId"    column="create_add_id"    />
     </resultMap>
 
     <sql id="selectJwSportVo">
-        select id, player_name, id_card, sex, age, create_user_id, player_phone from jw_sport
+        select id, player_name, id_card, sex, age, create_user_id, create_add_id, player_phone from jw_sport
     </sql>
 
     <resultMap id="JwSportSignGameItemResult" type="JwSport" extends="JwSportResult">
@@ -33,12 +34,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <select id="selectJwSignRecordSportGameItemList" resultMap="JwSportSignGameItemResult">
-        select js.*, jgi.id as game_item_id, jgi.match_id, jgi.code as game_item_code, jgi.name as game_item_name, jgi.fee as game_item_fee  from jw_sport  js
+        select js.*, jgi.id as game_item_id, jgi.match_id, jgi.code as game_item_code, jgi.name as game_item_name, jgi.fee as game_item_fee
+         from jw_sport  js
         LEFT JOIN jw_sign_record_sport  srs on js.id = srs.sport_id
         left join jw_game_item jgi on jgi.id = srs.game_item_id
         <where>
             <if test="teamId != null "> and srs.team_id = #{teamId}</if>
             <if test="matchId != null "> and srs.match_id = #{matchId}</if>
+            <if test="createAddId != null "> and js.create_add_id = #{createAddId}</if>
         </where>
     </select>
 
@@ -51,6 +54,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="age != null"> and age = #{age}</if>
             <if test="createUserId != null "> and create_user_id = #{createUserId}</if>
             <if test="playerPhone != null  and playerPhone != ''"> and player_phone = #{playerPhone}</if>
+            <if test="createAddId != null "> and create_add_id = #{createAddId}</if>
         </where>
     </select>
 
@@ -59,7 +63,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where create_user_id = #{createUserId}
         <if test="searchName != null  and searchName != ''"> and (player_name like concat('%', #{searchName}, '%') or id_card like concat('%', #{searchName}, '%'))</if>
     </select>
-
 
     <select id="selectTodayBirthSport" resultMap="JwSportResult">
         <include refid="selectJwSportVo"/>
@@ -79,6 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="playerName != null  and playerName != ''"> and player_name = #{playerName}</if>
             <if test="idCard != null  and idCard != ''"> and id_card = #{idCard}</if>
             <if test="createUserId != null "> and create_user_id = #{createUserId}</if>
+<!--            <if test="createAddId != null "> and create_add_id = #{createAddId}</if>-->
         </where>
         limit 1
     </select>
@@ -88,6 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where create_user_id = #{createUserId}
         and age &gt;= #{minAge} and age &lt;= #{maxAge}
         <if test="sex != null and sex != ''"> and sex = #{sex}</if>
+<!--        <if test="createAddId != null "> and create_add_id = #{createAddId}</if>-->
         and id not in (select sport_id from jw_sign_record_sport where game_item_id = #{gameItemId})
     </select>
 
@@ -127,6 +132,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="age != null">age,</if>
             <if test="createUserId != null">create_user_id,</if>
             <if test="playerPhone != null">player_phone,</if>
+            <if test="createAddId != null">create_add_id,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="playerName != null and playerName != ''">#{playerName},</if>
@@ -135,6 +141,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="age != null">#{age},</if>
             <if test="createUserId != null">#{createUserId},</if>
             <if test="playerPhone != null">#{playerPhone},</if>
+            <if test="createAddId != null">#{createAddId},</if>
          </trim>
     </insert>
 
@@ -147,6 +154,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="age != null">age = #{age},</if>
             <if test="createUserId != null">create_user_id = #{createUserId},</if>
             <if test="playerPhone != null">player_phone = #{playerPhone},</if>
+            <if test="createAddId != null">create_add_id = #{createAddId},</if>
         </trim>
         where id = #{id}
     </update>

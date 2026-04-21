@@ -24,17 +24,10 @@ public class RoomSessionGroupSorter {
         }
     }
 
-    // -----------------------------------------------------------------------
-    // 内部实现类：比较器逻辑
-    // -----------------------------------------------------------------------
-
-    /**
-     * 自定义比较器，实现三级排序
-     */
     static class RoomInfoComparator implements Comparator<String> {
 
         // 正则1：提取教室部分，捕获 "第(.*?)教室" 中的中文数字部分
-        private static final Pattern ROOM_PATTERN = Pattern.compile("第(.*?)教室");
+        private static final Pattern ROOM_PATTERN = Pattern.compile("第(.*?)场地");
 
         // 正则2：提取场次和组别，捕获 "第(\\d+)场" 和 "第(\\d+)组" 中的阿拉伯数字
         private static final Pattern DETAIL_PATTERN = Pattern.compile(".*?第(\\d+)场.*?第(\\d+)组");

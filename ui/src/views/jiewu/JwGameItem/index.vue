@@ -30,6 +30,16 @@
           />
         </el-select>
       </el-form-item>
+      <el-form-item label="打分类型" prop="scoreType">
+        <el-select v-model="queryParams.scoreType" placeholder="请选择打分类型" clearable>
+          <el-option
+            v-for="dict in dict.type.game_item_score_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -175,6 +185,11 @@
       <el-table-column label="音乐" align="center" prop="isMusic">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_yes_no" :value="scope.row.isMusic"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="打分类型" align="center" prop="scoreType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.game_item_score_type" :value="scope.row.scoreType"/>
         </template>
       </el-table-column>
       <el-table-column label="备注" show-overflow-tooltip align="center" prop="remark"/>
@@ -350,7 +365,7 @@
           </el-col>
         </el-row>
         <el-row>
-          <el-col :span="12">
+          <el-col :span="6">
             <!--<el-form-item label="成绩奖项" prop="resultDesId">-->
             <!--<el-radio-group v-model="form.resultDesId">-->
             <!--<el-radio-->
@@ -361,13 +376,28 @@
             <!--</el-radio>-->
             <!--</el-radio-group>-->
             <!--</el-form-item>-->
+            <el-form-item label="打分类型" prop="scoreType">
+              <el-radio-group v-model="form.scoreType">
+                <el-radio
+                  v-for="dict in dict.type.game_item_score_type"
+                  :key="dict.value"
+                  :label="dict.value"
+                >{{dict.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
+
+
             <el-form-item label="音乐" prop="isMusic">
               <el-radio-group v-model="form.isMusic">
                 <el-radio
                   v-for="dict in dict.type.sys_yes_no"
                   :key="dict.value"
                   :label="dict.value"
-                >{{dict.label}}</el-radio>
+                >{{dict.label}}
+                </el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
@@ -543,7 +573,7 @@
 
   export default {
     name: "JwGameItem",
-    dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode', 'sys_yes_no'],
+    dicts: ['sys_yes_no', 'jw_match_type', 'jw_sex', 'jw_sport_limit', 'jw_group_mode', 'sys_yes_no', 'game_item_score_type'],
     data() {
       return {
         showSetJudge: false,
@@ -605,6 +635,7 @@
           fee: null,
           resultDesId: null,
           sexCon: null,
+          scoreType: null
         },
         // 表单参数
         form: {},
@@ -626,7 +657,8 @@
             judgeIdB: this.judgeForm.judgeIdBs.join(","),
             judgeIdC: this.judgeForm.judgeIdCs.join(","),
             judgeIdD: this.judgeForm.judgeIdDs.join(","),
-            judgeIdAll: this.judgeForm.judgeIdAlls.join(",")};
+            judgeIdAll: this.judgeForm.judgeIdAlls.join(",")
+          };
           updateJwGameItem(data).then(res => {
             this.showSetJudge = false;
             this.getList();
@@ -642,7 +674,7 @@
             pageSize: 1000,
           }).then(response => {
             let names = [];
-            let judgeId = [], judgeIdB = [], judgeIdC = [],judgeIdD = [],judgeIdAll = [];
+            let judgeId = [], judgeIdB = [], judgeIdC = [], judgeIdD = [], judgeIdAll = [];
 
 
             (this.ids || []).forEach(id => {
@@ -655,12 +687,14 @@
               judgeIdAll = (item.judgeIdAll || "").split(",").map(Number);
             });
 
-            this.judgeForm = {ids: this.ids, name: names.join(", "),
+            this.judgeForm = {
+              ids: this.ids, name: names.join(", "),
               judgeIds: judgeId || [],
               judgeIdBs: judgeIdB || [],
               judgeIdCs: judgeIdC || [],
               judgeIdDs: judgeIdD || [],
-              judgeIdAlls: judgeIdAll || []};
+              judgeIdAlls: judgeIdAll || []
+            };
 
             this.matchJudgeList = response.rows || [];
             this.matchJudgeList.sort((a, b) => a.judgeId - b.judgeId);
@@ -779,7 +813,8 @@
           sexCon: null,
           minSport: 1,
           maxSport: 1,
-          feeMaxSport: 1
+          feeMaxSport: 1,
+          scoreType: "1"
         };
         this.resetForm("form");
       },

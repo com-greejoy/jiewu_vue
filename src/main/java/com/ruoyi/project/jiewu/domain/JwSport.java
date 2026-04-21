@@ -38,6 +38,8 @@ public class JwSport extends BaseEntity {
     private Long age;
 
     private Long createUserId;
+    private Long createAddId;
+
 
     private Boolean select;
     private Long matchId;
@@ -46,6 +48,14 @@ public class JwSport extends BaseEntity {
 
     @Excel(name = "创建者")
     private String teamName;
+
+    public Long getCreateAddId() {
+        return createAddId;
+    }
+
+    public void setCreateAddId(Long createAddId) {
+        this.createAddId = createAddId;
+    }
 
     private List<JwGameItem> jwGameItemList;
 

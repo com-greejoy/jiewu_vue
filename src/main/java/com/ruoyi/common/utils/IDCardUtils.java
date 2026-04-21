@@ -2,6 +2,8 @@ package com.ruoyi.common.utils;
 
 import com.ruoyi.framework.web.domain.server.Sys;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Random;
 
@@ -54,33 +56,79 @@ public class IDCardUtils {
 
 
     public static Long getAge(String idCard) {
+
+        return getAgeInYears(idCard);
+//        try {
+//            if (StringUtils.isNotEmpty(idCard)) idCard = idCard.replaceAll(" ", "");
+//            String birth = idCard.substring(6, 14);
+//            int year = Integer.parseInt(birth.substring(0, 4));
+//            int month = Integer.parseInt(birth.substring(4, 6));
+//            int day = Integer.parseInt(birth.substring(6, 8));
+//
+//            Calendar cal = Calendar.getInstance();
+//            int curYear = cal.get(Calendar.YEAR);
+//            int curMonth = cal.get(Calendar.MONTH) + 1;
+//            int curDay = cal.get(Calendar.DAY_OF_MONTH);
+//
+//            // 暂时改成一月一号
+////            curYear = 2025;
+//
+//            int age = curYear - year;
+//            // 暂时改成一月一号
+////            if (curMonth < month || (curMonth == month && curDay < day)) {
+////                age--;
+////            }
+//            return Long.valueOf(age);
+//        } catch (Exception e) {
+//            return 0l;
+//        }
+    }
+
+    public static Long getAgeInYears(String idCard) {
         try {
-            if (StringUtils.isNotEmpty(idCard)) idCard = idCard.replaceAll(" ", "");
-            String birth = idCard.substring(6, 14);
-            int year = Integer.parseInt(birth.substring(0, 4));
-            int month = Integer.parseInt(birth.substring(4, 6));
-            int day = Integer.parseInt(birth.substring(6, 8));
+            if (idCard == null) {
+                return 0l;
+//            throw new IllegalArgumentException("身份证号码不能为 null");
+            }
 
-            Calendar cal = Calendar.getInstance();
-            int curYear = cal.get(Calendar.YEAR);
-            int curMonth = cal.get(Calendar.MONTH) + 1;
-            int curDay = cal.get(Calendar.DAY_OF_MONTH);
+            idCard = idCard.trim();
+            LocalDate birthDate;
 
-            // 暂时改成一月一号
-//            curYear = 2025;
+            if (idCard.length() == 18) {
+                // 18位：yyyyMMdd（第7-14位）
+                String birthStr = idCard.substring(6, 14);
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                birthDate = LocalDate.parse(birthStr, formatter);
+            } else if (idCard.length() == 15) {
+                // 15位：yyMMdd（第7-12位），默认为19XX年
+                String yy = idCard.substring(6, 8);
+                String MM = idCard.substring(8, 10);
+                String dd = idCard.substring(10, 12);
 
-            int age = curYear - year;
-            // 暂时改成一月一号
-//            if (curMonth < month || (curMonth == month && curDay < day)) {
-//                age--;
-//            }
-            return Long.valueOf(age);
+                // 拼接为 yyyyMMdd，前缀 "19"
+                String fullYear = "19" + yy;
+                String birthStr = fullYear + MM + dd;
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+                birthDate = LocalDate.parse(birthStr, formatter);
+            } else {
+                return 0l;
+//            throw new IllegalArgumentException("身份证号码必须是15位或18位");
+            }
+
+            // 对齐到各自月份的第一天
+            LocalDate birthFirstDay = birthDate.withDayOfMonth(1);
+            LocalDate currentFirstDay = LocalDate.now().withDayOfMonth(1);
+
+            // 计算完整月份数
+            long monthsBetween = java.time.temporal.ChronoUnit.MONTHS.between(birthFirstDay, currentFirstDay);
+            return Long.valueOf((int) (monthsBetween / 12));
+
         } catch (Exception e) {
             return 0l;
         }
-
-
     }
+
 
     public static String getGender(String idCard) {
         try {

@@ -171,14 +171,9 @@ public class JwGameItemController extends BaseController {
         List<JwGameItem> jwGameItemList = util.importExcel(file.getInputStream());
 
         for (JwGameItem jwGameItem : jwGameItemList) {
+
             jwGameItem.setShowMinYear(jwGameItem.getMinYear());
             jwGameItem.setShowMaxYear(jwGameItem.getMaxYear());
-
-            // ------ 李金鑫的 年龄上下浮动2岁
-//            jwGameItem.setMinYear(jwGameItem.getMinYear() - 2);
-//            jwGameItem.setMaxYear(jwGameItem.getMaxYear() + 2);
-            // ------  李金鑫的 年龄上下浮动2岁
-
             jwGameItem.setMatchType("1"); //比赛模式
             jwGameItem.setGroupMode("3"); // 分组模式
             jwGameItem.setGroupLimit(1l);
@@ -188,42 +183,57 @@ public class JwGameItemController extends BaseController {
             jwGameItem.setMaxSport(1);
             jwGameItem.setIsMusic("N");
 
-            if (jwGameItem.getName().contains("双人")) {
-                jwGameItem.setSportLimit("2");
-                jwGameItem.setMinSport(2);
-                jwGameItem.setMaxSport(2);
-            } else if (jwGameItem.getName().contains("三人")) {
-                jwGameItem.setSportLimit("5");
-                jwGameItem.setMinSport(3);
-                jwGameItem.setMaxSport(3);
-            } else if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("群舞") || jwGameItem.getName().contains("多人")) {
-                jwGameItem.setSportLimit("3");
-                jwGameItem.setMinSport(4);
-                jwGameItem.setMaxSport(99);
-            } else  {
-                jwGameItem.setSportLimit("1");
-            }
-//            if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
-//                jwGameItem.setSportLimit("3"); //比赛模式
-//            } else {
-//                jwGameItem.setSportLimit("1"); //项目类型
-//
-//                if (jwGameItem.getName().contains("精英")) {
-//                    jwGameItem.setMatchType("2");
-//                    jwGameItem.setPromotionNum(32l);
-//                }
-//            }
-
-//            if (jwGameItem.getName().contains("小齐舞")) {
+            // ------ 遂宁艺术大赛的
+//            if (jwGameItem.getName().contains("双人")) {
+//                jwGameItem.setSportLimit("2");
+//                jwGameItem.setMinSport(2);
+//                jwGameItem.setMaxSport(2);
+//            } else if (jwGameItem.getName().contains("三人")) {
+//                jwGameItem.setSportLimit("5");
 //                jwGameItem.setMinSport(3);
-//                jwGameItem.setMaxSport(6);
-//                jwGameItem.setIsMusic("Y");
+//                jwGameItem.setMaxSport(3);
+//            } else if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("群舞") || jwGameItem.getName().contains("多人")) {
+//                jwGameItem.setSportLimit("3");
+//                jwGameItem.setMinSport(4);
+//                jwGameItem.setMaxSport(99);
+//            } else  {
+//                jwGameItem.setSportLimit("1");
 //            }
-//            if (jwGameItem.getName().contains("大齐舞")) {
-//                jwGameItem.setMinSport(7);
-//                jwGameItem.setMaxSport(20);
+            // ------ 遂宁艺术大赛的
+
+            // ------ 李金鑫的
+            // ------ 年龄上下浮动2岁
+//            jwGameItem.setMinYear(jwGameItem.getMinYear() - 2);
+//            jwGameItem.setMaxYear(jwGameItem.getMaxYear() + 2);
+            // ------   年龄上下浮动2岁
+
+
+            if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
+                jwGameItem.setSportLimit("3"); //比赛模式
+//                jwGameItem.setMinSport(6);
+//                jwGameItem.setMaxSport(99);
 //                jwGameItem.setIsMusic("Y");
-//            }
+            } else {
+                jwGameItem.setSportLimit("1"); //项目类型
+
+                if ((jwGameItem.getName().contains("精英") || jwGameItem.getName().contains("公开组") ||  jwGameItem.getName().contains("专业组")) && !jwGameItem.getName().contains("单人作品")) {
+                    jwGameItem.setMatchType("2");
+                    jwGameItem.setPromotionNum(32l);
+                }
+            }
+            // ------ 李金鑫的
+
+            //  ------  胶囊的
+            if (jwGameItem.getName().contains("小齐舞")) {
+                jwGameItem.setMinSport(4);
+                jwGameItem.setMaxSport(7);
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("大齐舞")) {
+                jwGameItem.setMinSport(7);
+                jwGameItem.setMaxSport(99);
+                jwGameItem.setIsMusic("Y");
+            }
 //            if (jwGameItem.getName().contains("作品")) {
 //                jwGameItem.setIsMusic("Y");
 //            }

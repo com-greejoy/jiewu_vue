@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.aspectj.lang.annotation.DataSource;
@@ -15,6 +16,7 @@ import com.ruoyi.framework.aspectj.lang.enums.DataSourceType;
 import com.ruoyi.framework.web.domain.AjaxResult;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.mapper.JwEightMapper;
+import com.ruoyi.project.jiewu.mapper.JwSignRecordMapper;
 import com.ruoyi.project.jiewu.mapper.JwTeamMapper;
 import io.swagger.annotations.Scope;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,9 @@ public class JwHaiScoreService {
 
     @Autowired
     private JwMatchTeamService jwMatchTeamService;
+
+    @Autowired
+    private JwSignRecordMapper jwSignRecordMapper;
 
     public JwHaiScore selectJwHaiScoreById(Long id) {
         return jwHaiScoreMapper.selectJwHaiScoreById(id);
@@ -293,6 +298,20 @@ public class JwHaiScoreService {
             jwSignRecordService.updateJwSignRecord(jwSport2);
             preavgscore = jwSignRecordList.get(i).getAvgScore();
         }
+
+        // 把成绩存成字符串准备上传到服务器
+        JwSignRecord jwSignRecord = new JwSignRecord();
+        jwSignRecord.setGameItemId(gameItemId);
+        List<JwSignRecord> jwSignRecordList1 = listGameItemGradeDes(jwSignRecord);
+        jwSignRecordList1.forEach(jwSignRecord1 -> {
+            JwSignRecord updateSign = new JwSignRecord();
+            updateSign.setId(jwSignRecord1.getId());
+            if(StringUtils.isNotEmpty(jwSignRecord1.getGradeStr())){
+                updateSign.setGradeStr(jwSignRecord1.getGradeStr());
+                jwSignRecordMapper.saveAward(updateSign);
+            }
+
+        });
         return 1;
     }
 
@@ -466,7 +485,10 @@ public class JwHaiScoreService {
                         List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
                         JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
                         jwSignRecord1.setItemName(jwGameItem.getName());
-                        if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                        if (awardsItem != null) {
+                            jwSignRecord1.setGradeStr(JSONObject.toJSONString(awardsItem));
+                            jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                        }
                     }
                 });
             }

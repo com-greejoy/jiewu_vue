@@ -58,6 +58,8 @@ public interface JwSignRecordMapper {
 
     public int updateJwSignRecordUpScore(JwSignRecord jwSignRecord);
 
+    public int saveAward(JwSignRecord jwSignRecord);
+
     public int clearAllBackNum(@Param("matchId") Long matchId);
 
     public int deleteJwSignRecordById(Long id);

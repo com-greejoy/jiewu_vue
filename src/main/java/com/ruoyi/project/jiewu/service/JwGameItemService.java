@@ -114,6 +114,7 @@ public class JwGameItemService {
                 jwSignRecordUpLoad.setAvgScore(jwSignRecord1.getAvgScore());
                 jwSignRecordUpLoad.setAllScore(jwSignRecord1.getAllScore());
                 jwSignRecordUpLoad.setRankOrder(jwSignRecord1.getRankOrder());
+                jwSignRecordUpLoad.setGradeStr(jwSignRecord1.getGradeStr());
                 int re = jwSignRecordService.updateJwSignRecordUpScore(jwSignRecordUpLoad);
                 if (re <= 0) {
                     throw new GlobalException(jwSignRecord1.getBackNumber() + "：同步失败");

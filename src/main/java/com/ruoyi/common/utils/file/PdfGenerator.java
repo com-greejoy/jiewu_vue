@@ -340,7 +340,7 @@ public class PdfGenerator {
         String[] keyS = groupedRecords.keySet().toArray(new String[0]);
 
         // 正则表达式：精确提取“阶段汉字”和“场次数字”
-        Pattern pattern = Pattern.compile("第(.+?)教室.*?第(\\d+)场");
+//        Pattern pattern = Pattern.compile("第(.+?)教室.*?第(\\d+)场");
 
 //        Arrays.sort(keyS, new CustomSortExample.MultiKeyComparator());
         RoomSessionGroupSorter.sort(keyS);

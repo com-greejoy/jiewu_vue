@@ -18,7 +18,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectJwSignRecordSportVo">
-        select id, match_id, sport_id, team_id, game_item_id, sign_record_id from jw_sign_record_sport
+        select id, match_id, sport_id, team_id, game_item_id,
+        sign_record_id from jw_sign_record_sport
     </sql>
 
     <select id="selectJwSignRecordSportList" parameterType="JwSignRecordSport" resultMap="JwSignRecordSportResult">

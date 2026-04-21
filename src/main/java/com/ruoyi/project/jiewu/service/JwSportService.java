@@ -57,8 +57,8 @@ public class JwSportService {
     }
 
     // 获取所有运动员的报名项目
-    public List<JwSport> selectJwSignRecordSportGameItemList(Long matchId, Long teamId) {
-        return jwSportMapper.selectJwSignRecordSportGameItemList(matchId, teamId);
+    public List<JwSport> selectJwSignRecordSportGameItemList(Long matchId, Long teamId, Long createAddId) {
+        return jwSportMapper.selectJwSignRecordSportGameItemList(matchId, teamId, createAddId);
     }
 
     // 获取所有运动员的报名项目

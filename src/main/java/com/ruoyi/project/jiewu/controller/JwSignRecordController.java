@@ -130,7 +130,7 @@ public class JwSignRecordController extends BaseController {
     @PostMapping
     public AjaxResult add(@RequestBody JwSignRecord jwSignRecord) {
         JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
-        return jwSignRecordService.saveSign(jwGameItem, jwSignRecord.getSportIds(), jwSignRecord.getTeamId(), null, null);
+        return jwSignRecordService.saveSign(jwGameItem, jwSignRecord.getSportIds(), jwSignRecord.getTeamId(), null, null, null);
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwSignRecord:add')")
@@ -203,7 +203,7 @@ public class JwSignRecordController extends BaseController {
                 if (jwGameItem == null) {
                     throw new GlobalException(jwSportImport.getPlayerGroup());
                 }
-                jwSignRecordService.saveSign(jwGameItem, sportIds.toArray(new Long[0]), jwTeam.getId(), null, jwSportImport.getBackNum());
+                jwSignRecordService.saveSign(jwGameItem, sportIds.toArray(new Long[0]), jwTeam.getId(), null, jwSportImport.getBackNum(), null);
             }
         }
         return success();

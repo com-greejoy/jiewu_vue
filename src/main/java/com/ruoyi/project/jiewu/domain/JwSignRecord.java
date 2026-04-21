@@ -71,6 +71,9 @@ public class JwSignRecord extends BaseEntity
 
     private Long backNumOrder;
 
+    private String gradeStr;
+
+
     private List<JwSignRecordSport> jwSignRecordSportList;
 
     // 海选打分明细
@@ -99,6 +102,24 @@ public class JwSignRecord extends BaseEntity
     private String showImg;
 
     private String isMusic;
+
+    private Long createAddId;
+
+    public Long getCreateAddId() {
+        return createAddId;
+    }
+
+    public void setCreateAddId(Long createAddId) {
+        this.createAddId = createAddId;
+    }
+
+    public String getGradeStr() {
+        return gradeStr;
+    }
+
+    public void setGradeStr(String gradeStr) {
+        this.gradeStr = gradeStr;
+    }
 
     public Long getBackNumOrder() {
         return backNumOrder;

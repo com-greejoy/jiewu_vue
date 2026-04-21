@@ -17,10 +17,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sportCount"    column="sportCount"    />
         <result property="lockScore"    column="lock_score"    />
         <result property="scheduleIndex"    column="schedule_index"    />
+        <result property="scoreType"    column="score_type"    />
     </resultMap>
 
     <sql id="selectJwScheduleItemVo">
-        select id, match_id, game_item_id, schedule_index, schedule_info_id, lock_score, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
+        select id, match_id, game_item_id, schedule_index, score_type, schedule_info_id, lock_score, item_process, schedule_place_id, item_name, shcedule_time, area from jw_schedule_item
     </sql>
 
     <select id="selectJwScheduleItemByGameItemId" parameterType="Long" resultMap="JwScheduleItemResult">
@@ -73,6 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="itemProcess != null">item_process,</if>
             <if test="lockScore != null">lock_score,</if>
             <if test="scheduleIndex != null">schedule_index,</if>
+            <if test="scoreType != null">score_type,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -85,6 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="itemProcess != null">#{itemProcess},</if>
             <if test="lockScore != null">#{lockScore},</if>
             <if test="scheduleIndex != null">#{scheduleIndex},</if>
+            <if test="scoreType != null">#{scoreType},</if>
          </trim>
     </insert>
 
@@ -101,6 +104,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="itemProcess != null">item_process = #{itemProcess},</if>
             <if test="lockScore != null">lock_score = #{lockScore},</if>
             <if test="scheduleIndex != null">schedule_index = #{scheduleIndex},</if>
+            <if test="scoreType != null">score_type = #{scoreType},</if>
         </trim>
         where id = #{id}
     </update>

@@ -1,10 +1,15 @@
 package com.ruoyi.common.utils.file;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.UUID;
+
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.web.multipart.MultipartFile;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.exception.file.FileNameLengthLimitExceededException;
@@ -85,6 +90,21 @@ public class FileUploadUtils
             throw new IOException(e.getMessage(), e);
         }
     }
+    public static String uploadFile(String baseDir, File sourceFile)   {
+        String extension = getExtensionFile(sourceFile.getName());
+        String fileName = DateUtils.datePath() + "/" + UUID.randomUUID().toString() + (StringUtils.isNotEmpty(extension) ? "." + extension : "");
+        File destFile = getAbsoluteFile(baseDir, fileName);
+        try (FileInputStream fis = new FileInputStream(sourceFile);
+             FileOutputStream fos = new FileOutputStream(destFile)) {
+            IOUtils.copy(fis, fos);
+
+        return getPathFileName(baseDir, fileName);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     /**
      * 文件上传
@@ -235,5 +255,17 @@ public class FileUploadUtils
             extension = MimeTypeUtils.getExtension(Objects.requireNonNull(file.getContentType()));
         }
         return extension;
+    }
+
+    public static final String getExtensionFile(String fileName)
+    {
+        if (fileName == null || "".equals(fileName)) {
+            return "";
+        }
+        int index = fileName.lastIndexOf(".");
+        if (index == -1 || index == fileName.length() - 1) {
+            return "";
+        }
+        return fileName.substring(index + 1);
     }
 }

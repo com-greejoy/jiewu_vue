@@ -345,7 +345,7 @@
         // 查询参数
         queryParams: {
           pageNum: 1,
-          pageSize: 10,
+          pageSize: 100,
           matchId: (this.Cookies.get("matchId") * 1) || null,
           scheduleName: null,
           beginTime: null,

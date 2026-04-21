@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ruoyi.project.jiewu.mapper.JwMatchTeamMapper">
-    
+
     <resultMap type="JwMatchTeam" id="JwMatchTeamResult">
-        <result property="teamId"    column="team_id"    />
-        <result property="matchId"    column="match_id"    />
-        <result property="indexOrder"    column="index_order"    />
+        <result property="teamId" column="team_id"/>
+        <result property="matchId" column="match_id"/>
+        <result property="indexOrder" column="index_order"/>
+        <result property="erCode"    column="er_code"    />
     </resultMap>
 
     <sql id="selectJwMatchTeamVo">
-        select team_id, match_id, index_order from jw_match_team
+        select team_id, match_id, index_order, er_code from jw_match_team
     </sql>
 
     <select id="selectJwMatchTeamList" parameterType="JwMatchTeam" resultMap="JwMatchTeamResult">
         <include refid="selectJwMatchTeamVo"/>
-        <where>  
-            <if test="matchId != null "> and match_id = #{matchId}</if>
-            <if test="indexOrder != null "> and index_order = #{indexOrder}</if>
+        <where>
+            <if test="matchId != null ">and match_id = #{matchId}</if>
+            <if test="indexOrder != null ">and index_order = #{indexOrder}</if>
         </where>
     </select>
 
@@ -49,18 +50,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="teamId != null">team_id,</if>
             <if test="matchId != null">match_id,</if>
             <if test="indexOrder != null">index_order,</if>
-         </trim>
+            <if test="erCode != null">er_code,</if>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="teamId != null">#{teamId},</if>
             <if test="matchId != null">#{matchId},</if>
             <if test="indexOrder != null">#{indexOrder},</if>
-         </trim>
+            <if test="erCode != null">#{erCode},</if>
+        </trim>
     </insert>
 
     <update id="updateJwMatchTeam" parameterType="JwMatchTeam">
         update jw_match_team
         <trim prefix="SET" suffixOverrides=",">
             <if test="indexOrder != null">index_order = #{indexOrder},</if>
+            <if test="erCode != null">er_code = #{erCode},</if>
         </trim>
         where team_id = #{teamId} and match_id = #{matchId}
     </update>
@@ -70,7 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteJwMatchTeamByTeamIds" parameterType="String">
-        delete from jw_match_team where team_id in 
+        delete from jw_match_team where team_id in
         <foreach item="teamId" collection="array" open="(" separator="," close=")">
             #{teamId}
         </foreach>
@@ -80,4 +84,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         delete from jw_match_team where index_order = #{indexOrder} and match_id = #{matchId}
     </delete>
 
+    <delete id="deleteJwMatchTeam" parameterType="Long">
+        delete from jw_sign_record_sport where match_id = #{matchId} and team_id = #{teamId};
+        delete from jw_sign_record where match_id = #{matchId} and team_id = #{teamId};
+        delete from jw_match_team where match_id = #{matchId} and team_id = #{teamId};
+    </delete>
 </mapper>

@@ -607,7 +607,11 @@
           if (!this.form.matchConfig) {
             this.form.matchConfig = this.getInitConfing();
           } else {
-            this.form.matchConfig = JSON.parse(this.form.matchConfig || "{}");
+            try {
+              this.form.matchConfig = JSON.parse(this.form.matchConfig || "{}");
+            }catch (e) {
+              this.form.matchConfig = this.getInitConfing();
+            }
           }
           this.open = true;
           this.title = "修改赛事管理";

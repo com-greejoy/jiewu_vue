@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.alibaba.fastjson2.JSONObject;
 import com.ruoyi.common.exception.GlobalException;
 import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
@@ -208,7 +209,7 @@ public class JwSignRecordService {
     }
 
     @Transactional
-    public AjaxResult saveSign(JwGameItem jwGameItem, Long[] sportIds, Long teamId, Long editId, String backNum) {
+    public AjaxResult saveSign(JwGameItem jwGameItem, Long[] sportIds, Long teamId, Long editId, String backNum, Long createAddId) {
 
         if (jwGameItem != null && sportIds != null && sportIds.length > 0) {
 
@@ -271,6 +272,8 @@ public class JwSignRecordService {
                         // 要删的，暂时用下背号当作品名称
 //                        jwSignRecord.setWorksName(backNum);
 
+                        jwSignRecord.setCreateAddId(createAddId);
+
                         insertJwSignRecord(jwSignRecord);
 
                         JwSignRecordSport jwSignRecordSport = new JwSignRecordSport();
@@ -324,6 +327,7 @@ public class JwSignRecordService {
 
                     // 要删的，暂时用下背号当作品名称
 //                    jwSignRecord.setWorksName(backNum);
+                    jwSignRecord.setCreateAddId(createAddId);
 
                     insertJwSignRecord(jwSignRecord);
 
@@ -377,6 +381,7 @@ public class JwSignRecordService {
 
                     // 要删的，暂时用下背号当作品名称
 //                    jwSignRecord.setWorksName(backNum);
+                    jwSignRecord.setCreateAddId(createAddId);
 
                     insertJwSignRecord(jwSignRecord);
 
@@ -510,7 +515,6 @@ public class JwSignRecordService {
         return jwSignRecordMapper.selectJwSignRecordListWithJudgeScore(judgeId, scheduleItemId);
     }
 
-
     private String getZeroString(Long number) {
         number = Math.abs(number);
         int length = String.valueOf(number).length();
@@ -537,6 +541,13 @@ public class JwSignRecordService {
     @DataSource(value = DataSourceType.SLAVE)
     public int updateJwSignRecordUpScore(JwSignRecord jwSignRecord) {
         return jwSignRecordMapper.updateJwSignRecordUpScore(jwSignRecord);
+    }
+
+    public int saveAward(Long id, JwAwardsItem jwAwardsItem) {
+        JwSignRecord jwSignRecord = new JwSignRecord();
+        jwSignRecord.setId(id);
+        jwSignRecord.setGradeStr(JSONObject.toJSONString(jwAwardsItem));
+        return jwSignRecordMapper.saveAward(jwSignRecord);
     }
 
     public List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){

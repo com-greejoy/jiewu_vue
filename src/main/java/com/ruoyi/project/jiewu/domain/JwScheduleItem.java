@@ -33,7 +33,8 @@ public class JwScheduleItem extends BaseEntity
     /** 小项 */
     @Excel(name = "小项")
     private String itemName;
-
+    @Excel(name = "打分类型")
+    private String scoreType;
     /** 开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -51,6 +52,14 @@ public class JwScheduleItem extends BaseEntity
     private Long sportCount;
 
     private Long scheduleIndex;
+
+    public String getScoreType() {
+        return scoreType;
+    }
+
+    public void setScoreType(String scoreType) {
+        this.scoreType = scoreType;
+    }
 
     public Long getScheduleIndex() {
         return scheduleIndex;

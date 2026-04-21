@@ -25,7 +25,7 @@ public interface JwSportMapper {
     public List<JwSport> getWxSportListByMatchTeam(JwSport jwSport);
 
     // 获取所有运动员的报名项目
-    public List<JwSport> selectJwSignRecordSportGameItemList(Long matchId, Long teamId);
+    public List<JwSport> selectJwSignRecordSportGameItemList(Long matchId, Long teamId, Long createAddId);
 
     public int insertJwSport(JwSport jwSport);
 

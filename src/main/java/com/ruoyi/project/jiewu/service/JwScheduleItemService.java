@@ -155,7 +155,6 @@ public class JwScheduleItemService {
     // 初始化背号
     public AjaxResult initBackNum(Long matchId) {
 
-
         JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
         Long startBackNum = StringUtils.isLongNotNull(jwMatch.getStartBackNum()) ? jwMatch.getStartBackNum() : 1L;
 
@@ -254,6 +253,7 @@ public class JwScheduleItemService {
                 jwScheduleItem.setArea("" + i); // 默认场地
                 jwScheduleItem.setItemProcess("1");
                 jwScheduleItem.setLockScore("N");
+                jwScheduleItem.setScoreType(jwGameItem.getScoreType());
                 String groupStr = jwGameItem.getGroupLimit() > 1 ? "第" + i + "组" : "";
                 if ("2".equals(jwGameItem.getMatchType())) {
                     jwScheduleItem.setItemName(jwGameItem.getCode() + ":" + jwGameItem.getName() + "海选" + groupStr);

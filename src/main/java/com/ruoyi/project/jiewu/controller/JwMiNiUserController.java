@@ -1,6 +1,7 @@
 package com.ruoyi.project.jiewu.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaCodeLineColor;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 
@@ -24,6 +25,7 @@ import com.ruoyi.project.jiewu.service.*;
 import me.chanjar.weixin.common.annotation.Required;
 import me.chanjar.weixin.common.error.WxErrorException;
 
+import net.bytebuddy.implementation.bind.annotation.Default;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.ibatis.util.MapUtil;
 import org.checkerframework.checker.units.qual.A;
@@ -38,8 +40,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -207,12 +211,76 @@ public class JwMiNiUserController extends BaseController {
         }
     }
 
+    @GetMapping("/getMatchTeamInviteErCode")
+    public void getMatchTeamInviteErCode(HttpServletResponse response, Long matchId, Long teamId) {
+
+        try {
+            //• "develop" 开发版
+            //• "trial" 体验版
+            //• "release"
+            byte[] wordBytes = wxMaService.getQrcodeService().createWxaCodeUnlimitBytes("inviteTeamId="+teamId+"&matchId=" + matchId,
+                    "pages/sign/signMatchGameItemSportSuiNingInvite/signMatchGameItemSportSuiNingInvite",
+                    false,
+                    "release",
+                    600,
+                    false, new WxMaCodeLineColor("255", "153", "51"), false);
+            if (wordBytes == null || wordBytes.length == 0) {
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "生成二维码失败");
+                return;
+            }
+            response.setContentType("image/png");
+            response.setContentLength(wordBytes.length);
+            try (ServletOutputStream out = response.getOutputStream()) {
+                out.write(wordBytes);
+                out.flush();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     @PostMapping("/getWxUserTeam")
     @ResponseBody
-    public AjaxResult getWxUserTeam(@RequestHeader("Authorization") String openId) {
+    public AjaxResult getWxUserTeam(@RequestHeader("Authorization") String openId, Long teamId) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
-            return AjaxResult.success(jwTeamService.selectJwTeamByUserId(zwWxUser.getId()));
+            if(StringUtils.isLongNotNull(teamId)){
+                return AjaxResult.success(jwTeamService.selectJwTeamById(teamId));
+            }else{
+                return AjaxResult.success(jwTeamService.selectJwTeamByUserId(zwWxUser.getId()));
+            }
+        } else {
+            return AjaxResult.error("错误");
+        }
+    }
+
+
+    @PostMapping("/createSportInvite")
+    @ResponseBody
+    public AjaxResult createSportInvite(@RequestHeader("Authorization") String openId, @Validated JwSport jwSport) {
+
+        if (!IDCardUtils.isIdCard(jwSport.getIdCard())) {
+            return AjaxResult.error("身份证格式错误");
+        }
+
+        JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
+        if (zwWxUser != null) {
+
+//            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), jwSport.getId(), jwSport.getCreateUserId());
+//            if (jwSport1 != null) {
+////                return AjaxResult.error("身份证已经存在");
+//            }
+
+            if (StringUtils.isLongNotNull(jwSport.getId())) {
+                jwSport.setCreateAddId(zwWxUser.getId());
+                jwSportService.updateJwSport(jwSport);
+            } else {
+//                jwSport.setCreateUserId(zwWxUser.getId());
+                jwSport.setCreateAddId(zwWxUser.getId());
+                jwSportService.insertJwSport(jwSport);
+            }
+            return AjaxResult.success(jwSport);
         } else {
             return AjaxResult.error("错误");
         }
@@ -273,12 +341,24 @@ public class JwMiNiUserController extends BaseController {
 
     @PostMapping("/getWxSportList")
     @ResponseBody
-    public AjaxResult getWxSportList(@RequestHeader("Authorization") String openId, String searchName) {
+    public AjaxResult getWxSportList(@RequestHeader("Authorization") String openId, String searchName,
+                                     @RequestParam(defaultValue = "false") Boolean createAddId,
+                                     Long createUserId) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
-            List<JwSport> jwSportList = jwSportService.selectJwSportByUserId(zwWxUser.getId(), searchName);
+            if(createAddId){
 
-            return AjaxResult.success(jwSportList);
+                JwSport jwSport = new JwSport();
+                jwSport.setCreateAddId(zwWxUser.getId());
+                jwSport.setPlayerName(searchName);
+                jwSport.setCreateUserId(createUserId);
+
+                List<JwSport> jwSportList = jwSportService. selectJwSportList(jwSport);
+                return AjaxResult.success(jwSportList);
+            }else{
+                List<JwSport> jwSportList = jwSportService.selectJwSportByUserId(zwWxUser.getId(), searchName);
+                return AjaxResult.success(jwSportList);
+            }
         } else {
             return AjaxResult.error("错误");
         }
@@ -351,7 +431,7 @@ public class JwMiNiUserController extends BaseController {
                     }
                 }
 
-                jwSignRecordService.saveSign(jwGameItem, sportIds, teamId, editId, null);
+                jwSignRecordService.saveSign(jwGameItem, sportIds, teamId, editId, null, zwWxUser.getId());
             }
 
             return AjaxResult.success();
@@ -454,10 +534,15 @@ public class JwMiNiUserController extends BaseController {
     // 获取总费用
     @PostMapping("/getTeamFee")
     @ResponseBody
-    public AjaxResult getTeamFee(@RequestHeader("Authorization") String openId, Long matchId, Long teamId) {
+    public AjaxResult getTeamFee(@RequestHeader("Authorization") String openId, Long matchId, Long teamId, @RequestParam(defaultValue = "false") Boolean onlyInvite) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
             List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
+
+            // 如果是被邀请的人来查，就只查他自己数据
+            if(onlyInvite){
+                jwSignRecords = jwSignRecords.stream().filter(jwSignRecord -> zwWxUser.getId().equals(jwSignRecord.getCreateAddId())).collect(Collectors.toList());
+            }
 
             List<JwSport> jwSportList = new ArrayList<>();
 
@@ -559,12 +644,16 @@ public class JwMiNiUserController extends BaseController {
 
     @PostMapping("/listMatchGameItemSignRecord")
     @ResponseBody
-    public AjaxResult listMatchGameItemSignRecord(@RequestHeader("Authorization") String openId, Long matchId, Long teamId) {
+    public AjaxResult listMatchGameItemSignRecord(@RequestHeader("Authorization") String openId, Long matchId, Long teamId, @RequestParam(defaultValue = "false") Boolean onlyInvite) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
             // 获取所有运动员的报名项目
-            List<JwSport> jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId);
-
+            List<JwSport> jwSportList = new ArrayList<>();
+            if(onlyInvite){
+               jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, zwWxUser.getId());
+            }else{
+               jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, null);
+            }
             return AjaxResult.success(jwSportList);
         } else {
             return AjaxResult.error("错误");

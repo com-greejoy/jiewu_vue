@@ -24,4 +24,6 @@ public interface JwMatchTeamMapper {
     public int deleteJwMatchTeamByTeamIds(Long[] teamIds);
 
     public int deleteJwMatchTeamByTeamMatch(Long indexOrder, Long matchId);
+
+    public int deleteJwMatchTeam(Long teamId, Long matchId);
 }

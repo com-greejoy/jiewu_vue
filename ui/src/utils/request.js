@@ -128,7 +128,7 @@ export function download(url, params, filename, config) {
   return service.post(url, params, {
     transformRequest: [(params) => { return tansParams(params) }],
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    responseType: 'blob',
+    responseType: 'blob',timeout: 6000000,
     ...config
   }).then(async (data) => {
     const isBlob = blobValidate(data);

@@ -8,7 +8,8 @@
       </div>
       <div class="lou-out" @click="logout">退出<i class="el-icon-right"></i></div>
     </div>
-    <div class="hai-score-body" v-if="!isJueSai" v-loading="loadSport">
+
+    <div class="hai-score-body" v-if="!isJueSai && (!currentGameItem.scoreType || currentGameItem.scoreType == '1')" v-loading="loadSport">
       <div class="sport-item-con-h" :class="{inputMode: match.matchConfig.hScoreMode == '1'}">
         <div class="sport-item-con">
           <div class="no-user" @click="selectGameItemHandel" v-if="!currentGameItem || !currentGameItem.id">选择组别</div>
@@ -78,6 +79,28 @@
       </div>
     </div>
 
+    <div class="hai-score-body score-level" v-if="!isJueSai && currentGameItem.scoreType == '2'" v-loading="loadSport">
+      <div class="sport-item-con-h" :class="{inputMode: match.matchConfig.hScoreMode == '1'}">
+        <div class="sport-item-con">
+          <div class="no-user" @click="selectGameItemHandel" v-if="!currentGameItem || !currentGameItem.id">选择组别</div>
+          <div class="sport-item-box" v-for="sport in sportList">
+            <div class="sport-item" :class="{select: currentSport.id == sport.id}" @click="selectSport(sport)">
+              <div class="sport-index">{{sport.indexOrder}}</div>
+              <!--              <div class="sport-index">{{sport.backNumber}}</div>-->
+              <!--              <div class="sport-name w"  v-if="sport.worksName"> {{sport.worksName}}</div>-->
+              <div class="sport-name">({{sport.backNumber}}) {{sport.playerName}}</div>
+              <div class="sport-score" v-if="match.matchConfig.hScoreMode == '1'">
+                <el-radio-group v-model="sport.award" size="mini" @change="sportAwardChange(sport)">
+                  <el-radio-button v-for="award in awardList" :label="award">{{award.rankText}}</el-radio-button>
+                </el-radio-group>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
     <div class="hai-score-body" v-if="isJueSai" v-loading="loadSport">
       <juesai :currentJudge="currentJudge" :currentGameItem="currentGameItem"></juesai>
     </div>
@@ -87,16 +110,21 @@
         <div class="game-item-con" @click.stop="aaac">
           <div class="g-title">选择组别</div>
           <div class="g-body" v-loading="loadingItem">
-            <div class="game-items" v-for="item in gameItemList">
-              <div class="item-chang">第 {{item.placeOrder}} 场</div>
-              <div class="item-chang-items">
-                <div class="game-item" @click="selectGameItem(scheduleItem)" :class="{select: currentSelectGameItem.id == scheduleItem.id}" v-for="scheduleItem in item.scheduleItemList">
-                  <div class="item-name">{{scheduleItem.area}}:{{scheduleItem.itemName}}</div>
-                  <div class="item-check">
-                    <i class="el-icon-check"></i>
+            <div v-for="itemmm in gameItemList">
+              <div class="place-name">{{itemmm.placeName}}</div>
+
+              <div class="game-items" v-for="item in itemmm.schedulePlaceList">
+                <div class="item-chang">第 {{item.placeOrder}} 场 </div>
+                <div class="item-chang-items">
+                  <div class="game-item" @click="selectGameItem(scheduleItem)" :class="{select: currentSelectGameItem.id == scheduleItem.id}" v-for="scheduleItem in item.scheduleItemList">
+                    <div class="item-name">第 {{scheduleItem.scheduleIndex}} 组 {{scheduleItem.area}}:{{scheduleItem.itemName}}</div>
+                    <div class="item-check">
+                      <i class="el-icon-check"></i>
+                    </div>
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
           <div class="g-btn">
@@ -110,7 +138,7 @@
 </template>
 
 <script>
-  import {getScheduleItems, getSports, saveScore} from "@/api/jiewu/JwAppScore";
+  import {getScheduleItems, getSports, saveScore, saveAward, getGameItemAwards} from "@/api/jiewu/JwAppScore";
 
   import juesai from '@/views/jiewu/appScore/juesai';
 
@@ -154,6 +182,7 @@
         isJueSai: false,
         eightList: [],
         requestChain: Promise.resolve(),
+        awardList:[],
         marks: {
           80: '80',
           // 65: '65',
@@ -193,7 +222,6 @@
           this.score3 = (avg * 5).toFixed(2) * 1;
           this.score4 = (avg * 5).toFixed(2) * 1;
           this.score5 = ((sport.judgeScore - (avg * 4)) * 5).toFixed(2) * 1;
-
         }
 
         // this.score1 = 0;
@@ -223,6 +251,20 @@
           })
         }
       },
+      sportAwardChange(sport){
+        if (sport.id) {
+          let judgeId = sport.id * 1;
+          let sportId = sport.id * 1;
+          this.requestChain = this.requestChain.then(() => {
+            return this.doSaveAward(judgeId, sport.award.id, sportId)
+          }).catch(err => {
+            console.warn('请求链中发生错误，但继续执行:', err)
+          })
+        }
+      },
+      doSaveAward(judgeId, awardId, sportId){
+        return saveAward({"judgeId": judgeId, "awardId": awardId, "sportId": sportId})
+      },
       saveScoreHandel() {
         if (this.currentSport.id) {
           // 将当前保存任务追加到串行队列末尾
@@ -239,7 +281,7 @@
 
       doSaveSocre(judgeId, scoreAll, sportId){
         console.log(scoreAll)
-        return  saveScore({"judgeId": judgeId, "score": scoreAll || null, "sportId": sportId})
+        return saveScore({"judgeId": judgeId, "score": scoreAll || null, "sportId": sportId})
       },
       // async saveScoreHandel() {
       //   if (this.currentSport.id) {
@@ -285,11 +327,13 @@
         this.scoreAll = 0;
       },
       queRenGameItem() {
-
+        let that = this;
         if (this.currentSelectGameItem && this.currentSelectGameItem.id) {
           this.showSelectGameItem = false;
           this.currentGameItem = this.currentSelectGameItem;
           this.loadSport = true;
+          console.log(this.currentGameItem)
+
           getSports({judgeId: this.currentJudge.id, scheduleItemId: this.currentGameItem.id}).then(res => {
             let sportList = [];
 
@@ -311,6 +355,14 @@
               sportList.sort((a, b) => a.indexOrder - b.indexOrder)
               this.sportList = sportList;
             }
+
+            if(that.currentGameItem.scoreType == '2'){
+              getGameItemAwards({gameItemId: that.currentGameItem.gameItemId}).then(res=>{
+                that.awardList = Array.from(
+                  new Map((res.data || []).map(item => [item.rankText, item])).values()
+                )
+              })
+            }
             this.loadSport = false;
           })
         } else {
@@ -330,30 +382,40 @@
           if (this.showSelectGameItem) {
             let gameItemList = [];
             res.data.forEach(item=>{
-              gameItemList = gameItemList.concat(item.jwSchedulePlaceList || []);
-            })
-            // let gameItemList = res.data[0].jwSchedulePlaceList || [];
-            let schedulePlaceList = [];
-            gameItemList.forEach(place => {
-              let scheduleItemList = [];
-              place["jwScheduleItemList"].forEach((item) => {
-                scheduleItemList.push({
-                  area: ["A", "B", "C", "D", "E", "F"][item["area"] * 1 - 1],
-                  gameItemId: item["gameItemId"],
-                  scheduleInfoId: item["scheduleInfoId"],
-                  schedulePlaceId: item["schedulePlaceId"],
-                  itemName: item["itemName"],
-                  id: item["id"]
+              // gameItemList = gameItemList.concat(item.jwSchedulePlaceList || []);
+
+              // let gameItemList = res.data[0].jwSchedulePlaceList || [];
+              let schedulePlaceList = [];
+              item.jwSchedulePlaceList.forEach(place => {
+                let scheduleItemList = [];
+                place["jwScheduleItemList"].forEach((item) => {
+                  scheduleItemList.push({
+                    area: ["A", "B", "C", "D", "E", "F"][item["area"] * 1 - 1],
+                    gameItemId: item["gameItemId"],
+                    scheduleInfoId: item["scheduleInfoId"],
+                    schedulePlaceId: item["schedulePlaceId"],
+                    itemName: item["itemName"],
+                    id: item["id"],
+                    scoreType: item["scoreType"],
+                    scheduleIndex: item["scheduleIndex"]
+                  });
                 });
+
+                // scheduleItemList = scheduleItemList.sort((a, b) => a.area > b.area ? 1 : -1);
+
+                scheduleItemList = scheduleItemList.sort((a, b) => a.scheduleIndex * 1 - b.scheduleIndex * 1);
+
+
+                schedulePlaceList.push({placeOrder: place["placeOrder"], scheduleItemList: scheduleItemList});
               });
-              scheduleItemList = scheduleItemList.sort((a, b) => a.area > b.area ? 1 : -1);
-              console.log(scheduleItemList)
-              schedulePlaceList.push({placeOrder: place["placeOrder"], scheduleItemList: scheduleItemList});
-            });
-            if(schedulePlaceList){
-              schedulePlaceList.sort((a, b) => a.placeOrder - b.placeOrder)
-            }
-            this.gameItemList = schedulePlaceList;
+              if(schedulePlaceList){
+                schedulePlaceList.sort((a, b) => a.placeOrder - b.placeOrder)
+              }
+              gameItemList.push({placeName: item.scheduleName, schedulePlaceList: schedulePlaceList});
+            })
+
+            this.gameItemList = gameItemList;
+            console.log(this.gameItemList)
           }
           this.currentSelectGameItem = this.currentGameItem || {};
           that.loadingItem = false
@@ -441,6 +503,36 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      &.score-level{
+        .sport-item-con-h{
+          margin-bottom: 12pt !important;
+          .sport-item-con{
+            .sport-item-box{
+              width: 80%;
+              margin-bottom: 12pt;
+              .sport-item{
+                padding-right: 0;
+                border-radius: 4px;
+
+                &.select{
+                  border-right: none;
+                }
+                .sport-score{
+                  width: auto;
+                  .el-radio-group{
+                    vertical-align: bottom;
+                  }
+                  ::v-deep .el-radio-button__inner{
+                    height: 32px;
+                    line-height: 32px;
+                    padding: 0px 15px;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
 
       .sport-item-con-h {
         flex: 1;
@@ -788,6 +880,12 @@
         margin-top: 12pt;
         padding: 4pt 8pt;
         overflow: auto;
+        .place-name{
+          text-align: center;
+          font-weight: 900;
+          font-size: 16pt;
+          margin-bottom: 16pt;
+        }
 
         .game-items {
           padding: 4pt 8pt;

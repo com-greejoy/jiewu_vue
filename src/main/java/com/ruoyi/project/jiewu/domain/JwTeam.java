@@ -52,11 +52,13 @@ public class JwTeam extends BaseEntity
 //    @Excel(name = "比赛ID")
     private Long matchId;
 
-
+    @Excel(name = "单人")
     private Long singleCount;
     private Long singleSportCount;
     private Long qiCount;
+    @Excel(name = "多人")
     private Long qiSportCount;
+    @Excel(name = "总费用")
     private BigDecimal allFee;
 
     @Excel(name = "背号")

@@ -59,6 +59,9 @@ public class JwAppScoreController extends BaseController {
     private JwEightScoreService jwEightScoreService;
 
     @Autowired
+    private JwAwardsItemService jwAwardsItemService;
+
+    @Autowired
     private JwEightScoreMapper jwEightScoreMapper;
 
     @Autowired
@@ -109,7 +112,6 @@ public class JwAppScoreController extends BaseController {
     }
 
     // 根据组别获取选手名单
-
     @PostMapping("/getSports")
     @ResponseBody
     public AjaxResult getSports(Long judgeId, Long matchId, Long scheduleItemId) {
@@ -131,12 +133,30 @@ public class JwAppScoreController extends BaseController {
         }
     }
 
+    // 获取一个组别的奖项设置
+    @PostMapping("/getGameItemAwards")
+    @ResponseBody
+    public AjaxResult getGameItemAwards(Long gameItemId) {
+        return AjaxResult.success(jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItemService.selectJwGameItemById(gameItemId).getResultDesId().split(",")));
+    }
+
+
     // 保存打分
     @PostMapping("/saveScore")
     @ResponseBody
     public AjaxResult saveScore(Long judgeId, String score, Long sportId) {
         return AjaxResult.success(jwHaiScoreService.saveJudgeScore(judgeId, score, sportId));
     }
+
+    // 保存直接打的成绩
+    @PostMapping("/saveAward")
+    @ResponseBody
+    public AjaxResult saveAward(Long judgeId, Long awardId, Long sportId) {
+        JwAwardsItem jwAwardsItem = jwAwardsItemService.selectJwAwardsItemById(awardId);
+
+        return AjaxResult.success(jwSignRecordService.saveAward(sportId, jwAwardsItem));
+    }
+
 
 
     // 主持点击开始打分

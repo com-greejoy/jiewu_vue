@@ -40,10 +40,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="judgeIdAll"    column="judge_id_all"    />
         <result property="isMusic"    column="is_music"    />
         <result property="gameType"    column="game_type"    />
+        <result property="scoreType"    column="score_type"    />
     </resultMap>
 
     <sql id="selectJwGameItemVo">
-        select id, match_id, code, is_music, show_min_year, game_type, judge_id, judge_id_b, judge_id_c, judge_id_d, judge_id_all, show_max_year, name,
+        select id, match_id, code, is_music, show_min_year, score_type, game_type, judge_id, judge_id_b, judge_id_c, judge_id_d, judge_id_all, show_max_year, name,
         max_sport, min_sport, group_mode, group_limit, sport_limit, sex_con,
         single_duration, match_type, promotion_num, min_year, max_year,
         fee, fee_max_sport, result_des_id, update_time, create_by, create_time, update_by,
@@ -56,6 +57,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>  
             <if test="matchId != null "> and gi.match_id = #{matchId}</if>
             <if test="code != null  and code != ''"> and gi.code = #{code}</if>
+            <if test="scoreType != null  and scoreType != ''"> and gi.score_type = #{scoreType}</if>
             <if test="name != null  and name != ''"> and gi.name like concat('%', #{name}, '%')</if>
             <if test="groupLimit != null "> and gi.group_limit = #{groupLimit}</if>
             <if test="singleDuration != null "> and gi.single_duration = #{singleDuration}</if>
@@ -80,6 +82,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="id != null "> and gi.id = #{id}</if>
             <if test="matchId != null "> and gi.match_id = #{matchId}</if>
             <if test="code != null  and code != ''"> and gi.code = #{code}</if>
+            <if test="scoreType != null  and scoreType != ''"> and gi.score_type = #{scoreType}</if>
             <if test="name != null  and name != ''"> and gi.name like concat('%', #{name}, '%')</if>
             <if test="groupLimit != null "> and gi.group_limit = #{groupLimit}</if>
             <if test="singleDuration != null "> and gi.single_duration = #{singleDuration}</if>
@@ -125,7 +128,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         limit 1
     </select>
 
-
     <select id="selectJwGameItemById" parameterType="Long" resultMap="JwGameItemResult">
         <include refid="selectJwGameItemVo"/>
         where id = #{id}
@@ -166,6 +168,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdAll != null">judge_id_all,</if>
             <if test="isMusic != null">is_music,</if>
             <if test="gameType != null">game_type,</if>
+            <if test="scoreType != null">score_type,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchId != null">#{matchId},</if>
@@ -200,6 +203,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdAll != null">#{judgeIdAll},</if>
             <if test="isMusic != null">#{isMusic},</if>
             <if test="gameType != null">#{gameType},</if>
+            <if test="scoreType != null">#{scoreType},</if>
          </trim>
     </insert>
 
@@ -238,6 +242,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="judgeIdAll != null">judge_id_all = #{judgeIdAll},</if>
             <if test="isMusic != null">is_music = #{isMusic},</if>
             <if test="gameType != null">game_type = #{gameType},</if>
+            <if test="scoreType != null">score_type = #{scoreType},</if>
         </trim>
         where id = #{id}
     </update>

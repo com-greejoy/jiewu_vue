@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-export function  getMatchInfo(data) {
+export function getMatchInfo(data) {
   return request({
     url: '/app/score/api/getGameInfo',
     method: 'post',
@@ -37,8 +37,7 @@ export function xianshi3dafen(data) {
 }
 
 
-
-export function  getScheduleItems(data) {
+export function getScheduleItems(data) {
   return request({
     url: '/app/score/api/getScheduleItems',
     method: 'post',
@@ -47,9 +46,18 @@ export function  getScheduleItems(data) {
   })
 }
 
-export function  getSports(data) {
+export function getSports(data) {
   return request({
     url: '/app/score/api/getSports',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
+export function getGameItemAwards(data) {
+  return request({
+    url: '/app/score/api/getGameItemAwards',
     method: 'post',
     params: data,
     headers: {repeatSubmit: false}
@@ -64,6 +72,16 @@ export function saveScore(data) {
     headers: {repeatSubmit: false}
   })
 }
+
+export function saveAward(data) {
+  return request({
+    url: '/app/score/api/saveAward',
+    method: 'post',
+    params: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
 export function getCurrentPk(data) {
   return request({
     url: '/app/score/api/getCurrentPk',
@@ -72,7 +90,6 @@ export function getCurrentPk(data) {
     headers: {repeatSubmit: false}
   })
 }
-
 
 export function saveEightScore(data) {
   return request({

@@ -34,9 +34,9 @@ public class AutoService {
     public void autoSportAge() {
         // 每天凌晨计算选手的年龄
         List<JwSport> jwSportList = jwSportService.selectTodayBirthSport(DateUtils.getDateBirthStr());
-//        JwSport q = new JwSport();
+        JwSport q = new JwSport();
 //        q.setAge(0l);
-//        jwSportList = jwSportService.selectJwSportList(q);
+        jwSportList = jwSportService.selectJwSportList(q);
         jwSportList.forEach(jwSport -> {
             JwSport jwSport1 = new JwSport();
             jwSport1.setId(jwSport.getId());

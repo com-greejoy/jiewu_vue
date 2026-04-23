@@ -215,7 +215,7 @@ public class JwMiNiMatchController extends BaseController {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null && StringUtils.isLongNotNull(matchId)){
             JwMatch jwMatch = jwMatchService.selectJwMatchById(matchId);
-            if(StringUtils.isNotEmpty(jwMatch.getInvitationList()) && jwMatch.getInvitationList().contains(openId)){
+            if(StringUtils.isEmpty(jwMatch.getInvitationCode()) || (StringUtils.isNotEmpty(jwMatch.getInvitationList()) && jwMatch.getInvitationList().contains(openId))){
                 return  AjaxResult.success(1);
             }else{
                 return AjaxResult.success(0);

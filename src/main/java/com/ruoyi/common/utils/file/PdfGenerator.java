@@ -307,6 +307,7 @@ public class PdfGenerator {
 
 
         if (jwTeam != null) {
+            titleRun.addBreak();
             XWPFRun aaa = titleParagraph.createRun();
             aaa.setText(jwTeam.getTeamName());
             aaa.setFontSize(16);
@@ -324,67 +325,15 @@ public class PdfGenerator {
         Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(
                 Collectors.groupingBy(jws -> jws.getScheduleName() + "【第" + jws.getPlaceOrder() + "场 - 第" + jws.getJwScheduleItem().getScheduleIndex() + "组 "
                 + DateUtils.parseDateToStr("MM-dd HH:mm", jws.getJwScheduleItem().getShceduleTime())
-                + "】  " + jws.getItemName()
+                + "】 ooo" + jws.getItemName()
                 + "【" + DictUtils.getDictLabel("jw_area", jws.getJwScheduleItem().getArea()) + "】"
         ));
 
-//        Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(Collectors.groupingBy(
-//                jws -> "【第" + jws.getPlaceOrder() + "场 "
-//                        + DateUtils.parseDateToStr("HH:mm", jws.getPlaceTime())
-//                        + "】    " + jws.getItemName()
-//                        + "【" + DictUtils.getDictLabel("jw_area", jws.getJwScheduleItem().getArea()) + "】",
-//                () -> new TreeMap<>(customOrderComparator), // 提取数字部分进行比较
-//                Collectors.toList()
-//        ));
-
         String[] keyS = groupedRecords.keySet().toArray(new String[0]);
 
-        // 正则表达式：精确提取“阶段汉字”和“场次数字”
-//        Pattern pattern = Pattern.compile("第(.+?)教室.*?第(\\d+)场");
-
-//        Arrays.sort(keyS, new CustomSortExample.MultiKeyComparator());
         RoomSessionGroupSorter.sort(keyS);
 
-//        Arrays.sort(keyS, (s1, s2) -> {
-//            Matcher m1 = pattern.matcher(s1);
-//            Matcher m2 = pattern.matcher(s2);
-//
-//            int stage1 = 0, stage2 = 0, round1 = 0, round2 = 0;
-//
-//            if (m1.find() && m2.find()) {
-//                String stageStr1 = m1.group(1);
-//                String stageStr2 = m2.group(1);
-//                stage1 = ChineseNumUtil.chineseToArabic(stageStr1);
-//                stage2 = ChineseNumUtil.chineseToArabic(stageStr2);
-//                round1 = Integer.parseInt(m1.group(2));
-//                round2 = Integer.parseInt(m2.group(2));
-//            }
-//
-//            // 先按阶段排序
-//            int stageCompare = Integer.compare(stage1, stage2);
-//            if (stageCompare != 0) {
-//                return stageCompare;
-//            }
-//
-//            // 阶段相同，再按场次排序
-//            stageCompare = Integer.compare(round1, round2);
-//            if (stageCompare != 0) {
-//                return stageCompare;
-//            }
-//
-//            return Character.compare(getVenue(s1), getVenue(s2));
-//        });
 
-//        Arrays.sort(keyS, (s1, s2) -> {
-//            int sessionComparison = Integer.compare(getSessionNumber(s1), getSessionNumber(s2));
-//            if (sessionComparison != 0) {
-//                return sessionComparison;
-//            }
-//            return Character.compare(getVenue(s1), getVenue(s2));
-//        });
-
-
-        // 添加每个分组的数据为表格
         for (String key : keyS) {
             List<JwSignRecord> jwSignRecordList = groupedRecords.get(key);
             if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
@@ -397,7 +346,17 @@ public class PdfGenerator {
                 XWPFParagraph groupTitleParagraph = document.createParagraph();
                 groupTitleParagraph.setAlignment(ParagraphAlignment.LEFT);
                 XWPFRun groupTitleRun = groupTitleParagraph.createRun();
-                groupTitleRun.setText(key);
+
+//                groupTitleRun.setText(key);
+                String[] lines = key.split("ooo");
+                for (int i = 0; i < lines.length; i++) {
+                    groupTitleRun.setText(lines[i], i);
+                    if (i < lines.length - 1) {
+                        CTBr br = groupTitleRun.getCTR().addNewBr();
+                        br.setType(STBrType.TEXT_WRAPPING);
+                    }
+                }
+
                 groupTitleRun.setFontSize(14);
                 groupTitleRun.setBold(true);
 
@@ -407,25 +366,28 @@ public class PdfGenerator {
                 tableWidth.setW(BigInteger.valueOf(5000));
 
                 // 创建表格
-                XWPFTable table = document.createTable(sortedList.size() + 1, 4); // 表头+数据行数
+                XWPFTable table = document.createTable(sortedList.size() + 1, 5); // 表头+数据行数
                 table.getCTTbl().addNewTblPr().setTblW(tableWidth);
 
-                int columnCount = 4;
+                int columnCount = 5;
                 for (int col = 0; col < columnCount; col++) {
                     CTTblWidth cellWidth = CTTblWidth.Factory.newInstance();
                     cellWidth.setType(STTblWidth.DXA);
                     int w = 2000;
                     switch (col) {
                         case 0:
-                            w = 1000;
+                            w = 800;
                             break;
                         case 1:
-                            w = 1000;
+                            w = 1500;
                             break;
                         case 2:
-                            w = 4000;
+                            w = 800;
                             break;
                         case 3:
+                            w = 4000;
+                            break;
+                        case 4:
                             w = 2000;
                             break;
                     }
@@ -442,7 +404,7 @@ public class PdfGenerator {
 
                 // 设置表头
                 XWPFTableRow headerRow = table.getRow(0);
-                String[] headers = {"上场序号", "背号", "选手", "代表队"};
+                String[] headers = {"上场序号", "预计时间", "选手编号", "选手", "代表队"};
                 for (int i = 0; i < headers.length; i++) {
 
                     if (headerRow.getCell(i) == null) {
@@ -468,6 +430,7 @@ public class PdfGenerator {
                     String h = StringUtils.isNotEmpty(record.getWorksName()) ? record.getWorksName() + "\\n" : "";
                     String[] rowContents = {
                             String.valueOf(record.getIndexOrder()),
+                            DateUtils.parseDateToStr("MM月dd日 HH:mm", record.getIndexTime()),
                             String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
                             record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
                             record.getTeamName()
@@ -485,7 +448,7 @@ public class PdfGenerator {
                         p.setAlignment(ParagraphAlignment.CENTER);
 
                         // 插入作品的名字
-                        if (i == 2 && StringUtils.isNotEmpty(record.getWorksName())) {
+                        if (i == 3 && StringUtils.isNotEmpty(record.getWorksName())) {
 
                             XWPFRun run1 = p.createRun();
                             run1.setBold(true);

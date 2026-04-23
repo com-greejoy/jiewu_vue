@@ -43,7 +43,7 @@ public class PdfUtils {
     @Autowired
     private JwGameItemService jwGameItemService;
 
-    private final String dirc = "E:\\jz\\项目\\jieWu\\2026\\2025-1-11 体育六艺\\赛程";
+    private final String dirc = "E:\\jz\\项目\\jieWu\\2026\\2026-05-01 遂宁\\赛程";
 
     private static String GAMENAME = "\n“全域天府 舞遍四川”体育舞蹈比赛暨\n四川省第三十一届体育舞蹈（国标舞）锦标赛";
 //	private static String tempFile = "E:/jz/项目/jieWu/2024街舞重庆/赛程/模板.pdf";
@@ -125,11 +125,11 @@ public class PdfUtils {
                             for (JwSignRecord jwSignRecord : backList) {
                                 List<JwSignRecordSport> jwSignRecordSportList = jwSignRecord.getJwSignRecordSportList();
                                 userNameS = (jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")));
-                                gameItemName += DateUtils.parseDateToStr("HH:mm", jwSignRecord.getPlaceTime()) + "  " + jwSignRecord.getItemName() + " → " + jwSignRecord.getIndexOrder() + "【" + DictUtils.getDictLabel("jw_area", jwSignRecord.getArea()) + "】" + "\r\n";
+                                gameItemName += DateUtils.parseDateToStr("HH:mm", jwSignRecord.getIndexTime()) + "  " + jwSignRecord.getItemName() + " → " + jwSignRecord.getIndexOrder() + "【" + jwSignRecord.getScheduleName() + "】" + "\r\n";
                                 indexOrder += (jwSignRecord.getPlaceOrder()) + " : " + jwSignRecord.getIndexOrder() + "\r\n";
                             }
-                            if (backList.size() > 2) {
-                                System.out.println(userNameS + "3333333333");
+                            if (backList.size() >= 3) {
+                                System.out.println(userNameS + "3333333333" + backNumber);
                             }
                         }
                         Map<String, String> map = new HashMap<String, String>();
@@ -139,7 +139,7 @@ public class PdfUtils {
                         map.put("name", userNameS);
                         map.put("game1", gameItemName);
                         map.put("indexOrder", String.valueOf(indexOrder));
-                        if (gameItemName.contains("齐舞") || gameItemName.contains("混合小作品")) {
+                        if (gameItemName.contains("群舞") || gameItemName.contains("混合小作品")) {
                             list.add(getStampedReader(map, dirc +  "/模板齐舞.pdf"));
                         } else {
                             list.add(getStampedReader(map, dirc +  "/模板单人.pdf"));

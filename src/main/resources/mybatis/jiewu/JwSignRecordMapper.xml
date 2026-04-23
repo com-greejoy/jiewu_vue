@@ -33,6 +33,7 @@
         <result property="lockJudgeScore" column="lock_judge_score"/>
         <result property="gradeStr"    column="grade_str"    />
         <result property="createAddId"    column="create_add_id"    />
+        <result property="indexTime"    column="index_time"    />
     </resultMap>
 
     <resultMap id="JwSignRecordJwSignRecordSportResult" type="JwSignRecord" extends="JwSignRecordResult">
@@ -64,7 +65,7 @@
     </resultMap>
 
     <sql id="selectJwSignRecordVo">
-        select id, back_number, lock_judge_score, grade_str, create_add_id, schedule_item_id, show_img, index_order, all_score, avg_score, rank_order, match_id, works_music_name, team_id, game_item_id, sport_limit, works_name, works_music, works_video, create_time, update_time from jw_sign_record
+        select id, back_number, index_time, lock_judge_score, grade_str, create_add_id, schedule_item_id, show_img, index_order, all_score, avg_score, rank_order, match_id, works_music_name, team_id, game_item_id, sport_limit, works_name, works_music, works_video, create_time, update_time from jw_sign_record
     </sql>
 
     <select id="selectJwSignRecordList" parameterType="JwSignRecord" resultMap="JwSignRecordResult">
@@ -148,10 +149,12 @@
     <select id="selectJwSignRecordListWithUserGameItem" resultMap="JwSignRecordJwSignRecordSportResult">
         select a.id, a.team_id, a.schedule_item_id, a.grade_str, a.lock_judge_score, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit, a.works_name, a.works_music, a.works_music_name, a.works_video,
         a.create_time, a.update_time, a.create_add_id, b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
-        cc.player_name, cc.id_card, cc.sex
+        cc.player_name, cc.id_card, cc.sex,
+        jt.team_name
         from jw_sign_record a
         left join jw_sign_record_sport b on b.sign_record_id = a.id
         left join jw_sport cc on cc.id = b.sport_id
+        left join jw_team jt on jt.id = a.team_id
         <where>
 <!--            <if test="createAddId != null "> and a.create_add_id = #{createAddId}</if>-->
             <if test="teamId != null ">and a.team_id = #{teamId}</if>
@@ -193,7 +196,7 @@
     <!--获取代表队全部赛程-->
     <select id="getTeamScheduleInfoList" resultMap="JwSignRecordAllResult">
         select a.id, a.team_id, a.lock_judge_score, a.grade_str, jt.team_name, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit,
-        a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.works_name, a.works_music, a.works_music_name, a.works_video, a.index_time,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex, jt.id as sub_team_id,
         jsi.item_name, jsii.schedule_name, jsp.place_order, jsi.area, jsi.shcedule_time, jsi.schedule_index, jsp.place_time
@@ -238,7 +241,7 @@
     <!--根据背号获取赛程-->
     <select id="selectScheduleByBackNum" resultMap="JwSignRecordJwSignRecordSportResult">
         select a.id, a.team_id, a.grade_str, a.schedule_item_id, a.lock_judge_score, a.index_order, a.back_number, a.show_img, a.match_id, a.game_item_id, a.sport_limit,
-        a.works_name, a.works_music, a.works_music_name, a.works_video,
+        a.works_name, a.works_music, a.works_music_name, a.works_video, a.index_time,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex,
         jsi.item_name, jsii.schedule_name, jsp.place_order, jsi.area, jsp.place_time
@@ -312,6 +315,7 @@
             <if test="lockJudgeScore != null">lock_judge_score,</if>
             <if test="gradeStr != null">grade_str,</if>
             <if test="createAddId != null">create_add_id,</if>
+            <if test="indexTime != null">index_time,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="teamId != null">#{teamId},</if>
@@ -334,6 +338,7 @@
             <if test="lockJudgeScore != null">#{lockJudgeScore},</if>
             <if test="gradeStr != null">#{gradeStr},</if>
             <if test="createAddId != null">#{createAddId},</if>
+            <if test="indexTime != null">#{indexTime},</if>
         </trim>
     </insert>
 
@@ -380,6 +385,7 @@
             <if test="lockJudgeScore != null">lock_judge_score = #{lockJudgeScore},</if>
             <if test="gradeStr != null">grade_str = #{gradeStr},</if>
             <if test="createAddId != null">create_add_id = #{createAddId},</if>
+            <if test="indexTime != null">index_time = #{indexTime},</if>
         </trim>
         where id = #{id}
     </update>

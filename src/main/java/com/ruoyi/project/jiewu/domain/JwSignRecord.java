@@ -99,6 +99,10 @@ public class JwSignRecord extends BaseEntity
     @JsonFormat(pattern = "MM月dd日 HH:mm")
     private Date placeTime;
 
+    @JsonFormat(pattern = "MM月dd日 HH:mm")
+    private Date indexTime;
+
+
     private String showImg;
 
     private String isMusic;
@@ -111,6 +115,14 @@ public class JwSignRecord extends BaseEntity
 
     public void setCreateAddId(Long createAddId) {
         this.createAddId = createAddId;
+    }
+
+    public Date getIndexTime() {
+        return indexTime;
+    }
+
+    public void setIndexTime(Date indexTime) {
+        this.indexTime = indexTime;
     }
 
     public String getGradeStr() {

@@ -212,9 +212,12 @@ public class JwMatchTeamController extends BaseController {
     // 获取代表队赛程 下载
     @PostMapping("/getTeamScheduleInfoListDownload")
     @ResponseBody
-    public ResponseEntity<byte[]> getTeamScheduleInfoListDownload(Long matchId, Long teamId) {
+    public ResponseEntity<byte[]> getTeamScheduleInfoListDownload(Long matchId, Long teamId, String type) {
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
         try {
+            if(StringUtils.isNotEmpty(type)){
+                jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord -> jwSignRecord.getScheduleName().contains(type)).collect(Collectors.toList());
+            }
             // 调用服务生成Word文档并返回字节数组
             byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
             // 设置响应头

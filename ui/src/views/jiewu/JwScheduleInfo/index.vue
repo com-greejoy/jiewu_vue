@@ -370,7 +370,14 @@
     },
     methods: {
       getTeamScheduleInfoListDownload() {
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null}, `${this.JwScheduleInfoList[0].matchName} 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "语言"}, `${this.JwScheduleInfoList[0].matchName} 语言 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "舞蹈"}, `${this.JwScheduleInfoList[0].matchName} 舞蹈 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "音乐"}, `${this.JwScheduleInfoList[0].matchName} 音乐 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "棋类"}, `${this.JwScheduleInfoList[0].matchName} 棋类 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "书法"}, `${this.JwScheduleInfoList[0].matchName} 书法 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "美术"}, `${this.JwScheduleInfoList[0].matchName} 美术 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: ""}, `${this.JwScheduleInfoList[0].matchName} 全部 赛程表明细.docx`)
+
       },
       async saveAsImage() {
         try {

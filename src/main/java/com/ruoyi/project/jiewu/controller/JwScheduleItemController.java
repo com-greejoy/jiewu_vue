@@ -151,6 +151,17 @@ public class JwScheduleItemController extends BaseController {
     @Log(title = "赛程小项", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody JwScheduleItem jwScheduleItem) {
+        JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwScheduleItem.getGameItemId());
+        jwScheduleItem.setItemProcess("1");
+        jwScheduleItem.setScheduleIndex(1l);
+        jwScheduleItem.setMatchId(jwGameItem.getMatchId());
+        jwScheduleItem.setGameItemId(jwGameItem.getId());
+        jwScheduleItem.setItemProcess("1");
+        jwScheduleItem.setLockScore("N");
+        jwScheduleItem.setScoreType(jwGameItem.getScoreType());
+        String groupStr = jwGameItem.getGroupLimit() > 1 ? "第一组" : "";
+        jwScheduleItem.setItemName(jwGameItem.getCode() + ":" + jwGameItem.getName() + "决赛" + groupStr);
+
         return toAjax(jwScheduleItemService.insertJwScheduleItem(jwScheduleItem));
     }
 

@@ -114,12 +114,16 @@ public class JwSignRecordService {
     // 修改分组小项
     public int changeJwScheduleItem(Long id, Long changeScheduleItemId) {
 
+        Long indexOrder = 0l;
         List<JwSignRecord> jwSignRecordList = selectJwSignRecordListByScheduleItem(changeScheduleItemId);
-        JwSignRecord jwSignRecord = jwSignRecordList.stream().max(Comparator.comparingLong(JwSignRecord::getIndexOrder)).get();
+        if(jwSignRecordList != null && jwSignRecordList.size() > 0){
+            JwSignRecord jwSignRecord = jwSignRecordList.stream().max(Comparator.comparingLong(JwSignRecord::getIndexOrder)).get();
+            indexOrder = jwSignRecord.getIndexOrder();
+        }
         JwSignRecord updateD = new JwSignRecord();
         updateD.setId(id);
         updateD.setScheduleItemId(changeScheduleItemId);
-        updateD.setIndexOrder(jwSignRecord.getIndexOrder() + 1l);
+        updateD.setIndexOrder(indexOrder + 1l);
         updateJwSignRecord(updateD);
 
         // 如果已经分组, 把组别的排序重新整理

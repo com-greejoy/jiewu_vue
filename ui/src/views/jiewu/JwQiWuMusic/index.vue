@@ -217,7 +217,7 @@
     created() {
       this.getTeamList();
       this.getGameItemList();
-      this.getList();
+      // this.getList();
     },
     watch: {
       "queryParams.matchId": function (val) {

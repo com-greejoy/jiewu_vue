@@ -218,28 +218,30 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="比赛" prop="matchId">
-          <el-input v-model="form.matchId" placeholder="请输入比赛"/>
+          <ELSelectMatch :matchId.sync="form.matchId"/>
         </el-form-item>
         <el-form-item label="项目" prop="gameItemId">
-          <el-input v-model="form.gameItemId" placeholder="请输入项目"/>
+          <el-select filterable v-model="form.gameItemId" placeholder="组别" clearable>
+            <el-option
+              v-for="gameItem in JwGameItemList"
+              :key="gameItem.id"
+              :label="gameItem.code + ' : ' + gameItem.name"
+              :value="gameItem.id"
+            />
+          </el-select>
         </el-form-item>
-        <el-form-item label="阶段" prop="scheduleInfoId">
-          <el-input v-model="form.scheduleInfoId" placeholder="请输入阶段"/>
-        </el-form-item>
-        <el-form-item label="场次" prop="schedulePlaceId">
-          <el-input v-model="form.schedulePlaceId" placeholder="请输入场次"/>
-        </el-form-item>
-        <el-form-item label="小项" prop="itemName">
-          <el-input v-model="form.itemName" placeholder="请输入小项"/>
-        </el-form-item>
-        <el-form-item label="开始时间" prop="shceduleTime">
-          <el-date-picker clearable
-                          v-model="form.shceduleTime"
-                          type="date"
-                          value-format="yyyy-MM-dd"
-                          placeholder="请选择开始时间">
-          </el-date-picker>
-        </el-form-item>
+
+<!--        <el-form-item label="小项" prop="itemName">-->
+<!--          <el-input v-model="form.itemName" placeholder="请输入小项"/>-->
+<!--        </el-form-item>-->
+<!--        <el-form-item label="开始时间" prop="shceduleTime">-->
+<!--          <el-date-picker clearable-->
+<!--                          v-model="form.shceduleTime"-->
+<!--                          type="date"-->
+<!--                          value-format="yyyy-MM-dd"-->
+<!--                          placeholder="请选择开始时间">-->
+<!--          </el-date-picker>-->
+<!--        </el-form-item>-->
         <el-form-item label="场地" prop="area">
           <el-radio-group v-model="form.area">
             <el-radio

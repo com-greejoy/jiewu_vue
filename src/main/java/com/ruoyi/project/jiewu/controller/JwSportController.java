@@ -95,35 +95,40 @@ public class JwSportController extends BaseController {
 //                jwSportService.updateJwSport(up);
 //            }
 
+            JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
 
-            JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), null, null);
-            if (jwSport1 == null) {
-                if(StringUtils.isNotEmpty(jwSport.getIdCard()) && jwSport.getIdCard().length() > 15){
-                    try{
-                        jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
-                        jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
-                    }catch (Exception e){
-                        System.out.println(jwSport.getIdCard());
-                        throw new GlobalException(jwSport.getIdCard());
+            try{
+                JwSport jwSport1 = jwSportService.selectJwSportByIdCard(jwSport.getIdCard(), null, jwTeam.getCreateUserId());
+                if (jwSport1 == null) {
+                    if(StringUtils.isNotEmpty(jwSport.getIdCard()) && jwSport.getIdCard().length() > 15){
+                        try{
+                            jwSport.setSex(IDCardUtils.getGender(jwSport.getIdCard()));
+                            jwSport.setAge(IDCardUtils.getAge(jwSport.getIdCard()));
+                        }catch (Exception e){
+                            System.out.println(jwSport.getIdCard());
+                            throw new GlobalException(jwSport.getIdCard());
+                        }
+                    }else{
+                        jwSport.setSex("m");
+                        jwSport.setAge(5l);
                     }
+
+                    if (jwSport.getAge() <= 0 || jwSport.getAge() >= 99) {
+                        jwSport.setAge(10l);
+                    }
+                    if(jwTeam == null){
+                        throw new GlobalException(jwSport.getTeamName());
+                    }
+                    jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
+
+                    jwSportService.insertJwSport(jwSport);
                 }else{
-                    jwSport.setSex("m");
-                    jwSport.setAge(5l);
+                    System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
                 }
-
-                if (jwSport.getAge() <= 0 || jwSport.getAge() >= 99) {
-                    jwSport.setAge(10l);
-                }
-               JwTeam jwTeam = jwTeamService.selectJwTeamByName(jwSport.getTeamName());
-                if(jwTeam == null){
-                    throw new GlobalException(jwSport.getTeamName());
-                }
-                jwSport.setCreateUserId(jwTeamService.selectJwTeamByName(jwSport.getTeamName()).getCreateUserId());
-
-                jwSportService.insertJwSport(jwSport);
-            }else{
-                System.out.println(jwSport.getPlayerName() +"---------------"+ jwSport.getIdCard());
+            }catch (Exception e){
+                e.printStackTrace();
             }
+
         }
         return success();
     }
@@ -136,7 +141,7 @@ public class JwSportController extends BaseController {
         List<JwSportExport> jwSportExportList = new ArrayList<>();
         if (jwSportList != null && jwSportList.size() > 0) {
             jwSportList.forEach(jwSport1 -> {
-                jwSportExportList.add(new JwSportExport(jwSport1.getTeamName(), jwSport1.getPlayerName(), jwSport1.getIdCard()));
+                jwSportExportList.add(new JwSportExport(jwSport1.getTeamName(), jwSport1.getPlayerName(), jwSport1.getIdCard(), jwSport1.getPlayerPhone()));
             });
         }
         jwSportExportList.sort(Comparator.comparing(JwSportExport::getTeamName));

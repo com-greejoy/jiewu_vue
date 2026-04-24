@@ -210,9 +210,9 @@ public class JwGameItemController extends BaseController {
 
             if (jwGameItem.getName().contains("团体") || jwGameItem.getName().contains("齐舞")) {
                 jwGameItem.setSportLimit("3"); //比赛模式
-//                jwGameItem.setMinSport(6);
-//                jwGameItem.setMaxSport(99);
-//                jwGameItem.setIsMusic("Y");
+                jwGameItem.setMinSport(5);
+                jwGameItem.setMaxSport(99);
+                jwGameItem.setIsMusic("Y");
             } else {
                 jwGameItem.setSportLimit("1"); //项目类型
 
@@ -224,16 +224,16 @@ public class JwGameItemController extends BaseController {
             // ------ 李金鑫的
 
             //  ------  胶囊的
-            if (jwGameItem.getName().contains("小齐舞")) {
-                jwGameItem.setMinSport(4);
-                jwGameItem.setMaxSport(7);
-                jwGameItem.setIsMusic("Y");
-            }
-            if (jwGameItem.getName().contains("大齐舞")) {
-                jwGameItem.setMinSport(7);
-                jwGameItem.setMaxSport(99);
-                jwGameItem.setIsMusic("Y");
-            }
+//            if (jwGameItem.getName().contains("小齐舞")) {
+//                jwGameItem.setMinSport(4);
+//                jwGameItem.setMaxSport(7);
+//                jwGameItem.setIsMusic("Y");
+//            }
+//            if (jwGameItem.getName().contains("大齐舞")) {
+//                jwGameItem.setMinSport(7);
+//                jwGameItem.setMaxSport(99);
+//                jwGameItem.setIsMusic("Y");
+//            }
 //            if (jwGameItem.getName().contains("作品")) {
 //                jwGameItem.setIsMusic("Y");
 //            }

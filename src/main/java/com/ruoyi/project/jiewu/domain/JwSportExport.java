@@ -19,7 +19,25 @@ public class JwSportExport  {
     @Excel(name = "身份证", cellType = Excel.ColumnType.TEXT)
     private String idCard;
 
+    @Excel(name = "电话")
+    private String userPhone;
+
+    public String getUserPhone() {
+        return userPhone;
+    }
+
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
+    }
+
     public JwSportExport() {
+    }
+
+    public JwSportExport(String teamName, String playerName, String idCard, String userPhone) {
+        this.teamName = teamName;
+        this.playerName = playerName;
+        this.idCard = idCard;
+        this.userPhone = userPhone;
     }
 
     public JwSportExport(String teamName, String playerName, String idCard) {

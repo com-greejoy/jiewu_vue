@@ -7,10 +7,7 @@ import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.DictUtils;
 import com.ruoyi.project.jiewu.domain.*;
 import com.ruoyi.project.jiewu.mapper.JwTeamMapper;
-import com.ruoyi.project.jiewu.service.JwGameItemService;
-import com.ruoyi.project.jiewu.service.JwMatchService;
-import com.ruoyi.project.jiewu.service.JwSignRecordService;
-import com.ruoyi.project.jiewu.service.JwSportService;
+import com.ruoyi.project.jiewu.service.*;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,9 +38,12 @@ public class PdfUtils {
     private JwSignRecordService jwSignRecordService;
 
     @Autowired
+    private JwScheduleItemService jwScheduleItemService;
+
+    @Autowired
     private JwGameItemService jwGameItemService;
 
-    private final String dirc = "E:\\jz\\项目\\jieWu\\2026\\2026-05-01 遂宁\\赛程";
+    private final String dirc = "E:\\jz\\项目\\jieWu\\2026\\2026-05-01锦标赛\\赛程";
 
     private static String GAMENAME = "\n“全域天府 舞遍四川”体育舞蹈比赛暨\n四川省第三十一届体育舞蹈（国标舞）锦标赛";
 //	private static String tempFile = "E:/jz/项目/jieWu/2024街舞重庆/赛程/模板.pdf";
@@ -115,60 +115,69 @@ public class PdfUtils {
 
                 if (jwSignRecords != null && jwSignRecords.size() > 0) {
                     for (String backNumber : jwSignRecords) {
-//						if(Long.valueOf(backNumber) >= 417 ){
                         String userNameS = "";
                         String gameItemName = "";
                         String indexOrder = "";
                         // 获取 背号 的全部赛程
                         List<JwSignRecord> backList = jwSignRecordService.selectScheduleByBackNum(matchId, backNumber);
-                        if (backList != null && backList.size() > 0) {
-                            for (JwSignRecord jwSignRecord : backList) {
-                                List<JwSignRecordSport> jwSignRecordSportList = jwSignRecord.getJwSignRecordSportList();
-                                userNameS = (jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")));
-                                gameItemName += DateUtils.parseDateToStr("HH:mm", jwSignRecord.getIndexTime()) + "  " + jwSignRecord.getItemName() + " → " + jwSignRecord.getIndexOrder() + "【" + jwSignRecord.getScheduleName() + "】" + "\r\n";
-                                indexOrder += (jwSignRecord.getPlaceOrder()) + " : " + jwSignRecord.getIndexOrder() + "\r\n";
+//                        if (backList.size() >= 2) {
+                            if (backList != null && backList.size() > 0) {
+                                for (JwSignRecord jwSignRecord : backList) {
+                                    List<JwSignRecordSport> jwSignRecordSportList = jwSignRecord.getJwSignRecordSportList();
+                                    JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(jwSignRecord.getScheduleItemId());
+
+                                    userNameS = (jwSignRecordSportList.stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")));
+                                    gameItemName += "【" + jwSignRecord.getScheduleName() + "】\r\n" +
+                                            " 第" + jwSignRecord.getPlaceOrder() + "场" + "-第" + jwScheduleItem.getScheduleIndex() + "组-" + "第" + jwSignRecord.getIndexOrder() + "号 ：" +
+                                            DateUtils.parseDateToStr("HH:mm", jwSignRecord.getIndexTime()) + "  " +
+                                            jwSignRecord.getItemName() + "\r\n";
+                                    indexOrder += (jwSignRecord.getPlaceOrder()) + " : " + jwSignRecord.getIndexOrder() + "\r\n";
+                                }
+                                if (backList.size() >= 2) {
+                                    System.out.println(userNameS + "3333333333" + backNumber);
+                                }
                             }
-                            if (backList.size() >= 3) {
-                                System.out.println(userNameS + "3333333333" + backNumber);
+                            Map<String, String> map = new HashMap<String, String>();
+                            map.put("gameName", GAMENAME);
+                            map.put("backNumber", backNumber);
+                            map.put("department", jwTeam.getIndexOrder() + ". " + jwTeam.getTeamName());
+                            map.put("name", userNameS);
+                            map.put("game1", gameItemName);
+                            map.put("indexOrder", String.valueOf(indexOrder));
+                            if (gameItemName.contains("群舞") || gameItemName.contains("混合小作品")) {
+                                list.add(getStampedReader(map, dirc + "/模板齐舞.pdf"));
+                            } else {
+                                if (backList.size() > 2) {
+                                    list.add(getStampedReader(map, dirc + "/模板单人2.pdf"));
+                                }else{
+                                    list.add(getStampedReader(map, dirc + "/模板单人.pdf"));
+                                }
+                            }
+                            if (lastBackNum < Long.valueOf(backNumber)) {
+                                lastBackNum = Long.valueOf(backNumber);
                             }
                         }
-                        Map<String, String> map = new HashMap<String, String>();
-                        map.put("gameName", GAMENAME);
-                        map.put("backNumber", backNumber);
-                        map.put("department", jwTeam.getIndexOrder() + ". " + jwTeam.getTeamName());
-                        map.put("name", userNameS);
-                        map.put("game1", gameItemName);
-                        map.put("indexOrder", String.valueOf(indexOrder));
-                        if (gameItemName.contains("群舞") || gameItemName.contains("混合小作品")) {
-                            list.add(getStampedReader(map, dirc +  "/模板齐舞.pdf"));
-                        } else {
-                            list.add(getStampedReader(map, dirc +  "/模板单人.pdf"));
-                        }
-                        if (lastBackNum < Long.valueOf(backNumber)) {
-                            lastBackNum = Long.valueOf(backNumber);
-                        }
-//						}
-                    }
+//                    }
                 }
             }
 
 //			// 再多增加 20个背号
-            for (int i = 1; i <= 10; i++) {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put("gameName", GAMENAME);
-                map.put("backNumber", new DecimalFormat(getZeroString(lastBackNum)).format(lastBackNum + i));
-                map.put("department", "");
-                map.put("name", "");
-                map.put("game1", "");
-                map.put("indexOrder", "");
-
-                list.add(getStampedReader(map, dirc + "/模板单人.pdf"));
-            }
+//            for (int i = 1; i <= 10; i++) {
+//                Map<String, String> map = new HashMap<String, String>();
+//                map.put("gameName", GAMENAME);
+//                map.put("backNumber", new DecimalFormat(getZeroString(lastBackNum)).format(lastBackNum + i));
+//                map.put("department", "");
+//                map.put("name", "");
+//                map.put("game1", "");
+//                map.put("indexOrder", "");
+//
+//                list.add(getStampedReader(map, dirc + "/模板单人.pdf"));
+//            }
         }
         return list;
     }
 
-    private  String getZeroString(Long number) {
+    private String getZeroString(Long number) {
         number = Math.abs(number);
         int length = String.valueOf(number).length();
         StringBuilder sb = new StringBuilder();
@@ -211,7 +220,7 @@ public class PdfUtils {
     public void genPdf(Long matchId) {
         try {
             long t1 = System.currentTimeMillis();
-            OutputStream out = new FileOutputStream(dirc +  "/全部背号.pdf");
+            OutputStream out = new FileOutputStream(dirc + "/全部背号.pdf");
             generatePdf(out, matchId);
             System.out.println("耗时：" + (System.currentTimeMillis() - t1) / 1000 + "秒");
         } catch (Exception e) {

@@ -891,7 +891,7 @@ public class JwMiNiUserController extends BaseController {
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
         try {
             // 调用服务生成Word文档并返回字节数组
-            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
+            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId), "1");
             ServletUtils.downloadFile(response, wordBytes, jwTeamService.selectJwTeamById(teamId).getTeamName() + "_赛程表" +  ".docx");
 
         } catch (IOException e) {

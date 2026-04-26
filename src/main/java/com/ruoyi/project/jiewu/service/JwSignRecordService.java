@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,6 +51,9 @@ public class JwSignRecordService {
 
     @Autowired
     private JwTeamService jwTeamService;
+
+    @Autowired
+    private JwScheduleInfoService jwScheduleInfoService;
 
     @Autowired
     private JwSignRecordSportService jwSignRecordSportService;
@@ -115,15 +119,26 @@ public class JwSignRecordService {
     public int changeJwScheduleItem(Long id, Long changeScheduleItemId) {
 
         Long indexOrder = 0l;
+        Date date = new Date();
         List<JwSignRecord> jwSignRecordList = selectJwSignRecordListByScheduleItem(changeScheduleItemId);
         if(jwSignRecordList != null && jwSignRecordList.size() > 0){
             JwSignRecord jwSignRecord = jwSignRecordList.stream().max(Comparator.comparingLong(JwSignRecord::getIndexOrder)).get();
             indexOrder = jwSignRecord.getIndexOrder();
+            date = jwSignRecord.getIndexTime();
         }
         JwSignRecord updateD = new JwSignRecord();
         updateD.setId(id);
         updateD.setScheduleItemId(changeScheduleItemId);
         updateD.setIndexOrder(indexOrder + 1l);
+
+        JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(changeScheduleItemId);
+        JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
+        if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
+            updateD.setIndexTime(date);
+        }else{
+            updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+        }
+
         updateJwSignRecord(updateD);
 
         // 如果已经分组, 把组别的排序重新整理
@@ -420,11 +435,25 @@ public class JwSignRecordService {
         if (jwScheduleItemList != null && jwScheduleItemList.size() > 0) {
             // 找到最少的一个组加进去
             JwScheduleItem jwScheduleItem = jwScheduleItemList.stream().min(Comparator.comparingLong(JwScheduleItem::getSportCount)).get();
+
+            List<JwSignRecord> jwSignRecordList = selectJwSignRecordListByScheduleItem(jwScheduleItem.getId());
+            Date date = new Date();
+            if(jwSignRecordList != null && jwSignRecordList.size() > 0){
+                date = jwSignRecordList.stream().max(Comparator.comparingLong(JwSignRecord::getIndexOrder)).get().getIndexTime();
+            }
+
             if (jwScheduleItem.getSportCount() < 0) jwScheduleItem.setSportCount(0l);
             JwSignRecord updateD = new JwSignRecord();
             updateD.setId(jwSignRecord.getId());
             updateD.setScheduleItemId(jwScheduleItem.getId());
             updateD.setIndexOrder(jwScheduleItem.getSportCount() + 1);
+
+            JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
+            if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
+                updateD.setIndexTime(date);
+            }else{
+                updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+            }
             jwSignRecordService.updateJwSignRecord(updateD);
         }
     }

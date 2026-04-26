@@ -179,7 +179,7 @@
 
         <el-button type="success" plain size="mini" @click="saveAsImage()">图片</el-button>
         <el-button type="warning" plain size="mini" @click="getTeamScheduleInfoListDownload()">下载</el-button>
-
+        <el-button type="primary" plain size="mini" @click="getTeamScheduleInfoListDownloadExcel()">下载EXCEL</el-button>
 
       </div>
       <div class="fee-items" id="printScheduleDetail" ref="capture" v-if="downLoadScheduleInfo" v-loading="scheduleLoading">
@@ -370,13 +370,31 @@
     },
     methods: {
       getTeamScheduleInfoListDownload() {
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "语言"}, `${this.JwScheduleInfoList[0].matchName} 语言 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "舞蹈"}, `${this.JwScheduleInfoList[0].matchName} 舞蹈 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "音乐"}, `${this.JwScheduleInfoList[0].matchName} 音乐 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "棋类"}, `${this.JwScheduleInfoList[0].matchName} 棋类 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "书法"}, `${this.JwScheduleInfoList[0].matchName} 书法 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "美术"}, `${this.JwScheduleInfoList[0].matchName} 美术 赛程表明细.docx`)
-        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: ""}, `${this.JwScheduleInfoList[0].matchName} 全部 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "语言", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 语言 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "舞蹈", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 舞蹈 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "音乐", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 音乐 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "棋类", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 棋类 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "书法", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 书法 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "美术", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 美术 赛程表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "", type2: "1"}, `${this.JwScheduleInfoList[0].matchName} 全部 赛程表明细.docx`)
+
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "语言", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 语言 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "舞蹈", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 舞蹈 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "音乐", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 音乐 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "棋类", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 棋类 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "书法", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 书法 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "美术", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 美术 评分表明细.docx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownload', {matchId: this.queryParams.matchId, teamId: null, type: "", type2: "2"}, `${this.JwScheduleInfoList[0].matchName} 全部 评分表明细.docx`)
+
+      },
+      getTeamScheduleInfoListDownloadExcel(){
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "语言"}, `${this.JwScheduleInfoList[0].matchName} 语言 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "舞蹈"}, `${this.JwScheduleInfoList[0].matchName} 舞蹈 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "音乐"}, `${this.JwScheduleInfoList[0].matchName} 音乐 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "棋类"}, `${this.JwScheduleInfoList[0].matchName} 棋类 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "书法"}, `${this.JwScheduleInfoList[0].matchName} 书法 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: "美术"}, `${this.JwScheduleInfoList[0].matchName} 美术 赛程表明细.xlsx`)
+        this.download('jiewu/JwMatchTeam/getTeamScheduleInfoListDownloadExcel', {matchId: this.queryParams.matchId, teamId: null, type: ""}, `${this.JwScheduleInfoList[0].matchName} 全部 赛程表明细.xlsx`)
 
       },
       async saveAsImage() {
@@ -414,13 +432,13 @@
         if ("scheduleDetail" == type) {
           // 详细赛程表
           this.scheduleLoading = true;
-          getTeamScheduleInfoList({matchId: this.queryParams.matchId, teamId: null}).then(res => {
-            this.showType = type;
-            let scheduleInfoList = res.data || [];
-            this.scheduleInfoList = scheduleInfoList.group((b) => b.itemName);
+          // getTeamScheduleInfoList({matchId: this.queryParams.matchId, teamId: null}).then(res => {
+          //   this.showType = type;
+          //   let scheduleInfoList = res.data || [];
+          //   this.scheduleInfoList = scheduleInfoList.group((b) => b.itemName);
             this.scheduleLoading = false;
             this.downLoadScheduleInfo = true;
-          })
+          // })
         } else if ("schedule" == type) {
           // 竞赛日程表
           this.downLoadSchedule = true;

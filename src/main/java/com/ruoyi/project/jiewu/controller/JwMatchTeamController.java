@@ -4,7 +4,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.MonthDay;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.servlet.http.HttpServletResponse;
@@ -107,9 +111,9 @@ public class JwMatchTeamController extends BaseController {
         return AjaxResult.success(result);
     }
 
-    private List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){
+    private List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList) {
 
-        return jwSignRecordService.genJwSignRecords( teamId,  matchId, jwSportList);
+        return jwSignRecordService.genJwSignRecords(teamId, matchId, jwSportList);
 //        List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
 //
 //        if (jwSignRecords != null && jwSignRecords.size() > 0) {
@@ -212,14 +216,14 @@ public class JwMatchTeamController extends BaseController {
     // 获取代表队赛程 下载
     @PostMapping("/getTeamScheduleInfoListDownload")
     @ResponseBody
-    public ResponseEntity<byte[]> getTeamScheduleInfoListDownload(Long matchId, Long teamId, String type) {
+    public ResponseEntity<byte[]> getTeamScheduleInfoListDownload(Long matchId, Long teamId, String type, String type2) {
         List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
         try {
-            if(StringUtils.isNotEmpty(type)){
+            if (StringUtils.isNotEmpty(type)) {
                 jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord -> jwSignRecord.getScheduleName().contains(type)).collect(Collectors.toList());
             }
             // 调用服务生成Word文档并返回字节数组
-            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId));
+            byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId), type2);
             // 设置响应头
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
@@ -230,6 +234,131 @@ public class JwMatchTeamController extends BaseController {
             // 处理异常情况
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwMatchTeam:export')")
+    @Log(title = "选手赛程表XLS", businessType = BusinessType.EXPORT)
+    @PostMapping("/getTeamScheduleInfoListDownloadExcel")
+    public void getTeamScheduleInfoListDownloadExcel(HttpServletResponse response, Long matchId, Long teamId, String type) {
+        List<JwSignRecord> jwSignRecordList = jwSignRecordService.getTeamScheduleInfoList(matchId, teamId);
+        if (StringUtils.isNotEmpty(type)) {
+            jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord -> jwSignRecord.getScheduleName().contains(type)).collect(Collectors.toList());
+        }
+        List<JwSignRecordExportXLS> jwSignRecordExportXLSList = new ArrayList<>();
+        jwSignRecordList.forEach(jwSignRecord -> {
+            JwSignRecordExportXLS jwSignRecordExportXLS = new JwSignRecordExportXLS();
+            jwSignRecordExportXLS.setPlaceOrder(jwSignRecord.getPlaceOrder());
+            jwSignRecordExportXLS.setScheduleIndex(jwSignRecord.getJwScheduleItem().getScheduleIndex());
+            jwSignRecordExportXLS.setSchedulePlace("第" + jwSignRecord.getPlaceOrder() + "场 第" + jwSignRecord.getJwScheduleItem().getScheduleIndex() + "组");
+            jwSignRecordExportXLS.setGameItemCode(jwSignRecord.getItemName().split(":")[0]);
+            jwSignRecordExportXLS.setGameItemName(jwSignRecord.getItemName().split(":")[1]);
+            jwSignRecordExportXLS.setIndexTime(jwSignRecord.getIndexTime());
+            jwSignRecordExportXLS.setIndexOrder(jwSignRecord.getIndexOrder());
+            jwSignRecordExportXLS.setScheduleName(jwSignRecord.getScheduleName());
+            jwSignRecordExportXLS.setBackNumber(jwSignRecord.getBackNumber());
+            jwSignRecordExportXLS.setTeamName(jwSignRecord.getTeamName());
+            if (jwSignRecord.getJwSignRecordSportList() != null && jwSignRecord.getJwSignRecordSportList().size() > 0) {
+                jwSignRecordExportXLS.setPlayerName(jwSignRecord.getJwSignRecordSportList().stream().map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(";")));
+            }
+            jwSignRecordExportXLSList.add(jwSignRecordExportXLS);
+        });
+
+        ExcelUtil<JwSignRecordExportXLS> util = new ExcelUtil<>(JwSignRecordExportXLS.class);
+        List<JwSignRecordExportXLS> jwSignRecordExportXLSListRe = jwSignRecordExportXLSList.stream().sorted(
+                Comparator.comparing((JwSignRecordExportXLS jw) -> parseScheduleNameForSort(jw.getScheduleName()).getKey())
+                        .thenComparing(r -> parseScheduleNameForSort(r.getScheduleName()).getValue())
+                        .thenComparing(JwSignRecordExportXLS::getPlaceOrder)
+                        .thenComparing(JwSignRecordExportXLS::getScheduleIndex)
+                        .thenComparing(JwSignRecordExportXLS::getIndexOrder)).collect(Collectors.toList());
+
+        util.exportExcel(response, jwSignRecordExportXLSListRe, "比赛参赛的队伍数据");
+    }
+
+    public static AbstractMap.SimpleEntry<MonthDay, Integer> parseScheduleNameForSort(String name) {
+        MonthDay dateKey = MonthDay.of(1, 1); // 默认 1月1日
+        int placeNum = 999;
+
+        // 1. 提取日期：如 "5月1日"
+        Pattern datePattern = Pattern.compile("(\\d{1,2}月\\d{1,2}日)");
+        Matcher m1 = datePattern.matcher(name);
+        if (m1.find()) {
+            String ds = m1.group(1).replace("月", "-").replace("日", "");
+            try {
+                dateKey = MonthDay.parse(ds, DateTimeFormatter.ofPattern("M-d"));
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 2. 提取“第X场地”
+        Pattern placePattern = Pattern.compile("第([一二三四五六七八九十]+)场地");
+        Matcher m2 = placePattern.matcher(name);
+        if (m2.find()) {
+            placeNum = chineseNumToArabic(m2.group(1));
+        }
+
+        return new AbstractMap.SimpleEntry<>(dateKey, placeNum);
+    }
+
+    public static int chineseNumToArabic(String cn) {
+        if (cn == null || cn.isEmpty()) return 999;
+        switch (cn) {
+            case "一":
+                return 1;
+            case "二":
+                return 2;
+            case "三":
+                return 3;
+            case "四":
+                return 4;
+            case "五":
+                return 5;
+            case "六":
+                return 6;
+            case "七":
+                return 7;
+            case "八":
+                return 8;
+            case "九":
+                return 9;
+            case "十":
+                return 10;
+            case "十一":
+                return 11;
+            case "十二":
+                return 12;
+            case "十三":
+                return 13;
+            case "十四":
+                return 14;
+            case "十五":
+                return 15;
+            case "十六":
+                return 16;
+            case "十七":
+                return 17;
+            case "十八":
+                return 18;
+            case "十九":
+                return 19;
+            case "二十":
+                return 20;
+            case "二十一":
+                return 21;
+            case "二十二":
+                return 22;
+            case "二十三":
+                return 23;
+            case "二十四":
+                return 24;
+            case "二十五":
+                return 25;
+            case "二十六":
+                return 26;
+            case "二十七":
+                return 27;
+            default:
+                return 999;
         }
     }
 
@@ -306,8 +435,6 @@ public class JwMatchTeamController extends BaseController {
     public AjaxResult reOrderMatchTeam(Long matchId) {
         return AjaxResult.success(jwMatchTeamService.reOrderMatchTeam(matchId));
     }
-
-
 
 
 }

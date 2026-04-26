@@ -287,7 +287,7 @@ public class PdfGenerator {
     }
 
 
-    public static byte[] generateWord(List<JwSignRecord> records, String matchName, JwTeam jwTeam) throws IOException {
+    public static byte[] generateWord(List<JwSignRecord> records, String matchName, JwTeam jwTeam, String type2) throws IOException {
         XWPFDocument document = new XWPFDocument();
 
         // 创建标题
@@ -324,20 +324,18 @@ public class PdfGenerator {
 
         Map<String, List<JwSignRecord>> groupedRecords = records.stream().collect(
                 Collectors.groupingBy(jws -> jws.getScheduleName() + "【第" + jws.getPlaceOrder() + "场 - 第" + jws.getJwScheduleItem().getScheduleIndex() + "组 "
-                + DateUtils.parseDateToStr("MM-dd HH:mm", jws.getJwScheduleItem().getShceduleTime())
-                + "】 ooo" + jws.getItemName()
-                + "【" + DictUtils.getDictLabel("jw_area", jws.getJwScheduleItem().getArea()) + "】"
-        ));
+                        + DateUtils.parseDateToStr("MM-dd HH:mm", jws.getJwScheduleItem().getShceduleTime())
+                        + "】 ooo" + jws.getItemName()
+                        + "【" + DictUtils.getDictLabel("jw_area", jws.getJwScheduleItem().getArea()) + "】"
+                ));
 
         String[] keyS = groupedRecords.keySet().toArray(new String[0]);
 
         RoomSessionGroupSorter.sort(keyS);
 
-
         for (String key : keyS) {
             List<JwSignRecord> jwSignRecordList = groupedRecords.get(key);
             if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
-
 
                 // 按照上场序号排序
                 List<JwSignRecord> sortedList = jwSignRecordList.stream().sorted(Comparator.comparingLong(JwSignRecord::getIndexOrder)).collect(Collectors.toList());
@@ -366,45 +364,78 @@ public class PdfGenerator {
                 tableWidth.setW(BigInteger.valueOf(5000));
 
                 // 创建表格
-                XWPFTable table = document.createTable(sortedList.size() + 1, 5); // 表头+数据行数
+                XWPFTable table = document.createTable(sortedList.size() + 1, type2.equals("1") ? 6 : 5); // 表头+数据行数
                 table.getCTTbl().addNewTblPr().setTblW(tableWidth);
 
-                int columnCount = 5;
+                int columnCount = type2.equals("1") ? 6 : 5;
                 for (int col = 0; col < columnCount; col++) {
                     CTTblWidth cellWidth = CTTblWidth.Factory.newInstance();
                     cellWidth.setType(STTblWidth.DXA);
                     int w = 2000;
-                    switch (col) {
-                        case 0:
-                            w = 800;
-                            break;
-                        case 1:
-                            w = 1500;
-                            break;
-                        case 2:
-                            w = 800;
-                            break;
-                        case 3:
-                            w = 4000;
-                            break;
-                        case 4:
-                            w = 2000;
-                            break;
+                    if (type2.equals("1")) {
+                        switch (col) {
+                            case 0:
+                                w = 800;
+                                break;
+                            case 1:
+                                w = 1500;
+                                break;
+                            case 2:
+                                w = 800;
+                                break;
+                            case 3:
+                                w = 1300;
+                                break;
+                            case 4:
+                                w = 3000;
+                                break;
+                            case 5:
+                                w = 800;
+                                break;
+                        }
+                    } else {
+                        switch (col) {
+                            case 0:
+                                w = 800;
+                                break;
+                            case 1:
+                                w = 800;
+                                break;
+                            case 2:
+                                w = 1300;
+                                break;
+                            case 3:
+                                w = 4500;
+                                break;
+                            case 4:
+                                w = 800;
+                                break;
+                        }
                     }
+
                     cellWidth.setW(BigInteger.valueOf(w)); // 2000 对应于大约25%
 
                     for (XWPFTableRow row : table.getRows()) {
+
                         XWPFTableCell cell = row.getCell(col);
                         if (cell.getCTTc().getTcPr() == null) {
                             cell.getCTTc().addNewTcPr();
                         }
                         cell.getCTTc().getTcPr().setTcW(cellWidth);
+//                        row.setHeight(200);
                     }
                 }
 
                 // 设置表头
                 XWPFTableRow headerRow = table.getRow(0);
-                String[] headers = {"上场序号", "预计时间", "选手编号", "选手", "代表队"};
+                headerRow.setHeight(500);
+                String[] headers = null;
+                if (type2.equals("1")) {
+                    headers = new String[]{"上场序号", "预计时间", "选手编号", "选手", "代表队", "备注"};
+                } else {
+                    headers = new String[]{"上场序号", "选手编号", "选手", "备注", "得分"};
+                }
+
                 for (int i = 0; i < headers.length; i++) {
 
                     if (headerRow.getCell(i) == null) {
@@ -427,18 +458,34 @@ public class PdfGenerator {
                 int rowIndex = 1;
                 for (JwSignRecord record : sortedList) {
                     XWPFTableRow dataRow = table.getRow(rowIndex++);
+                    dataRow.setHeight(500);
                     String h = StringUtils.isNotEmpty(record.getWorksName()) ? record.getWorksName() + "\\n" : "";
                     String[] rowContents = {
                             String.valueOf(record.getIndexOrder()),
                             DateUtils.parseDateToStr("MM月dd日 HH:mm", record.getIndexTime()),
                             String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
                             record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
-                            record.getTeamName()
-                    };
+                            type2.equals("1") ? record.getTeamName() : "",
+                            ""};
+                    if (type2.equals("1")) {
+                        rowContents = new String[]{
+                                String.valueOf(record.getIndexOrder()),
+                                DateUtils.parseDateToStr("MM月dd日 HH:mm", record.getIndexTime()),
+                                String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
+                                record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
+                                record.getTeamName(),
+                                ""};
+                    } else {
+                        rowContents = new String[]{
+                                String.valueOf(record.getIndexOrder()),
+                                String.valueOf(StringUtils.isNotNull(record.getBackNumber()) ? record.getBackNumber() : "-"),
+                                record.getJwSignRecordSportList().stream().sorted(Comparator.comparing(JwSignRecordSport::getPlayerName)).map(JwSignRecordSport::getPlayerName).collect(Collectors.joining(" ")),
+                                "",
+                                ""};
+                    }
 
                     for (int i = 0; i < rowContents.length; i++) {
                         XWPFTableCell cell = dataRow.getCell(i);
-
 
                         XWPFParagraph p = cell.getParagraphs().get(0);
                         if (p == null) {
@@ -448,15 +495,15 @@ public class PdfGenerator {
                         p.setAlignment(ParagraphAlignment.CENTER);
 
                         // 插入作品的名字
-                        if (i == 3 && StringUtils.isNotEmpty(record.getWorksName())) {
-
-                            XWPFRun run1 = p.createRun();
-                            run1.setBold(true);
-                            run1.setText(record.getWorksName());
-                            // 添加断行符以在同一段落中换行
-                            run1.addBreak(); // 插入断行符
-
-                        }
+//                        if (i == 3 && StringUtils.isNotEmpty(record.getWorksName())) {
+//
+//                            XWPFRun run1 = p.createRun();
+//                            run1.setBold(true);
+//                            run1.setText(record.getWorksName());
+//                            // 添加断行符以在同一段落中换行
+//                            run1.addBreak(); // 插入断行符
+//
+//                        }
 
                         XWPFRun run = p.createRun();
                         run.setText(rowContents[i]);
@@ -480,7 +527,7 @@ public class PdfGenerator {
         }
 
         // 调用方法来设置整个文档的页边距
-        setPageMargins(document, 720, 720, 720, 720);
+        setPageMargins(document, 720, 720, 360, 360);
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 

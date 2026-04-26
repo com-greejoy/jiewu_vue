@@ -130,13 +130,14 @@ public class JwSignRecordService {
         updateD.setId(id);
         updateD.setScheduleItemId(changeScheduleItemId);
         updateD.setIndexOrder(indexOrder + 1l);
-
-        JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(changeScheduleItemId);
-        JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
-        if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
-            updateD.setIndexTime(date);
-        }else{
-            updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+        if(date != null){
+            JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(changeScheduleItemId);
+            JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
+            if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
+                updateD.setIndexTime(date);
+            }else{
+                updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+            }
         }
 
         updateJwSignRecord(updateD);
@@ -448,12 +449,15 @@ public class JwSignRecordService {
             updateD.setScheduleItemId(jwScheduleItem.getId());
             updateD.setIndexOrder(jwScheduleItem.getSportCount() + 1);
 
-            JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
-            if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
-                updateD.setIndexTime(date);
-            }else{
-                updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+            if(date != null){
+                JwScheduleInfo jwScheduleInfo = jwScheduleInfoService.selectJwScheduleInfoById(jwScheduleItem.getScheduleInfoId());
+                if(jwScheduleInfo.getScheduleName().contains("美术") || jwScheduleInfo.getScheduleName().contains("书法") || jwScheduleInfo.getScheduleName().contains("棋类")) {
+                    updateD.setIndexTime(date);
+                }else{
+                    updateD.setIndexTime(DateUtils.addSeconds(date, 180));
+                }
             }
+
             jwSignRecordService.updateJwSignRecord(updateD);
         }
     }

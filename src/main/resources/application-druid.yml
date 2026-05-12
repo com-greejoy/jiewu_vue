@@ -19,7 +19,7 @@ spring:
 #                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2025_11_09_1?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
 #                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2025_12_14?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
 #                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2026_01_11?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
-#                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2026_05_01?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+#                url: jdbc:mysql://127.0.0.1:3306/jiewu_vue_2026_05_01_suining?useUnicode=true&allowMultiQueries=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
 #
 #                username: root
 #                password: 123456

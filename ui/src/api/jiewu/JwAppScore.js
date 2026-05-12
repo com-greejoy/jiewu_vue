@@ -73,6 +73,25 @@ export function saveScore(data) {
   })
 }
 
+
+export function saveScoreList(data) {
+  return request({
+    url: '/app/score/api/saveScoreList',
+    method: 'post',
+    data: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
+export function saveAwardList(data) {
+  return request({
+    url: '/app/score/api/saveAwardList',
+    method: 'post',
+    data: data,
+    headers: {repeatSubmit: false}
+  })
+}
+
 export function saveAward(data) {
   return request({
     url: '/app/score/api/saveAward',

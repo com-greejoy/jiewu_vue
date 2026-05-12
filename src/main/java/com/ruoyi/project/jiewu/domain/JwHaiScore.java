@@ -24,6 +24,8 @@ public class JwHaiScore extends BaseEntity{
 
     private Long judgeId;
 
+    private Long awardId;
+
     private String score;
 
     private String scoreType;
@@ -44,6 +46,14 @@ public class JwHaiScore extends BaseEntity{
     }
 
     public JwHaiScore() {
+    }
+
+    public Long getAwardId() {
+        return awardId;
+    }
+
+    public void setAwardId(Long awardId) {
+        this.awardId = awardId;
     }
 
     public String getJudgeImg() {

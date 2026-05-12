@@ -17,7 +17,7 @@ const service = axios.create({
   // axios中请求配置有baseURL选项，表示请求URL公共部分
   baseURL: process.env.VUE_APP_BASE_URL,
   // 超时
-  timeout: 60000
+  timeout: 6000000
 })
 
 // request拦截器
@@ -128,7 +128,7 @@ export function download(url, params, filename, config) {
   return service.post(url, params, {
     transformRequest: [(params) => { return tansParams(params) }],
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    responseType: 'blob',timeout: 6000000,
+    responseType: 'blob',timeout: 60000000,
     ...config
   }).then(async (data) => {
     const isBlob = blobValidate(data);

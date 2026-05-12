@@ -581,10 +581,21 @@ public class JwSignRecordService {
     }
 
     public int saveAward(Long id, JwAwardsItem jwAwardsItem) {
-        JwSignRecord jwSignRecord = new JwSignRecord();
-        jwSignRecord.setId(id);
-        jwSignRecord.setGradeStr(JSONObject.toJSONString(jwAwardsItem));
-        return jwSignRecordMapper.saveAward(jwSignRecord);
+
+        if(jwAwardsItem != null){
+            JwSignRecord jwSignRecord1 = jwSignRecordService.selectJwSignRecordById(id);
+
+            JwScheduleItem jwScheduleItem = jwScheduleItemService.selectJwScheduleItemById(jwSignRecord1.getScheduleItemId());
+            if (jwScheduleItem == null || "Y".equals(jwScheduleItem.getLockScore()) || "Y".equals(jwSignRecord1.getLockJudgeScore())) {
+                return 1;
+            }
+
+            JwSignRecord jwSignRecord = new JwSignRecord();
+            jwSignRecord.setId(id);
+            jwSignRecord.setGradeStr(JSONObject.toJSONString(jwAwardsItem));
+            return jwSignRecordMapper.saveAward(jwSignRecord);
+        }
+        return 0;
     }
 
     public List<JwSignRecord> genJwSignRecords(Long teamId, Long matchId, List<JwSport> jwSportList ){

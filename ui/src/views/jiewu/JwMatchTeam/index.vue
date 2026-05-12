@@ -719,23 +719,22 @@
       },
       // 全部成绩
       handleDownLoadAllGrade() {
+
+        this.download('jiewu/JwHaiScore/downloadTeamGradeDes',  {matchId: this.queryParams.matchId, teamId: this.queryParams.teamId}, `代表队成绩.docx`);
+
         let allgradeAwardsItemList = [];
         let i = 0;
         let ss = setInterval(() => {
           let item = this.JwTeamList[i];
           if (item) {
-            listTeamGradeDes({matchId: this.queryParams.matchId, teamId: item.id}).then(res => {
-              allgradeAwardsItemList.push((res.data[0].jwSignRecordList || []))
-              this.allgradeAwardsItemList = allgradeAwardsItemList;
-              this.$forceUpdate()
-            })
+            this.download('jiewu/JwHaiScore/downloadTeamGradeDes',  {matchId: this.queryParams.matchId, teamId: item.id}, `${item.indexOrder}_${item.teamName}_代表队成绩.docx`);
           }
 
           i++;
           if (i == this.JwTeamList.length) {
             clearInterval(ss)
           }
-        }, 2000)
+        }, 2000);
 
         // this.JwTeamList.forEach(item => {
         //   listTeamGradeDes({matchId: this.queryParams.matchId, teamId: item.id}).then(res => {

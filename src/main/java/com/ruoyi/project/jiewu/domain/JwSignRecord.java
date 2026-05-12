@@ -1,6 +1,7 @@
 package com.ruoyi.project.jiewu.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ruoyi.framework.aspectj.lang.annotation.Excel;
@@ -207,6 +208,15 @@ public class JwSignRecord extends BaseEntity
 
     public Long getRankOrder() {
         return rankOrder;
+    }
+
+    public Long getGameItemCode(){
+        if(getJwGameItem() != null && StringUtils.isNotEmpty(getJwGameItem().getCode())){
+            return Long.valueOf(getJwGameItem().getCode());
+
+        }else {
+            return 0l;
+        }
     }
 
     public void setRankOrder(Long rankOrder) {

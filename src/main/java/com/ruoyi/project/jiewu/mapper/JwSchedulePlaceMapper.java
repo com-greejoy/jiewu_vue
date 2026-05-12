@@ -13,6 +13,8 @@ public interface JwSchedulePlaceMapper {
 
     public List<JwSchedulePlace> listJwSchedulePlaceWithScheduleItem(JwSchedulePlace jwSchedulePlace);
 
+    public List<JwSchedulePlace> listJwSchedulePlaceWithScheduleItemSimple(JwSchedulePlace jwSchedulePlace);
+
     public int insertJwSchedulePlace(JwSchedulePlace jwSchedulePlace);
 
     public int updateJwSchedulePlace(JwSchedulePlace jwSchedulePlace);

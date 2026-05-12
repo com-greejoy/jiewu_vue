@@ -1,12 +1,8 @@
 package com.ruoyi.project.jiewu.domain;
 
 import com.ruoyi.framework.aspectj.lang.annotation.Excel;
-import com.ruoyi.framework.web.domain.BaseEntity;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 
 import javax.validation.constraints.NotEmpty;
-import java.util.List;
 
 public class JwSportWxImport   {
 
@@ -17,6 +13,18 @@ public class JwSportWxImport   {
     @NotEmpty(message = "身份证不能为空")
     @Excel(name = "身份证")
     private String idCard;
+
+    @NotEmpty(message = "手机号不能为空")
+    @Excel(name = "手机号")
+    private String playerPhone;
+
+    public String getPlayerPhone() {
+        return playerPhone;
+    }
+
+    public void setPlayerPhone(String playerPhone) {
+        this.playerPhone = playerPhone;
+    }
 
     public String getPlayerName() {
         return playerName;

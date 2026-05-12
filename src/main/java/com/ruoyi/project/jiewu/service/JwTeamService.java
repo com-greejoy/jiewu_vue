@@ -35,7 +35,6 @@ public class JwTeamService {
     @Autowired
     private JwGameItemService jwGameItemService;
 
-
     public JwTeam selectJwTeamById(Long id) {
         return jwTeamMapper.selectJwTeamById(id);
     }
@@ -85,8 +84,6 @@ public class JwTeamService {
                                 .collect(Collectors.joining(",")));
                     }
                     jwTeam1.setAllFee(allFee);
-
-
                 });
             }
             return list;

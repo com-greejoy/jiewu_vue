@@ -123,6 +123,7 @@
     <resultMap type="JwTeam" id="JwTeamResult">
         <result property="id" column="sub_team_id"/>
         <result property="teamName" column="team_name"/>
+        <result property="indexOrder" column="team_index_order"/>
     </resultMap>
 
     <select id="selectJwSignRecordListWithAllInfo" resultMap="JwSignRecordAllResult">
@@ -459,12 +460,14 @@
         select a.*, jj.judge_name, jj.img as judge_img, jsi.item_name, jsi.lock_score, jt.team_name,
         srs.id as sub_id, srs.match_id as sub_match_id, srs.sport_id as sub_sport_id, srs.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex, cc.player_phone,
+        jmt.index_order as team_index_order,
         b.id as sub_hai_id, b.sport_id as sub_hai_sport_id, b.judge_id as sub_judge_id, b.score as sub_score, b.score_type as sub_score_type, b.create_time as sub_create_time
         from jw_sign_record a
         left join jw_schedule_item jsi on jsi.id = a.schedule_item_id
         left join jw_hai_score b on b.sport_id = a.id
         left join jw_judge jj on jj.id = b.judge_id
         left join jw_team jt on jt.id = a.team_id
+        left join jw_match_team jmt on jmt.team_id = a.team_id
         left join jw_sign_record_sport srs on srs.sign_record_id = a.id
         left join jw_sport cc on cc.id = srs.sport_id
         <where>
@@ -481,7 +484,7 @@
     <select id="selectJwSignRecordListWithJudgeScore" resultMap="JwSignRecordAllResult">
         select a.id, a.team_id, a.lock_judge_score, a.schedule_item_id, a.index_order, a.back_number, a.match_id, a.game_item_id, a.sport_limit,
         a.works_name, a.works_music, a.works_music_name, a.works_video,
-        a.create_time, a.update_time,
+        a.create_time, a.update_time, a.grade_str,
         b.id as sub_id, b.match_id as sub_match_id, b.sport_id as sub_sport_id, b.sign_record_id as sub_sign_record_id,
         cc.player_name, cc.id_card, cc.sex,
         jt.team_name,

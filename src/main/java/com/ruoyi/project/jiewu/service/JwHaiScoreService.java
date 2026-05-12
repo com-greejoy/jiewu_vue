@@ -120,7 +120,9 @@ public class JwHaiScoreService {
                     jwHaiScore.setId(oldJwScore.getId());
                     updateJwHaiScore(jwHaiScore);
                 } else {
-                    insertJwHaiScore(jwHaiScore);
+                    if(StringUtils.isNotEmpty(jwHaiScore.getScore())){
+                        insertJwHaiScore(jwHaiScore);
+                    }
                 }
             }
         }
@@ -302,7 +304,7 @@ public class JwHaiScoreService {
         // 把成绩存成字符串准备上传到服务器
         JwSignRecord jwSignRecord = new JwSignRecord();
         jwSignRecord.setGameItemId(gameItemId);
-        List<JwSignRecord> jwSignRecordList1 = listGameItemGradeDes(jwSignRecord);
+        List<JwSignRecord> jwSignRecordList1 = jiSuanListGameItemGradeDes(jwSignRecord);
         jwSignRecordList1.forEach(jwSignRecord1 -> {
             JwSignRecord updateSign = new JwSignRecord();
             updateSign.setId(jwSignRecord1.getId());
@@ -455,25 +457,95 @@ public class JwHaiScoreService {
             // 获取海选成绩
             list = jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord);
 
-            // 如果有决赛， 获取决赛成绩
-            if ("2".equals(jwGameItem.getMatchType())) {
 
-                List<JwEight> jwEightList = getEightOrder(jwSignRecord.getGameItemId());
-
-                if (jwEightList != null && jwEightList.size() > 0) {
-                    for (int i = 0; i < jwEightList.size(); i++) {
-                        JwEight jwEight = jwEightList.get(i);
-                        list.forEach(item -> {
-                            if (item.getId().equals(jwEight.getPlayerId())) {
-                                item.setRankOrder(jwEight.getEightOrder());
-                                item.setDescription(jwEight.getDescription());
-                            }
-                        });
+            if (list != null && list.size() != 0) {
+                list.forEach(jwSignRecord1 -> {
+                    jwSignRecord1.setJwGameItem(jwGameItem);
+                    if(StringUtils.isNotEmpty(jwSignRecord1.getGradeStr())){
+                        String gradeStr = jwSignRecord1.getGradeStr();
+                        JwAwardsItem jwAwardsItem = JSONObject.parseObject(gradeStr, JwAwardsItem.class);
+                        jwSignRecord1.setRankOrderDes(jwAwardsItem.getRankText());
+                        if(!StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())){
+                            jwSignRecord1.setRankOrder(jwAwardsItem.getId() - 28);
+                        }
                     }
-                }
+                });
                 list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                 list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
             }
+
+            // 如果有决赛， 获取决赛成绩
+//            if ("2".equals(jwGameItem.getMatchType())) {
+//
+//                List<JwEight> jwEightList = getEightOrder(jwSignRecord.getGameItemId());
+//
+//                if (jwEightList != null && jwEightList.size() > 0) {
+//                    for (int i = 0; i < jwEightList.size(); i++) {
+//                        JwEight jwEight = jwEightList.get(i);
+//                        list.forEach(item -> {
+//                            if (item.getId().equals(jwEight.getPlayerId())) {
+//                                item.setRankOrder(jwEight.getEightOrder());
+//                                item.setDescription(jwEight.getDescription());
+//                            }
+//                        });
+//                    }
+//                }
+//                list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+//                list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//            }
+
+
+//            if (list != null && list.size() != 0) {
+//                list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+//                list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//                int allSize = list.size();
+//                list.forEach(jwSignRecord1 -> {
+//                    if (StringUtils.isNotEmpty(jwGameItem.getResultDesId())) {
+//                        List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+//                        JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+//                        jwSignRecord1.setItemName(jwGameItem.getName());
+//                        if (awardsItem != null) {
+//                            jwSignRecord1.setGradeStr(JSONObject.toJSONString(awardsItem));
+//                            jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+//                        }
+//                    }
+//                });
+//            }
+        }
+//        list = list.stream().filter(jwSignRecord1 -> jwSignRecord1.getJwTeam().getTeamName().contains("充轻舞飞扬艺术")).collect(Collectors.toList());
+        return list;
+    }
+
+
+    public List<JwSignRecord> jiSuanListGameItemGradeDes(JwSignRecord jwSignRecord) {
+        List<JwSignRecord> list = new ArrayList<>();
+        if (StringUtils.isLongNotNull(jwSignRecord.getGameItemId())) {
+
+            JwGameItem jwGameItem = jwGameItemService.selectJwGameItemById(jwSignRecord.getGameItemId());
+
+            // 获取海选成绩
+            list = jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord);
+
+
+            // 如果有决赛， 获取决赛成绩
+//            if ("2".equals(jwGameItem.getMatchType())) {
+//
+//                List<JwEight> jwEightList = getEightOrder(jwSignRecord.getGameItemId());
+//
+//                if (jwEightList != null && jwEightList.size() > 0) {
+//                    for (int i = 0; i < jwEightList.size(); i++) {
+//                        JwEight jwEight = jwEightList.get(i);
+//                        list.forEach(item -> {
+//                            if (item.getId().equals(jwEight.getPlayerId())) {
+//                                item.setRankOrder(jwEight.getEightOrder());
+//                                item.setDescription(jwEight.getDescription());
+//                            }
+//                        });
+//                    }
+//                }
+//                list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+//                list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//            }
 
 
             if (list != null && list.size() != 0) {
@@ -497,6 +569,7 @@ public class JwHaiScoreService {
         return list;
     }
 
+
     // 获取比赛全部成绩
     // 获取比赛 项目成绩
     public List<JwSignRecord> listAllGameItemGradeDes(Long matchId, Long gameItemId) {
@@ -513,38 +586,54 @@ public class JwHaiScoreService {
                     List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordHaiScore(query);
                     if (jwSignRecordList != null && jwSignRecordList.size() > 0) {
                         // 如果有决赛， 获取决赛成绩
-                        if ("2".equals(jwGameItem.getMatchType())) {
-
-                            List<JwEight> jwEightList = getEightOrder(jwGameItem.getId());
-
-                            if (jwEightList != null && jwEightList.size() > 0) {
-                                for (int i = 0; i < jwEightList.size(); i++) {
-                                    JwEight jwEight = jwEightList.get(i);
-                                    jwSignRecordList.forEach(item -> {
-                                        if (item.getId().equals(jwEight.getPlayerId())) {
-                                            item.setRankOrder(jwEight.getEightOrder());
-                                            item.setDescription(jwEight.getDescription());
-                                        }
-                                    });
-                                }
-                            }
-                            jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
-                            jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
-                        }
+//                        if ("2".equals(jwGameItem.getMatchType())) {
+//
+//                            List<JwEight> jwEightList = getEightOrder(jwGameItem.getId());
+//
+//                            if (jwEightList != null && jwEightList.size() > 0) {
+//                                for (int i = 0; i < jwEightList.size(); i++) {
+//                                    JwEight jwEight = jwEightList.get(i);
+//                                    jwSignRecordList.forEach(item -> {
+//                                        if (item.getId().equals(jwEight.getPlayerId())) {
+//                                            item.setRankOrder(jwEight.getEightOrder());
+//                                            item.setDescription(jwEight.getDescription());
+//                                        }
+//                                    });
+//                                }
+//                            }
+//                            jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+//                            jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//                        }
 
                         if (jwSignRecordList != null && jwSignRecordList.size() != 0) {
-                            jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
-                            jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
-                            int allSize = jwSignRecordList.size();
-                            if (StringUtils.isNotEmpty(jwGameItem.getResultDesId())) {
-                                List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+//                            jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+//                            jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//                            int allSize = jwSignRecordList.size();
+
+//                            if (jwSignRecordList != null && jwSignRecordList.size() != 0) {
                                 jwSignRecordList.forEach(jwSignRecord1 -> {
-                                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
-                                    jwSignRecord1.setJwGameItem(jwGameItem);
-                                    jwSignRecord1.setItemName(jwGameItem.getName());
-                                    if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+                                    if(StringUtils.isNotEmpty(jwSignRecord1.getGradeStr())){
+                                        String gradeStr = jwSignRecord1.getGradeStr();
+                                        JwAwardsItem jwAwardsItem = JSONObject.parseObject(gradeStr, JwAwardsItem.class);
+                                        jwSignRecord1.setRankOrderDes(jwAwardsItem.getRankText());
+                                        if(!StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())){
+                                            jwSignRecord1.setRankOrder(jwAwardsItem.getId() - 28);
+                                        }
+                                    }
                                 });
-                            }
+                                jwSignRecordList = jwSignRecordList.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
+                                jwSignRecordList.sort(Comparator.comparing(JwSignRecord::getRankOrder));
+//                            }
+
+//                            if (StringUtils.isNotEmpty(jwGameItem.getResultDesId())) {
+//                                List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
+//                                jwSignRecordList.forEach(jwSignRecord1 -> {
+//                                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+//                                    jwSignRecord1.setJwGameItem(jwGameItem);
+//                                    jwSignRecord1.setItemName(jwGameItem.getName());
+//                                    if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
+//                                });
+//                            }
 
                             jwSignRecordList.forEach(jwSignRecord1 -> {
                                 jwSignRecord1.setJwGameItem(jwGameItem);
@@ -556,7 +645,7 @@ public class JwHaiScoreService {
             }
         }
 
-        list.sort(Comparator.comparing(jwSignRecord -> jwMatchTeamService.getJwMatchTeam(matchId, jwSignRecord.getTeamId()).getIndexOrder()));
+        list.sort(Comparator.comparing(jwSignRecord -> jwSignRecord.getJwTeam().getIndexOrder()));
         return list;
     }
 
@@ -589,29 +678,23 @@ public class JwHaiScoreService {
 
                     List<JwSignRecord> list = jwSignRecordService.selectJwSignRecordHaiScore(queryJ);
 
-                    // 如果有决赛， 获取决赛成绩
-                    if ("2".equals(jwGameItem.getMatchType())) {
-
-                        List<JwEight> jwEightList = getEightOrder(jwGameItem.getId());
-
-                        if (jwEightList != null && jwEightList.size() > 0) {
-                            for (int i = 0; i < jwEightList.size(); i++) {
-                                JwEight jwEight = jwEightList.get(i);
-                                list.forEach(item -> {
-                                    if (item.getId().equals(jwEight.getPlayerId())) {
-                                        item.setRankOrder(jwEight.getEightOrder());
-                                        item.setDescription(jwEight.getDescription());
-                                    }
-                                });
-                            }
-                        }
-                        list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
-                        list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
-                    }
 
                     List<JwAwardsItem> jwAwardsItemList = jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItem.getResultDesId().split(","));
 
                     if (list != null && list.size() != 0) {
+
+                        list.forEach(jwSignRecord1 -> {
+                            if(StringUtils.isNotEmpty(jwSignRecord1.getGradeStr())){
+                                String gradeStr = jwSignRecord1.getGradeStr();
+                                JwAwardsItem jwAwardsItem = JSONObject.parseObject(gradeStr, JwAwardsItem.class);
+                                jwSignRecord1.setRankOrderDes(jwAwardsItem.getRankText());
+                                if(!StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())){
+                                    jwSignRecord1.setRankOrder(jwAwardsItem.getId() - 28);
+                                }
+                            }
+                        });
+
+
                         list = list.stream().filter(jwSignRecord1 -> StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())).collect(Collectors.toList());
                         list.sort(Comparator.comparing(JwSignRecord::getRankOrder));
                         int allSize = list.size();
@@ -620,7 +703,18 @@ public class JwHaiScoreService {
                             jwMatchTeamGradeList.forEach(jwMatchTeamGrade -> {
                                 if (jwMatchTeamGrade.getTeamId().equals(jwSignRecord1.getTeamId())) {
                                     jwSignRecord1.setJwGameItem(jwGameItem);
-                                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+
+//                                    JwAwardsItem awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+                                    JwAwardsItem awardsItem = null;
+                                    if(StringUtils.isNotEmpty(jwSignRecord1.getGradeStr())){
+                                        awardsItem = JSONObject.parseObject(jwSignRecord1.getGradeStr(), JwAwardsItem.class);
+                                        if(!StringUtils.isLongNotNull(jwSignRecord1.getRankOrder())){
+                                            jwSignRecord1.setRankOrder(awardsItem.getId() - 28);
+                                        }
+                                    }else{
+                                        awardsItem = getOrderDes(jwAwardsItemList, Long.valueOf(allSize), jwSignRecord1);
+                                    }
+
                                     if (awardsItem != null) jwSignRecord1.setRankOrderDes(awardsItem.getRankText());
 
                                     // 获奖记录加进去

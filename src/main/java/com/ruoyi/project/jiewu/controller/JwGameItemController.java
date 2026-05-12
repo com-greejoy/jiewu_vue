@@ -216,7 +216,11 @@ public class JwGameItemController extends BaseController {
             } else {
                 jwGameItem.setSportLimit("1"); //项目类型
 
-                if ((jwGameItem.getName().contains("精英") || jwGameItem.getName().contains("公开组") ||  jwGameItem.getName().contains("专业组")) && !jwGameItem.getName().contains("单人作品")) {
+                if ((jwGameItem.getName().contains("精英") ||
+                        jwGameItem.getName().contains("公开组") ||
+                        jwGameItem.getName().contains("竞技组") ||
+                        jwGameItem.getName().contains("专业组"))
+                        && !jwGameItem.getName().contains("单人作品")) {
                     jwGameItem.setMatchType("2");
                     jwGameItem.setPromotionNum(32l);
                 }
@@ -224,23 +228,23 @@ public class JwGameItemController extends BaseController {
             // ------ 李金鑫的
 
             //  ------  胶囊的
-//            if (jwGameItem.getName().contains("小齐舞")) {
-//                jwGameItem.setMinSport(4);
-//                jwGameItem.setMaxSport(7);
-//                jwGameItem.setIsMusic("Y");
-//            }
-//            if (jwGameItem.getName().contains("大齐舞")) {
-//                jwGameItem.setMinSport(7);
-//                jwGameItem.setMaxSport(99);
-//                jwGameItem.setIsMusic("Y");
-//            }
-//            if (jwGameItem.getName().contains("作品")) {
-//                jwGameItem.setIsMusic("Y");
-//            }
-//            if (jwGameItem.getName().contains("混合小作品")) {
-//                jwGameItem.setMinSport(2);
-//                jwGameItem.setMaxSport(3);
-//            }
+            if (jwGameItem.getName().contains("小齐舞")) {
+                jwGameItem.setMinSport(4);
+                jwGameItem.setMaxSport(9);
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("大齐舞")) {
+                jwGameItem.setMinSport(9);
+                jwGameItem.setMaxSport(99);
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("作品")) {
+                jwGameItem.setIsMusic("Y");
+            }
+            if (jwGameItem.getName().contains("混合小作品")) {
+                jwGameItem.setMinSport(2);
+                jwGameItem.setMaxSport(3);
+            }
 //                if(jwGameItem.getRemark().contains("六人一组")){
 //                    jwGameItem.setMinSport(6);
 //                    jwGameItem.setMaxSport(6);

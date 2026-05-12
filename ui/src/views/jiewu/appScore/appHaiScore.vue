@@ -1,7 +1,7 @@
 <template>
-  <div class="hai-score" @click.stop="aaac">
+  <div class="hai-score" v-loading="saveAllIng" @click.stop="aaac">
     <div class="hai-score-header">
-      <div class="judge-name">{{currentJudge.judgeName}}</div>
+      <div class="judge-name" @dblclick="setTypeHandel">{{currentJudge.judgeName}}</div>
       <div class="game-item" @click="selectGameItemHandel">
         <div class="game-item-name">{{currentGameItem.itemName || '请选择打分组别'}}</div>
         <div class="qiehuan">切换组别</div>
@@ -10,7 +10,11 @@
     </div>
 
     <div class="hai-score-body" v-if="!isJueSai && (!currentGameItem.scoreType || currentGameItem.scoreType == '1')" v-loading="loadSport">
+      <div class="save-btn-h" v-if="currentGameItem && currentGameItem.id">
+        <el-button @click="saveAllScore" type="primary" size="mini">提交分数</el-button>
+      </div>
       <div class="sport-item-con-h" :class="{inputMode: match.matchConfig.hScoreMode == '1'}">
+
         <div class="sport-item-con">
           <div class="no-user" @click="selectGameItemHandel" v-if="!currentGameItem || !currentGameItem.id">选择组别</div>
           <div class="sport-item-box" v-for="sport in sportList">
@@ -80,6 +84,9 @@
     </div>
 
     <div class="hai-score-body score-level" v-if="!isJueSai && currentGameItem.scoreType == '2'" v-loading="loadSport">
+      <div class="save-btn-h" v-if="currentGameItem && currentGameItem.id">
+        <el-button @click="saveAllAward" type="primary" size="mini">提交分数</el-button>
+      </div>
       <div class="sport-item-con-h" :class="{inputMode: match.matchConfig.hScoreMode == '1'}">
         <div class="sport-item-con">
           <div class="no-user" @click="selectGameItemHandel" v-if="!currentGameItem || !currentGameItem.id">选择组别</div>
@@ -89,9 +96,9 @@
               <!--              <div class="sport-index">{{sport.backNumber}}</div>-->
               <!--              <div class="sport-name w"  v-if="sport.worksName"> {{sport.worksName}}</div>-->
               <div class="sport-name">({{sport.backNumber}}) {{sport.playerName}}</div>
-              <div class="sport-score" v-if="match.matchConfig.hScoreMode == '1'">
-                <el-radio-group v-model="sport.award" size="mini" @change="sportAwardChange(sport)">
-                  <el-radio-button v-for="award in awardList" :label="award">{{award.rankText}}</el-radio-button>
+              <div class="sport-score ll" v-if="match.matchConfig.hScoreMode == '1'">
+                <el-radio-group v-model="sport.awardId" size="mini" :key="`award-group-${sport.id}`" @change="sportAwardChange(sport)">
+                  <el-radio-button v-for="award in awardList" :key="award.id" :label="award.id">{{award.rankText.replace("奖", "")}}</el-radio-button>
                 </el-radio-group>
               </div>
             </div>
@@ -99,7 +106,6 @@
         </div>
       </div>
     </div>
-
 
     <div class="hai-score-body" v-if="isJueSai" v-loading="loadSport">
       <juesai :currentJudge="currentJudge" :currentGameItem="currentGameItem"></juesai>
@@ -109,10 +115,39 @@
       <div class="show-select-game" v-show="showSelectGameItem" @click.stop="aaac">
         <div class="game-item-con" @click.stop="aaac">
           <div class="g-title">选择组别</div>
-          <div class="g-body" v-loading="loadingItem">
-            <div v-for="itemmm in gameItemList">
-              <div class="place-name">{{itemmm.placeName}}</div>
+          <div class="select-types">
+            <div><el-radio-group size="mini" v-model="type1">
+              <el-radio-button label="">全部</el-radio-button>
+              <el-radio-button label="朝阳路"></el-radio-button>
+              <el-radio-button label="紫竹路"></el-radio-button>
+            </el-radio-group></div>
 
+            <div>
+              <el-radio-group size="mini" v-model="type3">
+                <el-radio-button label="">全部</el-radio-button>
+                <el-radio-button v-if="type1 == '朝阳路'" label="一楼学术厅"></el-radio-button>
+                <el-radio-button v-if="type1 == '朝阳路'" label="二楼艺术中心"></el-radio-button>
+                <el-radio-button v-if="type1 == '紫竹路'" label="一楼多功能厅"></el-radio-button>
+                <el-radio-button v-if="type1 == '紫竹路'" label="二楼紫竹剧场"></el-radio-button>
+                <el-radio-button v-if="type1 == '紫竹路'" label="一楼民族文化厅"></el-radio-button>
+              </el-radio-group>
+            </div>
+
+            <div>
+              <el-radio-group size="mini" v-model="type2">
+                <el-radio-button label="">全部</el-radio-button>
+                <el-radio-button label="语言"></el-radio-button>
+                <el-radio-button label="舞蹈"></el-radio-button>
+                <el-radio-button label="音乐"></el-radio-button>
+                <el-radio-button label="棋类"></el-radio-button>
+                <el-radio-button label="书法"></el-radio-button>
+                <el-radio-button label="美术"></el-radio-button>
+              </el-radio-group>
+            </div>
+          </div>
+          <div class="g-body" v-loading="loadingItem">
+            <div v-for="itemmm in gameItemList.filter(itee=>itee.placeName.includes(type1) && itee.placeName.includes(type2) && itee.placeName.includes(type3) )">
+              <div class="place-name">{{itemmm.placeName}}</div>
               <div class="game-items" v-for="item in itemmm.schedulePlaceList">
                 <div class="item-chang">第 {{item.placeOrder}} 场 </div>
                 <div class="item-chang-items">
@@ -138,7 +173,7 @@
 </template>
 
 <script>
-  import {getScheduleItems, getSports, saveScore, saveAward, getGameItemAwards} from "@/api/jiewu/JwAppScore";
+  import {getScheduleItems, getSports, saveScore, saveScoreList, saveAwardList, saveAward, getGameItemAwards} from "@/api/jiewu/JwAppScore";
 
   import juesai from '@/views/jiewu/appScore/juesai';
 
@@ -163,6 +198,10 @@
     },
     data() {
       return {
+        saveAllIng: false,
+        type1:"",
+        type3:"",
+        type2: "",
         height: "20",
         score1: 0,
         score2: 0,
@@ -200,7 +239,45 @@
 
     },
     methods: {
+      setTypeHandel(){
+        this.currentSelectGameItem.scoreType = this.currentSelectGameItem.scoreType =="1" ? "2" : "1";
+        this.queRenGameItem()
+      },
+      saveAllAward(){
+        let that = this;
+        this.saveAllIng = true;
+        let allScore = [];
+        this.sportList.forEach(item=>{
+          allScore.push({"awardId": item.awardId * 1, "sportId": item.id * 1});
+        });
+        saveAwardList(allScore).then(res=>{
+          that.saveAllIng = false;
+          that.$notify({
+            title: '成功',
+            message: '分数提交成功',
+            type: 'success',
+            offset: 300
+          });
+        })
+      },
+      saveAllScore(){
+        let that = this;
+        this.saveAllIng = true;
+        let allScore = [];
+        this.sportList.forEach(item=>{
+          allScore.push({sportId: item.id * 1 , score: item.judgeScore, judgeId : that.currentJudge.id * 1})
+        });
+        saveScoreList(allScore).then(res=>{
+          that.saveAllIng = false;
+          that.$notify({
+            title: '成功',
+            message: '分数提交成功',
+            type: 'success',
+            offset: 300
+          });
+        })
 
+      },
       addScore(score) {
         this.scoreAll = ((this.scoreAll * 1) + (score * 1)).toFixed(2) * 1;
         if (this.scoreAll <= 0) {
@@ -251,12 +328,13 @@
           })
         }
       },
+
       sportAwardChange(sport){
         if (sport.id) {
-          let judgeId = sport.id * 1;
+          let judgeId = this.currentJudge.id * 1;
           let sportId = sport.id * 1;
           this.requestChain = this.requestChain.then(() => {
-            return this.doSaveAward(judgeId, sport.award.id, sportId)
+            return this.doSaveAward(judgeId, sport.awardId, sportId)
           }).catch(err => {
             console.warn('请求链中发生错误，但继续执行:', err)
           })
@@ -268,7 +346,7 @@
       saveScoreHandel() {
         if (this.currentSport.id) {
           // 将当前保存任务追加到串行队列末尾
-          let judgeId =this.currentJudge.id * 1;
+          let judgeId = this.currentJudge.id * 1;
           let scoreAll = this.currentSport.judgeScore * 1;
           let sportId = this.currentSport.id * 1;
           this.requestChain = this.requestChain.then(() => {
@@ -280,7 +358,6 @@
       },
 
       doSaveSocre(judgeId, scoreAll, sportId){
-        console.log(scoreAll)
         return saveScore({"judgeId": judgeId, "score": scoreAll || null, "sportId": sportId})
       },
       // async saveScoreHandel() {
@@ -332,7 +409,6 @@
           this.showSelectGameItem = false;
           this.currentGameItem = this.currentSelectGameItem;
           this.loadSport = true;
-          console.log(this.currentGameItem)
 
           getSports({judgeId: this.currentJudge.id, scheduleItemId: this.currentGameItem.id}).then(res => {
             let sportList = [];
@@ -349,7 +425,7 @@
                   playerName.push(sport["playerName"]);
                 });
                 item.playerName = playerName.join(",");
-
+                item.awardId = 0;
                 sportList.push(item)
               })
               sportList.sort((a, b) => a.indexOrder - b.indexOrder)
@@ -360,7 +436,14 @@
               getGameItemAwards({gameItemId: that.currentGameItem.gameItemId}).then(res=>{
                 that.awardList = Array.from(
                   new Map((res.data || []).map(item => [item.rankText, item])).values()
-                )
+                );
+                let sportList = [].concat(that.sportList);
+                sportList.forEach(sport=>{
+                  if(sport.gradeStr){
+                    sport.awardId = that.awardList.find(item=>item.id == JSON.parse(sport.gradeStr).id * 1).id + "";
+                  }
+                })
+                that.sportList = sportList;
               })
             }
             this.loadSport = false;
@@ -415,7 +498,7 @@
             })
 
             this.gameItemList = gameItemList;
-            console.log(this.gameItemList)
+            // console.log(this.gameItemList)
           }
           this.currentSelectGameItem = this.currentGameItem || {};
           that.loadingItem = false
@@ -441,6 +524,41 @@
 
 <style scoped lang="scss">
 
+  @media screen and (max-width: 500px) {
+    .hai-score .hai-score-body .sport-item-con-h .sport-item-con .sport-item-box .sport-item .sport-name{
+      width: 160pt !important;
+      margin-left: 2pt !important;
+      margin: 0 2pt !important;
+    }
+    .hai-score {
+      .sport-item-con {
+        justify-content: center;
+      }
+
+      .sport-item-box {
+        width: 95% !important;
+
+        .sport-score:not(.ll) {
+          width: 56pt !important;
+        }
+
+
+
+        .sport-item{
+          padding: 0 2pt !important;
+        }
+        .sport-score{
+
+
+          ::v-deep .el-radio-button__inner{
+
+            padding: 0px 6pt !important;
+          }
+        }
+      }
+    }
+  }
+
   @media screen and (max-width: 768px) {
     .hai-score {
       .sport-item-con {
@@ -450,7 +568,7 @@
       .sport-item-box {
         width: 95% !important;
 
-        .sport-score {
+        .sport-score:not(.ll) {
           width: 56pt !important;
         }
 
@@ -503,6 +621,15 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      .save-btn-h{
+        text-align: right;
+        margin-right: 12pt;
+        margin-top: 6pt;
+        .el-button{
+          font-size: 8pt;
+          padding: 6px;
+        }
+      }
       &.score-level{
         .sport-item-con-h{
           margin-bottom: 12pt !important;
@@ -525,7 +652,7 @@
                   ::v-deep .el-radio-button__inner{
                     height: 32px;
                     line-height: 32px;
-                    padding: 0px 15px;
+                    padding: 0px 10pt;
                   }
                 }
               }
@@ -542,10 +669,11 @@
         position: relative;
         background: #fff;
         box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
-        margin: 12pt;
+        margin: 12pt 6pt;
         border-radius: 12px;
         &.inputMode{
-          margin-bottom: 280pt;
+          margin-top: 4pt;
+          /*margin-bottom: 280pt;*/
         }
         .sport-item-con {
           flex: 1;
@@ -564,7 +692,7 @@
             margin-bottom: 6pt;
 
             .sport-item {
-              width: calc(100% - 16pt);
+              width: calc(100% - 0pt);
 
               display: flex;
               flex-direction: row;
@@ -790,10 +918,13 @@
       flex-direction: row;
       align-items: center;
       padding: 8pt 0;
-      height: 32pt;
+      height: 40pt;
       background: #fff;
       box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
       border-top: 2px solid #DA4F33;
+      /*margin-top: 8pt;*/
+      padding-top: 16pt;
+      /*background: black;*/
       .judge-name {
         /*width: 100pt;*/
         font-weight: 800;
@@ -821,7 +952,7 @@
         }
 
         .qiehuan {
-
+            white-space: nowrap;
         }
       }
 
@@ -854,7 +985,7 @@
         flex-direction: column;
         /*align-items: center;*/
         position: absolute;
-        top: 44pt;
+        top: 24pt;
         left: 12pt;
         right: 12pt;
         bottom: 12pt;
@@ -873,18 +1004,25 @@
         border-radius: 12px;
         box-shadow: 0 2px 12px 0 rgba(0, 0, 0, .1);
       }
+      .select-types{
+        margin-top: 4pt;
+        text-align: center;
+        .el-radio-group:first-child{
+          margin-bottom: 4pt;
+        }
+      }
 
       .g-body {
         flex: 1;
         margin-right: 0;
-        margin-top: 12pt;
+        margin-top: 2pt;
         padding: 4pt 8pt;
         overflow: auto;
         .place-name{
           text-align: center;
           font-weight: 900;
-          font-size: 16pt;
-          margin-bottom: 16pt;
+          font-size: 13pt;
+          margin-bottom: 8pt;
         }
 
         .game-items {

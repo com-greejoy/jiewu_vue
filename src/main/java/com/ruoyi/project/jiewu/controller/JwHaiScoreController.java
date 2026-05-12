@@ -8,10 +8,13 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.PdfGenerator;
+import com.ruoyi.framework.redis.RedisCache;
+import com.ruoyi.project.jiewu.domain.JwMatchTeamGrade;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSportExport;
 import com.ruoyi.project.jiewu.service.JwMatchService;
 import com.ruoyi.project.jiewu.service.JwSignRecordService;
+import com.ruoyi.project.jiewu.service.JwTeamService;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,6 +44,9 @@ public class JwHaiScoreController extends BaseController {
 
     @Autowired
     private JwMatchService jwMatchService;
+
+    @Autowired
+    private JwTeamService jwTeamService;
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:list')")
     @GetMapping("/list")
@@ -98,10 +104,15 @@ public class JwHaiScoreController extends BaseController {
         util.exportExcel(response, jwSignRecordSportExportList, "全部成绩表");
     }
 
+    @Autowired
+    private RedisCache redisCache;
+
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
     @Log(title = "全部成绩", businessType = BusinessType.EXPORT)
     @PostMapping("/downloadAllScore")
     public ResponseEntity<byte[]> downloadAllScore(Long matchId) {
+
+
         List<JwSignRecord> jwSignRecordList = jwHaiScoreService.listAllGameItemGradeDes(matchId, null);
         try {
             // 调用服务生成Word文档并返回字节数组
@@ -117,6 +128,8 @@ public class JwHaiScoreController extends BaseController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+
     }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
@@ -139,6 +152,29 @@ public class JwHaiScoreController extends BaseController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:add')")
+    @Log(title = "获取代表队成绩统计", businessType = BusinessType.EXPORT)
+    @PostMapping("/downloadTeamGradeDes")
+    public ResponseEntity<byte[]> downloadTeamGradeDes(JwSignRecord jwSignRecord) {
+        List<JwMatchTeamGrade> jwMatchTeamGradeList = jwHaiScoreService.listTeamGradeDes(jwSignRecord);
+        try {
+            // 调用服务生成Word文档并返回字节数组
+            byte[] wordBytes = PdfGenerator.generateTeamGradeWord(jwMatchTeamGradeList, jwMatchService.selectJwMatchById(jwSignRecord.getMatchId()).getMatchName());
+            // 设置响应头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "schedule.docx");
+            // 返回带有字节数据和响应头的ResponseEntity
+            return new ResponseEntity<>(wordBytes, headers, HttpStatus.OK);
+        } catch (IOException e) {
+            // 处理异常情况
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:query')")
     @GetMapping(value = "/{id}")

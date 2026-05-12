@@ -75,6 +75,7 @@
               <div class="si all-score">总分</div>
               <div class="si avg-score">得分</div>
               <div class="si rank">排名</div>
+              <div class="si rank-str">奖项</div>
               <div class="si opt">操作</div>
             </div>
             <div class="score-item" v-for="sport in item.items">
@@ -86,6 +87,7 @@
               <div class="si all-score">{{sport.allScore || '-'}}</div>
               <div class="si avg-score">{{sport.avgScore || '-'}}</div>
               <div class="si rank">{{sport.rankOrder || '-'}}</div>
+              <div class="si rank-str">{{sport.gradeStr ? JSON.parse(sport.gradeStr).awardName : "-"}}</div>
               <div class="si opt">
                 <el-switch
                            v-model="sport.lockJudgeScore"
@@ -218,12 +220,12 @@
           <div class="index-v h order" v-if="matchConfig.grade.rankOrder" >名次</div>
 <!--          <div class="index-v h order-des">奖项</div>-->
 
-          <div class="index-v h grade" v-if="matchConfig.grade.rankOrderDes">奖项</div>
+<!--          <div class="index-v h grade" v-if="matchConfig.grade.rankOrderDes">奖项</div>-->
 
-          <div class="index-v h grade" v-if="currentGameItem.matchType == 1">成绩</div>
+          <div class="index-v h grade" >成绩</div>
 
-          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">决赛成绩</div>
-          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">海选成绩</div>
+<!--          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">决赛成绩</div>-->
+<!--          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">海选成绩</div>-->
 
           <div class="index-v h back-num" v-if="matchConfig.grade.backNum">背号</div>
           <div class="index-v h sport" v-if="matchConfig.grade.sport" :class="{qiwu: currentGameItem.sportLimit != 1}">选手</div>
@@ -234,10 +236,10 @@
 <!--      <div class="index-v order-des">{{item.rankOrderDes}}</div>-->
           <!--<div class="index-v order-des"></div>-->
 
-          <div class="index-v h grade" v-if="matchConfig.grade.rankOrderDes">{{item.rankOrderDes || '-'}}</div>
+          <div class="index-v h grade" >{{item.rankOrderDes || '-'}}</div>
 
-          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">{{item.description}}</div>
-          <div class="index-v grade">{{item.avgScore}}</div>
+<!--          <div class="index-v h grade" v-if="currentGameItem.matchType == 2">{{item.description}}</div>-->
+<!--          <div class="index-v grade">{{item.avgScore}}</div>-->
 
           <div class="index-v back-num" v-if="matchConfig.grade.backNum">{{item.backNumber}}</div>
           <div class="index-v sport" v-if="matchConfig.grade.sport" :class="{qiwu: currentGameItem.sportLimit != 1}">{{item.jwSignRecordSportList.map(item => item.playerName).join(" ")}}</div>
@@ -259,11 +261,10 @@
               <div class="item-value">{{itemm.playerName}}</div>
             </div>
             <div class="row-item gameItemName">
-              <div class="item-label">参赛项目</div>
+              <div class="item-label">组别</div>
               <div class="colon">:</div>
-
-              <div class="item-value" :class="{smalll: item.itemName.indexOf('waacking') > -1 }">{{item.itemName}}</div>
-              <!--              <div class="item-value" :class="{smalll: item.itemName.length > 170 }">{{item.itemName}}</div>-->
+<!--              <div class="item-value" >{{item.itemName.split(":")[1]}}</div>-->
+              <div class="item-value" :class="{small: item.jwGameItem.name.length > 13 , smalll: item.jwGameItem.name.length > 16}">{{item.jwGameItem.name}}</div>
             </div>
             <div class="row-item order">
               <div class="item-label">名次</div>
@@ -271,21 +272,21 @@
               <div class="item-value">{{item.rankOrderDes}}</div>
             </div>
             <div class="row-item team">
-              <div class="item-label">参赛单位</div>
+              <div class="item-label">代表队</div>
               <div class="colon">:</div>
-              <div class="item-value" :class="{small: item.jwTeam.teamName.length > 101, smalll: item.jwTeam.teamName.length >= 105 } ">{{item.jwTeam.teamName}}</div>
+              <div class="item-value" :class="{small: item.jwTeam.teamName.length > 13, smalll: item.jwTeam.teamName.length >= 105 } ">{{item.jwTeam.teamName}}</div>
+            </div>
 
-            </div>
-            <div class="row-item team">
-              <div class="item-label">时间</div>
-              <div class="colon">:</div>
-              <div class="item-value">二〇二五年十一月九日</div>
-            </div>
-            <div class="row-item team">
-              <div class="item-label">地点</div>
-              <div class="colon">:</div>
-              <div class="item-value">四川 · 南充</div>
-            </div>
+<!--            <div class="row-item team">-->
+<!--              <div class="item-label">时间</div>-->
+<!--              <div class="colon">:</div>-->
+<!--              <div class="item-value">二〇二六年五月一日</div>-->
+<!--            </div>-->
+<!--            <div class="row-item team">-->
+<!--              <div class="item-label">地点</div>-->
+<!--              <div class="colon">:</div>-->
+<!--              <div class="item-value">四川 · 遂宁</div>-->
+<!--            </div>-->
           </div>
         </div>
       </div>
@@ -520,14 +521,14 @@
       // 打印全部成绩
       handlePrintAllGrage() {
         let allGrade = [];
-        this.JwGameItemList.forEach(item => {
-          listGameItemGradeDes({
-            matchId: (this.Cookies.get("matchId") * 1) || null,
-            gameItemId: item.id,
-          },).then(res => {
-            allGrade.push({gameItem: item, grades: ([].concat(res.data || []).filter(item => item.rankOrder).sort((a, b) => a.rankOrder - b.rankOrder))})
-          })
-        })
+        // this.JwGameItemList.forEach(item => {
+        //   listGameItemGradeDes({
+        //     matchId: (this.Cookies.get("matchId") * 1) || null,
+        //     gameItemId: item.id,
+        //   },).then(res => {
+        //     allGrade.push({gameItem: item, grades: ([].concat(res.data || []).filter(item => item.rankOrder).sort((a, b) => a.rankOrder - b.rankOrder))})
+        //   })
+        // })
         this.allGrade = allGrade;
         this.showAllGrade = true;
 
@@ -910,7 +911,7 @@
   .print-con-zhengshu .item-label, .colon {
     /*visibility: hidden;*/
     font-weight: 900;
-    line-height: 76px;
+    line-height: 100px;
   }
 
   .item-value {
@@ -919,8 +920,8 @@
 
   .print-con-zhengshu {
     font-size: 26px;
-    padding-left: 80px;
-    padding-right: 80px;
+    padding-left: 175px;
+    padding-right: 35px;
     color: #000;
 
     .page-con-box {
@@ -929,13 +930,13 @@
     }
 
     .page-con {
-      padding-top: 390px;
+      padding-top: 240px;
       font-family: '华文中宋';
       height: 900px;
       page-break-before: always;
       /*page-break-after:always;*/
       .row-item {
-        height: 58px;
+        height: 76px;
         line-height: 120px;
         display: flex;
         flex-direction: row;
@@ -961,7 +962,7 @@
         margin-right: 6px;
         white-space: nowrap;
         font-weight: 900;
-        line-height: 76px;
+        line-height: 100px;
         /*visibility: hidden;*/
       }
 
@@ -974,14 +975,18 @@
         white-space: nowrap;
         color: #000;
         font-weight: 900;
-        line-height: 76px;
+        line-height: 100px;
 
         &.small {
-          font-size: 20px;
+          font-size: 22px;
         }
 
         &.smalll {
-          font-size: 22px;
+          font-size: 20px;
+          white-space: normal;
+          line-height: 22px;
+          display: flex;
+          align-items: end;
         }
       }
     }
@@ -1150,6 +1155,7 @@
         width: 80px;
         min-width: 80px;
       }
+
     }
   }
 
@@ -1244,7 +1250,10 @@
         width: 56px;
         min-width: 56px;
       }
-
+      .rank-str{
+        width: 80px;
+        min-width: 80px;
+      }
       .opt{
         width: 80px;
         min-width: 80px;

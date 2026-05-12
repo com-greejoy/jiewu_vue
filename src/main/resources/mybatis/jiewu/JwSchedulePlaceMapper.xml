@@ -61,6 +61,23 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         order by jsp.place_order asc, jsp.id desc
     </select>
 
+    <select id="listJwSchedulePlaceWithScheduleItemSimple" parameterType="JwSchedulePlace" resultMap="JwSchedulePlaceWithScheduleItemResult">
+        select jsp.*, jsi.item_process,  jsi.id as schedule_item_id, jsi.game_item_id, jsi.schedule_place_id,
+        jsi.item_name, jsi.shcedule_time, jsi.area, jsi.schedule_index, jsi.score_type
+        from jw_schedule_place jsp
+        left join jw_schedule_item jsi on jsi.schedule_place_id = jsp.id
+        <where>
+            <if test="matchId != null "> and jsp.match_id = #{matchId}</if>
+            <if test="scheduleInfoId != null "> and jsp.schedule_info_id = #{scheduleInfoId}</if>
+            <if test="placeOrder != null "> and jsp.place_order = #{placeOrder}</if>
+            <if test="placeTime != null "> and jsp.place_time = #{placeTime}</if>
+            <if test="lockScore != null and lockScore != ''"> and jsi.lock_score = #{lockScore}</if>
+        </where>
+        order by jsp.place_order asc, jsp.id desc
+    </select>
+
+
+
     <select id="selectJwSchedulePlaceById" parameterType="Long" resultMap="JwSchedulePlaceResult">
         <include refid="selectJwSchedulePlaceVo"/>
         where id = #{id}

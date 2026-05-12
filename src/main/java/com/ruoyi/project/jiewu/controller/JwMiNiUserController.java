@@ -218,7 +218,7 @@ public class JwMiNiUserController extends BaseController {
             //• "develop" 开发版
             //• "trial" 体验版
             //• "release"
-            byte[] wordBytes = wxMaService.getQrcodeService().createWxaCodeUnlimitBytes("inviteTeamId="+teamId+"&matchId=" + matchId,
+            byte[] wordBytes = wxMaService.getQrcodeService().createWxaCodeUnlimitBytes("inviteTeamId=" + teamId + "&matchId=" + matchId,
                     "pages/sign/signMatchGameItemSportSuiNingInvite/signMatchGameItemSportSuiNingInvite",
                     false,
                     "release",
@@ -245,9 +245,9 @@ public class JwMiNiUserController extends BaseController {
     public AjaxResult getWxUserTeam(@RequestHeader("Authorization") String openId, Long teamId) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
-            if(StringUtils.isLongNotNull(teamId)){
+            if (StringUtils.isLongNotNull(teamId)) {
                 return AjaxResult.success(jwTeamService.selectJwTeamById(teamId));
-            }else{
+            } else {
                 return AjaxResult.success(jwTeamService.selectJwTeamByUserId(zwWxUser.getId()));
             }
         } else {
@@ -346,16 +346,16 @@ public class JwMiNiUserController extends BaseController {
                                      Long createUserId) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if (zwWxUser != null) {
-            if(createAddId){
+            if (createAddId) {
 
                 JwSport jwSport = new JwSport();
                 jwSport.setCreateAddId(zwWxUser.getId());
                 jwSport.setPlayerName(searchName);
                 jwSport.setCreateUserId(createUserId);
 
-                List<JwSport> jwSportList = jwSportService. selectJwSportList(jwSport);
+                List<JwSport> jwSportList = jwSportService.selectJwSportList(jwSport);
                 return AjaxResult.success(jwSportList);
-            }else{
+            } else {
                 List<JwSport> jwSportList = jwSportService.selectJwSportByUserId(zwWxUser.getId(), searchName);
                 return AjaxResult.success(jwSportList);
             }
@@ -372,7 +372,7 @@ public class JwMiNiUserController extends BaseController {
         if (zwWxUser != null) {
 
             JwTeam jwTeam = null;
-            if(StringUtils.isLongNotNull(teamId)){
+            if (StringUtils.isLongNotNull(teamId)) {
                 jwTeam = jwTeamService.selectJwTeamById(teamId);
             }
 
@@ -420,7 +420,7 @@ public class JwMiNiUserController extends BaseController {
                 JwMatch jwMatch = jwMatchService.selectJwMatchById(jwGameItem.getMatchId());
 
                 // 如果是管理员就不需要判断时间
-                if(!jwMatchUserService.checkIfManagerMatch(zwWxUser.getId(), jwGameItem.getMatchId())){
+                if (!jwMatchUserService.checkIfManagerMatch(zwWxUser.getId(), jwGameItem.getMatchId())) {
 
                     Date now = DateUtils.getNowDate();
                     if (now.after(jwMatch.getSignEndTime())) {
@@ -462,7 +462,7 @@ public class JwMiNiUserController extends BaseController {
 
             // 判断报名时间过没过
             JwMatch jwMatch = jwMatchService.selectJwMatchById(jwSignRecordService.selectJwSignRecordById(id).getMatchId());
-            if(!jwMatchUserService.checkIfManagerMatch(zwWxUser.getId(), jwMatch.getId())){
+            if (!jwMatchUserService.checkIfManagerMatch(zwWxUser.getId(), jwMatch.getId())) {
                 Date now = DateUtils.getNowDate();
                 if (now.after(jwMatch.getSignEndTime())) {
                     return AjaxResult.error("报名已结束");
@@ -540,7 +540,7 @@ public class JwMiNiUserController extends BaseController {
             List<JwSignRecord> jwSignRecords = jwSignRecordService.selectJwSignRecordListWithUserMatch(teamId, matchId);
 
             // 如果是被邀请的人来查，就只查他自己数据
-            if(onlyInvite){
+            if (onlyInvite) {
                 jwSignRecords = jwSignRecords.stream().filter(jwSignRecord -> zwWxUser.getId().equals(jwSignRecord.getCreateAddId())).collect(Collectors.toList());
             }
 
@@ -649,10 +649,10 @@ public class JwMiNiUserController extends BaseController {
         if (zwWxUser != null) {
             // 获取所有运动员的报名项目
             List<JwSport> jwSportList = new ArrayList<>();
-            if(onlyInvite){
-               jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, zwWxUser.getId());
-            }else{
-               jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, null);
+            if (onlyInvite) {
+                jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, zwWxUser.getId());
+            } else {
+                jwSportList = jwSportService.selectJwSignRecordSportGameItemList(matchId, teamId, null);
             }
             return AjaxResult.success(jwSportList);
         } else {
@@ -772,39 +772,59 @@ public class JwMiNiUserController extends BaseController {
         if (jwWxUser == null) return AjaxResult.error("错误");
 
         ExcelUtil<JwSportWxImport> util = new ExcelUtil<>(JwSportWxImport.class);
-        List<JwSportWxImport> userList = null;
+        List<JwSportWxImport> userList = new ArrayList<>();
         try {
             userList = util.importExcel(file.getInputStream());
-
-            for (JwSportWxImport jwSport : userList) {
-                jwSport.setIdCard(StringUtils.trim(jwSport.getIdCard()));
-                jwSport.setPlayerName(StringUtils.trim(jwSport.getPlayerName()));
-                List<JwTeam> jwTeams = jwTeamService.selectJwTeamByUserId(jwWxUser.getId());
-                if(jwTeams != null && jwTeams.size() > 0){
-                    JwTeam jwTeam = jwTeams.get(0);
-
-                    JwSport jwSport1 = jwSportService.selectJwSportByName(null, jwSport.getIdCard(), jwTeam.getCreateUserId());
-                    if (jwSport1 == null) {
-                        JwSport up = new JwSport();
-                        up.setPlayerName(jwSport.getPlayerName());
-                        up.setIdCard(jwSport.getIdCard());
-                        up.setCreateUserId(jwTeam.getCreateUserId());
-                        jwSportService.insertJwSport(up);
-                    } else {
-                        JwSport up = new JwSport();
-                        up.setPlayerName(jwSport.getPlayerName());
-                        up.setIdCard(jwSport.getIdCard());
-                        up.setId(jwSport1.getId());
-                        jwSportService.updateJwSport(up);
-                    }
-                }else{
-                    throw new GlobalException("没有队伍");
-                }
-
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        for (JwSportWxImport jwSport : userList) {
+            jwSport.setIdCard(StringUtils.trim(jwSport.getIdCard()));
+            jwSport.setPlayerName(StringUtils.trim(jwSport.getPlayerName()));
+            jwSport.setPlayerPhone(StringUtils.trim(jwSport.getPlayerPhone()));
+            if (!Validator.isMobile(jwSport.getPlayerPhone())) {
+                return AjaxResult.error("手机号格式错误");
+            }
+            if (StringUtils.isEmpty(jwSport.getPlayerPhone())) {
+                return AjaxResult.error("请输入手机号");
+            }
+            if (StringUtils.isEmpty(jwSport.getPlayerName())) {
+                return AjaxResult.error("请输入姓名");
+            }
+            if (StringUtils.isEmpty(jwSport.getIdCard())) {
+                return AjaxResult.error("请输入身份证");
+            }
+        }
+        for (JwSportWxImport jwSport : userList) {
+            jwSport.setIdCard(StringUtils.trim(jwSport.getIdCard()));
+            jwSport.setPlayerName(StringUtils.trim(jwSport.getPlayerName()));
+            jwSport.setPlayerPhone(StringUtils.trim(jwSport.getPlayerPhone()));
+            List<JwTeam> jwTeams = jwTeamService.selectJwTeamByUserId(jwWxUser.getId());
+            if (jwTeams != null && jwTeams.size() > 0) {
+                JwTeam jwTeam = jwTeams.get(0);
+
+                JwSport jwSport1 = jwSportService.selectJwSportByName(null, jwSport.getIdCard(), jwTeam.getCreateUserId());
+                if (jwSport1 == null) {
+                    JwSport up = new JwSport();
+                    up.setPlayerName(jwSport.getPlayerName());
+                    up.setIdCard(jwSport.getIdCard());
+                    up.setCreateUserId(jwTeam.getCreateUserId());
+                    up.setPlayerPhone(jwSport.getPlayerPhone());
+                    jwSportService.insertJwSport(up);
+                } else {
+                    JwSport up = new JwSport();
+                    up.setPlayerName(jwSport.getPlayerName());
+                    up.setIdCard(jwSport.getIdCard());
+                    up.setId(jwSport1.getId());
+                    up.setPlayerPhone(jwSport.getPlayerPhone());
+                    jwSportService.updateJwSport(up);
+                }
+            } else {
+                return AjaxResult.error("没有队伍");
+//                    throw new GlobalException("没有队伍");
+            }
+        }
+
         return AjaxResult.success();
     }
 
@@ -879,7 +899,7 @@ public class JwMiNiUserController extends BaseController {
 
         try {
             byte[] wordBytes = PdfGenerator.generateFeeWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId), jwTeamService.selectJwTeamById(teamId));
-            ServletUtils.downloadFile(response, wordBytes, jwTeamService.selectJwTeamById(teamId).getTeamName() + "_收费通知单" +  ".docx");
+            ServletUtils.downloadFile(response, wordBytes, jwTeamService.selectJwTeamById(teamId).getTeamName() + "_收费通知单" + ".docx");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -892,7 +912,7 @@ public class JwMiNiUserController extends BaseController {
         try {
             // 调用服务生成Word文档并返回字节数组
             byte[] wordBytes = PdfGenerator.generateWord(jwSignRecordList, jwMatchService.selectJwMatchById(matchId).getMatchName(), jwTeamService.selectJwTeamById(teamId), "1");
-            ServletUtils.downloadFile(response, wordBytes, jwTeamService.selectJwTeamById(teamId).getTeamName() + "_赛程表" +  ".docx");
+            ServletUtils.downloadFile(response, wordBytes, jwTeamService.selectJwTeamById(teamId).getTeamName() + "_赛程表" + ".docx");
 
         } catch (IOException e) {
             // 处理异常情况

@@ -1,3 +1,3 @@
 ps -ef|grep "java -jar"
 kill -9 pid
-nohup java -jar jiewuu.jar > catalina.out 2>&1 &
+nohup java -jar jiew2.jar > catalina.out 2>&1 &

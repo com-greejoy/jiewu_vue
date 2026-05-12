@@ -3,6 +3,7 @@ package com.ruoyi.project.jiewu.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
+import com.alibaba.fastjson2.JSONObject;
 import com.mchange.lang.LongUtils;
 import com.ruoyi.common.utils.BigDecimalUtil;
 import com.ruoyi.common.utils.DateUtils;
@@ -64,6 +65,9 @@ public class JwMiNiMatchController extends BaseController {
 
     @Autowired
     private JwMatchTeamService jwMatchTeamService;
+
+    @Autowired
+    private JwAwardsItemService jwAwardsItemService;
 
     @PostMapping("/listMatchGameItem")
     @ResponseBody
@@ -204,7 +208,13 @@ public class JwMiNiMatchController extends BaseController {
     public AjaxResult getGradeByBackNum(@RequestHeader("Authorization") String openId, JwSignRecord jwSignRecord) {
         JwWxUser zwWxUser = jwWxUserService.selectZwWxUserByOpenId(openId);
         if(zwWxUser != null){
-            return AjaxResult.success(jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord));
+            List<JwSignRecord> jwSignRecordList = jwSignRecordService.selectJwSignRecordHaiScore(jwSignRecord);
+
+//            jwSignRecordList.forEach(jwSignRecord1 -> {
+//                jwSignRecord1.setGradeStr(JSONObject.toJSONString(jwAwardsItemService.selectJwAwardsItemById(33L)));
+//            });
+
+            return AjaxResult.success(jwSignRecordList);
         }
         return AjaxResult.success("拜拜");
     }

@@ -159,7 +159,7 @@
     data() {
       return {
         reWorksName: "",
-        loading: true,
+        loading: false,
         ids: [],
         // 非单个禁用
         single: true,

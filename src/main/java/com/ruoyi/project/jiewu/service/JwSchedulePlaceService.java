@@ -37,6 +37,10 @@ public class JwSchedulePlaceService {
         return jwSchedulePlaceMapper.listJwSchedulePlaceWithScheduleItem(jwSchedulePlace);
     }
 
+    public List<JwSchedulePlace> listJwSchedulePlaceWithScheduleItemSimple(JwSchedulePlace jwSchedulePlace) {
+        return jwSchedulePlaceMapper.listJwSchedulePlaceWithScheduleItemSimple(jwSchedulePlace);
+    }
+
     public int insertJwSchedulePlace(JwSchedulePlace jwSchedulePlace) {
         // 获取一个单元的最后一场比赛的 order
         JwSchedulePlace lastJwSchedulePlace = jwSchedulePlaceMapper.getLastJwSchedulePlace(jwSchedulePlace);

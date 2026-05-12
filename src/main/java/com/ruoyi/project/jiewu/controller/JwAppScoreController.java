@@ -10,10 +10,7 @@ import com.ruoyi.project.jiewu.mapper.JwEightScoreMapper;
 import com.ruoyi.project.jiewu.service.*;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
@@ -105,7 +102,7 @@ public class JwAppScoreController extends BaseController {
                 query.setMatchId(jwJudgeMatch.getMatchId());
                 query.setScheduleInfoId(jwScheduleInfo.getId());
                 query.setLockScore("N");
-                jwScheduleInfo.setJwSchedulePlaceList(jwSchedulePlaceService.listJwSchedulePlaceWithScheduleItem(query));
+                jwScheduleInfo.setJwSchedulePlaceList(jwSchedulePlaceService.listJwSchedulePlaceWithScheduleItemSimple(query));
             });
         }
         return AjaxResult.success(jwScheduleInfoList);
@@ -140,12 +137,26 @@ public class JwAppScoreController extends BaseController {
         return AjaxResult.success(jwAwardsItemService.selectJwAwardsItemListByIds(jwGameItemService.selectJwGameItemById(gameItemId).getResultDesId().split(",")));
     }
 
-
     // 保存打分
     @PostMapping("/saveScore")
     @ResponseBody
     public AjaxResult saveScore(Long judgeId, String score, Long sportId) {
         return AjaxResult.success(jwHaiScoreService.saveJudgeScore(judgeId, score, sportId));
+    }
+
+    @PostMapping("/saveScoreList")
+    @ResponseBody
+    public AjaxResult saveScoreList(@RequestBody List<JwHaiScore> jwHaiScoreList) {
+        if(jwHaiScoreList != null && jwHaiScoreList.size() > 0){
+            int re = 0;
+            for (JwHaiScore jwHaiScore : jwHaiScoreList) {
+                re += jwHaiScoreService.saveJudgeScore(jwHaiScore.getJudgeId(), jwHaiScore.getScore(), jwHaiScore.getSportId());
+            }
+            if(re == jwHaiScoreList.size()){
+                return AjaxResult.success(1);
+            }
+        }
+        return AjaxResult.success(0);
     }
 
     // 保存直接打的成绩
@@ -157,7 +168,21 @@ public class JwAppScoreController extends BaseController {
         return AjaxResult.success(jwSignRecordService.saveAward(sportId, jwAwardsItem));
     }
 
-
+    @PostMapping("/saveAwardList")
+    @ResponseBody
+    public AjaxResult saveAwardList(@RequestBody List<JwHaiScore> jwHaiScoreList) {
+        if(jwHaiScoreList != null && jwHaiScoreList.size() > 0){
+            int re = 0;
+            for (JwHaiScore jwHaiScore : jwHaiScoreList) {
+                JwAwardsItem jwAwardsItem = jwAwardsItemService.selectJwAwardsItemById(jwHaiScore.getAwardId());
+                re += jwSignRecordService.saveAward(jwHaiScore.getSportId(), jwAwardsItem);
+            }
+            if(re == jwHaiScoreList.size()){
+                return AjaxResult.success(1);
+            }
+        }
+        return AjaxResult.success(0);
+    }
 
     // 主持点击开始打分
     @PostMapping("/startPk")

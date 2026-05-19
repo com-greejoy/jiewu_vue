@@ -28,10 +28,11 @@
         <result property="matchConfig"    column="match_config"    />
         <result property="lastBackNum"    column="last_back_num"    />
         <result property="qunCode"    column="qun_code"    />
+        <result property="certTemplatePath"    column="cert_template_path"    />
     </resultMap>
 
     <sql id="selectJwMatchVo">
-        select id, match_name, match_config, qun_code, begin_time, last_back_num, end_time, start_back_num, is_show, main_img, battle_img, seal_unit,
+        select id, match_name, match_config, qun_code, cert_template_path, begin_time, last_back_num, end_time, start_back_num, is_show, main_img, battle_img, seal_unit,
         sign_begin_time, sign_end_time, addr, poster_img, state, match_details, match_regulations, manage_code, Invitation_code, Invitation_list from jw_match
     </sql>
 
@@ -95,6 +96,7 @@
             <if test="matchConfig != null">match_config,</if>
             <if test="lastBackNum != null">last_back_num,</if>
             <if test="qunCode != null">qun_code,</if>
+            <if test="certTemplatePath != null">cert_template_path,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="matchName != null">#{matchName},</if>
@@ -119,6 +121,7 @@
             <if test="matchConfig != null">#{matchConfig},</if>
             <if test="lastBackNum != null">#{lastBackNum},</if>
             <if test="qunCode != null">#{qunCode},</if>
+            <if test="certTemplatePath != null">#{certTemplatePath},</if>
         </trim>
     </insert>
 
@@ -147,6 +150,7 @@
             <if test="matchConfig != null">match_config = #{matchConfig},</if>
             <if test="lastBackNum != null">last_back_num = #{lastBackNum},</if>
             <if test="qunCode != null">qun_code = #{qunCode},</if>
+            <if test="certTemplatePath != null">cert_template_path = #{certTemplatePath},</if>
         </trim>
         where id = #{id}
     </update>

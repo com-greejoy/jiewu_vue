@@ -263,6 +263,13 @@
             <version>5.2.3</version> <!-- 确认为最新版本 -->
         </dependency>
 
+        <!-- JasperReports：服务端 JRXML 模板 → PDF 渲染 -->
+        <dependency>
+            <groupId>net.sf.jasperreports</groupId>
+            <artifactId>jasperreports</artifactId>
+            <version>6.21.0</version>
+        </dependency>
+
 	</dependencies>
 
 	<build>

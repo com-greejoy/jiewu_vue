@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+
+    <!--
+        JasperReports 字体扩展配置
+        将 jrxml 模板中使用的中文 fontName 映射到项目内嵌的 .ttf 字体文件，
+        使得 JasperReports 在任何环境下（包括无中文字体的 Linux 服务器）都能正确渲染和导出 PDF。
+
+        fontName: 对应 jrxml 模板中 <font fontName="宋体"/> 的名称
+        normal/bold/italic/boldItalic: 字体文件路径（classpath 相对路径）
+        pdfEncoding: PDF 导出编码，中文使用 Identity-H（Unicode 水平书写）
+        pdfEmbedded: 是否将字体嵌入 PDF（必须为 true，否则阅读端需要安装字体）
+    -->
+
+    <!-- 宋体 (SimSun) -->
+    <fontFamily name="宋体">
+        <normal>fonts/simsun.ttf</normal>
+        <bold>fonts/simsun.ttf</bold>
+        <italic>fonts/simsun.ttf</italic>
+        <boldItalic>fonts/simsun.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- SimSun 英文名映射（兼容使用英文名的模板） -->
+    <fontFamily name="SimSun">
+        <normal>fonts/simsun.ttf</normal>
+        <bold>fonts/simsun.ttf</bold>
+        <italic>fonts/simsun.ttf</italic>
+        <boldItalic>fonts/simsun.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- 黑体 (SimHei) -->
+    <fontFamily name="黑体">
+        <normal>fonts/simhei.ttf</normal>
+        <bold>fonts/simhei.ttf</bold>
+        <italic>fonts/simhei.ttf</italic>
+        <boldItalic>fonts/simhei.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="SimHei">
+        <normal>fonts/simhei.ttf</normal>
+        <bold>fonts/simhei.ttf</bold>
+        <italic>fonts/simhei.ttf</italic>
+        <boldItalic>fonts/simhei.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- 楷体 (KaiTi) -->
+    <fontFamily name="楷体">
+        <normal>fonts/simkai.ttf</normal>
+        <bold>fonts/simkai.ttf</bold>
+        <italic>fonts/simkai.ttf</italic>
+        <boldItalic>fonts/simkai.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="KaiTi">
+        <normal>fonts/simkai.ttf</normal>
+        <bold>fonts/simkai.ttf</bold>
+        <italic>fonts/simkai.ttf</italic>
+        <boldItalic>fonts/simkai.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- 仿宋 (FangSong) -->
+    <fontFamily name="仿宋">
+        <normal>fonts/simfang.ttf</normal>
+        <bold>fonts/simfang.ttf</bold>
+        <italic>fonts/simfang.ttf</italic>
+        <boldItalic>fonts/simfang.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="FangSong">
+        <normal>fonts/simfang.ttf</normal>
+        <bold>fonts/simfang.ttf</bold>
+        <italic>fonts/simfang.ttf</italic>
+        <boldItalic>fonts/simfang.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <!-- 微软雅黑 (Microsoft YaHei) -->
+    <fontFamily name="微软雅黑">
+        <normal>fonts/msyh.ttf</normal>
+        <bold>fonts/msyhbd.ttf</bold>
+        <italic>fonts/msyh.ttf</italic>
+        <boldItalic>fonts/msyhbd.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+    <fontFamily name="Microsoft YaHei">
+        <normal>fonts/msyh.ttf</normal>
+        <bold>fonts/msyhbd.ttf</bold>
+        <italic>fonts/msyh.ttf</italic>
+        <boldItalic>fonts/msyhbd.ttf</boldItalic>
+        <pdfEncoding>Identity-H</pdfEncoding>
+        <pdfEmbedded>true</pdfEmbedded>
+    </fontFamily>
+
+</fontFamilies>

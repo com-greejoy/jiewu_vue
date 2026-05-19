@@ -251,6 +251,7 @@
     <el-dialog title="证书打印" :visible.sync="showZhengShu" width="750px" center :append-to-body="false">
       <div class="btn-row">
         <el-button type="warning" size="mini" @click="handlePrint('zhengshu')">打印</el-button>
+        <el-button type="primary" size="mini" @click="handleDownloadCertificatePdf">下载 PDF</el-button>
       </div>
       <div class="print-con-zhengshu" id="zhengshu" v-if="showZhengShu">
         <div class="page-con-box" :style="{height: item.jwSignRecordSportList.length * 1005 + 'px'} " v-for="item in signRecordJinJiGradeList">
@@ -365,7 +366,7 @@
   import {updateJwScheduleItem} from "@/api/jiewu/JwScheduleItem";
   import 'core-js/actual/array/group';
   import {lockJwGameItem, listJwGameItem, uploadGameItemGrade, getGameItemGradeComPar} from "@/api/jiewu/JwGameItem";
-  import {listJwHaiScore, getJwHaiScore, delJwHaiScore, addJwHaiScore, updateJwHaiScore, jiSuanGameItem, saveCustomOrder, haiXuanComplete, listGameItemGradeDes, listAllGameItemGradeDes} from "@/api/jiewu/JwHaiScore";
+  import {listJwHaiScore, getJwHaiScore, delJwHaiScore, addJwHaiScore, updateJwHaiScore, jiSuanGameItem, saveCustomOrder, haiXuanComplete, listGameItemGradeDes, listAllGameItemGradeDes, downloadCertificatePdf} from "@/api/jiewu/JwHaiScore";
   import {sendBattle, sendHaiXuanGrade, sendJinJiSport, sendScoreScreen} from "@/api/jiewu/ScreenSend";
   import {sendMusic, sendScreenOpt} from "@/api/jiewu/ScreenSend";
   import {listJwSchedulePlaceWithScheduleItem} from "@/api/jiewu/JwSchedulePlace";
@@ -382,6 +383,7 @@
         allGrade: [],
         showAllGrade: false,
         showZhengShu: false,
+        zhengShuMode: 'single',
         showJinJiSport: false,
         showJinJiSportGrade: false,
         showHaiGrade: false,
@@ -537,6 +539,7 @@
       handlePrintAllZhengshu() {
         listAllGameItemGradeDes({matchId: this.queryParams.matchId}).then(res => {
           this.signRecordJinJiGradeList = [].concat(res.data || []).filter(item => (item.rankOrder && item.rankOrderDes));
+          this.zhengShuMode = "all";
           this.showZhengShu = true;
         })
       },
@@ -580,8 +583,40 @@
       handlePrintZhengshu() {
         listGameItemGradeDes(this.queryParams).then(res => {
           this.signRecordJinJiGradeList = [].concat(res.data || []).filter(item => item.rankOrder).sort((a, b) => a.rankOrder - b.rankOrder);
+          this.zhengShuMode = "single";
           this.showZhengShu = true;
         })
+      },
+      // 下载证书 PDF（参考 my-gyms：后端落盘 → 前端走 /common/download 通用八位流，避免 IDM 拦截）
+      handleDownloadCertificatePdf() {
+        const matchId = this.queryParams.matchId;
+        if (!matchId) {
+          this.$modal.msgWarning("缺少 matchId");
+          return;
+        }
+        let payload;
+        if (this.zhengShuMode === "all") {
+          payload = {matchId, filename: "全部证书"};
+        } else {
+          const gameItemId = this.queryParams.gameItemId;
+          if (!gameItemId) {
+            this.$modal.msgWarning("先选择组别");
+            return;
+          }
+          payload = {matchId, gameItemId, filename: "证书"};
+        }
+        this.$modal.loading("正在生成 PDF 证书，请稍候...");
+        downloadCertificatePdf(payload).then(res => {
+          if (res.code === 200) {
+            this.$download.name(res.msg);
+          } else {
+            this.$modal.msgError(res.msg || "下载证书失败");
+          }
+        }).catch(() => {
+          this.$modal.msgError("下载证书失败");
+        }).finally(() => {
+          this.$modal.closeLoading();
+        });
       },
       // 投屏晋级名单
       handleSendJinJiSport() {

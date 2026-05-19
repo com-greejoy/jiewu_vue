@@ -382,6 +382,18 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-divider>证书模板</el-divider>
+        <el-row>
+          <el-col :span="24">
+            <el-form-item label="证书模板" prop="certTemplatePath">
+              <FileUpload :limit="1" :fileType="['jrxml']" v-model="form.certTemplatePath"/>
+              <div style="color: #909399; font-size: 12px; line-height: 1.4;">
+                上传一份 .jrxml 模板，证书 PDF 下载时将使用该模板渲染。模板可用变量：
+                <code>$P{teamName}</code>、<code>$P{playerName}</code>、<code>$P{itemName}</code>、<code>$P{grade}</code>
+              </div>
+            </el-form-item>
+          </el-col>
+        </el-row>
 
 
       </el-form>
@@ -572,6 +584,7 @@
           isShowGrade: null,
           manageCode: null,
           qunCode: null,
+          certTemplatePath: null,
           matchConfig: this.getInitConfing()
         };
         this.resetForm("form");

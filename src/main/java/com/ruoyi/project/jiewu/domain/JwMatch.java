@@ -76,12 +76,22 @@ public class JwMatch extends BaseEntity {
 
     private String qunCode;
 
+    private String certTemplatePath;
+
     public String getQunCode() {
         return qunCode;
     }
 
     public void setQunCode(String qunCode) {
         this.qunCode = qunCode;
+    }
+
+    public String getCertTemplatePath() {
+        return certTemplatePath;
+    }
+
+    public void setCertTemplatePath(String certTemplatePath) {
+        this.certTemplatePath = certTemplatePath;
     }
 
     public Long getLastBackNum() {

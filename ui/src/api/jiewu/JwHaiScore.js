@@ -15,7 +15,7 @@ export function listJwHaiScoreBySport(data) {
     url: '/jiewu/JwHaiScore/listJwHaiScoreBySportrrr',
     method: 'post',
     params: data,
-    headers: {repeatSubmit: false}
+    headers: { repeatSubmit: false }
   })
 }
 
@@ -51,7 +51,7 @@ export function saveCustomOrder(data) {
     url: '/jiewu/JwHaiScore/saveCustomOrder',
     method: 'post',
     params: data,
-    headers: {repeatSubmit: false}
+    headers: { repeatSubmit: false }
   })
 }
 
@@ -61,7 +61,7 @@ export function listGameItemGradeDes(data) {
     url: '/jiewu/JwHaiScore/listGameItemGradeDes',
     method: 'post',
     params: data,
-    headers: {repeatSubmit: false}
+    headers: { repeatSubmit: false }
   })
 }
 
@@ -99,7 +99,7 @@ export function listTeamGradeDes(data) {
     url: '/jiewu/JwHaiScore/listTeamGradeDes',
     method: 'post',
     params: data,
-    headers: {repeatSubmit: false}
+    headers: { repeatSubmit: false }
   })
 }
 
@@ -109,5 +109,15 @@ export function listAllGameItemGradeDes(data) {
     url: '/jiewu/JwHaiScore/listAllGameItemGradeDes',
     method: 'post',
     params: data
+  })
+}
+
+// 生成证书 PDF：服务端落盘后返回 AjaxResult.success(filename)，
+// 前端再走 this.$download.name(filename) 通过 /common/download 拉八位流（避免 IDM 拦截）
+export function downloadCertificatePdf(query) {
+  return request({
+    url: '/jiewu/JwHaiScore/downloadCertificatePdf',
+    method: 'post',
+    params: query
   })
 }

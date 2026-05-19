@@ -1,21 +1,32 @@
 package com.ruoyi.project.jiewu.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.file.PdfGenerator;
+import com.ruoyi.framework.config.RuoYiConfig;
 import com.ruoyi.framework.redis.RedisCache;
+import com.ruoyi.project.jiewu.domain.JwMatch;
 import com.ruoyi.project.jiewu.domain.JwMatchTeamGrade;
 import com.ruoyi.project.jiewu.domain.JwSignRecord;
 import com.ruoyi.project.jiewu.domain.JwSignRecordSportExport;
 import com.ruoyi.project.jiewu.service.JwMatchService;
 import com.ruoyi.project.jiewu.service.JwSignRecordService;
 import com.ruoyi.project.jiewu.service.JwTeamService;
+import com.ruoyi.project.jiewu.utils.CertificateUtils;
 import org.checkerframework.checker.units.qual.A;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -35,6 +46,8 @@ import com.ruoyi.framework.web.page.TableDataInfo;
 @RestController
 @RequestMapping("/jiewu/JwHaiScore")
 public class JwHaiScoreController extends BaseController {
+
+    private static final Logger log = LoggerFactory.getLogger(JwHaiScoreController.class);
 
     @Autowired
     private JwHaiScoreService jwHaiScoreService;
@@ -175,6 +188,106 @@ public class JwHaiScoreController extends BaseController {
 
     }
 
+
+    /**
+     * 生成证书 PDF（参考 my-gyms 方式）：
+     * - 服务端先把 PDF 落盘到 RuoYiConfig.getDownloadPath()
+     * - 返回 AjaxResult.success(filename)；前端再走 /common/download?fileName=...&delete=true
+     *   走通用八位流（octet-stream），避免被 IDM 等下载器按 application/pdf 拦截
+     *
+     * 入参：
+     * - matchId   必填
+     * - gameItemId 可选；非空 → 当前组别；为空 → 整场比赛全部获奖
+     * - filename  可选；未指定时单组别用「证书」、全场用「全部证书」
+     */
+    @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:export')")
+    @Log(title = "证书 PDF 下载", businessType = BusinessType.EXPORT)
+    @PostMapping("/downloadCertificatePdf")
+    @ResponseBody
+    public AjaxResult downloadCertificatePdf(Long matchId, Long gameItemId, String filename) {
+        if (!StringUtils.isLongNotNull(matchId)) {
+            return AjaxResult.error("matchId 不能为空");
+        }
+
+        JwMatch match = jwMatchService.selectJwMatchById(matchId);
+        if (match == null) {
+            return AjaxResult.error("比赛不存在");
+        }
+        String templatePath = match.getCertTemplatePath();
+        if (StringUtils.isEmpty(templatePath)) {
+            return AjaxResult.error("该比赛未配置证书模板");
+        }
+
+        List<JwSignRecord> records;
+        if (StringUtils.isLongNotNull(gameItemId)) {
+            JwSignRecord query = new JwSignRecord();
+            query.setMatchId(matchId);
+            query.setGameItemId(gameItemId);
+            records = jwHaiScoreService.listGameItemGradeDes(query);
+        } else {
+            records = jwHaiScoreService.listAllGameItemGradeDes(matchId, null);
+            if (records != null) {
+                records = records.stream()
+                        .filter(r -> StringUtils.isNotEmpty(r.getRankOrderDes()))
+                        .collect(Collectors.toList());
+            }
+        }
+
+        if (records == null || records.isEmpty()) {
+            return AjaxResult.error("没有可生成的证书数据");
+        }
+
+        String absolutePath;
+        try {
+            absolutePath = resolveTemplateAbsolutePath(templatePath);
+        } catch (Exception e) {
+            log.error("解析证书模板路径失败: {}", templatePath, e);
+            return AjaxResult.error("证书模板路径无效");
+        }
+
+        try {
+            List<Map<String, Object>> paramsList = CertificateUtils.buildParamsFromSignRecords(records);
+            byte[] pdfBytes = CertificateUtils.renderCertificatePdf(absolutePath, paramsList);
+
+            String defaultName = StringUtils.isLongNotNull(gameItemId) ? "证书" : "全部证书";
+            String baseName = StringUtils.isNotEmpty(filename) ? filename : defaultName;
+            String downloadFilename = encodeDownloadFilename(baseName, ".pdf");
+
+            String absoluteFilePath = RuoYiConfig.getDownloadPath() + downloadFilename;
+            File targetFile = new File(absoluteFilePath);
+            if (!targetFile.getParentFile().exists()) {
+                targetFile.getParentFile().mkdirs();
+            }
+            try (FileOutputStream fos = new FileOutputStream(targetFile)) {
+                fos.write(pdfBytes);
+            }
+
+            return AjaxResult.success(downloadFilename);
+        } catch (Exception e) {
+            log.error("证书 PDF 生成失败, matchId={}, gameItemId={}", matchId, gameItemId, e);
+            return AjaxResult.error("生成 PDF 证书失败，请检查证书模板是否正确");
+        }
+    }
+
+    /**
+     * 与 my-gyms 的 DownloadUtils.encodingFilename 一致：UUID_原名.后缀。
+     * 复用 /common/download 的 realFileName 截取规则（首个下划线后即原始名）。
+     */
+    private String encodeDownloadFilename(String baseName, String extension) {
+        return UUID.randomUUID().toString() + "_" + baseName + extension;
+    }
+
+    /**
+     * 将 RuoYi 资源前缀路径（由 {@link Constants#RESOURCE_PREFIX} 定义，本项目为 /pokejiewu/profile）
+     * 转换为本地绝对路径。
+     */
+    private String resolveTemplateAbsolutePath(String templatePath) {
+        String prefix = Constants.RESOURCE_PREFIX;
+        if (templatePath.startsWith(prefix)) {
+            return RuoYiConfig.getProfile() + templatePath.substring(prefix.length());
+        }
+        return templatePath;
+    }
 
     @PreAuthorize("@ss.hasPermi('jiewu:JwHaiScore:query')")
     @GetMapping(value = "/{id}")
